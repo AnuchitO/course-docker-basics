@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICQR Magic Tree · 3D QR Code Generator</title>
+<meta name="description" content="Turn any link into a 3D QR tree that still scans. QR code generator with seasonal themes and custom colors.">
+<meta name="keywords" content="QR code generator, 3D QR code, QR tree, interactive QR, seasonal themes, custom QR">
+<meta name="theme-color" content="#f6f1e7">
+<meta property="og:title" content="ICQR Magic Tree · 3D QR Code Generator">
+<meta property="og:description" content="Turn any link into a QR code shaped like a tree.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+<style>
+  :root { --bg:#f6f1e7; --ink:#2b2a26; --card:#fffdf8; --line:#e4dccb; --ok:#2f7d32; --bad:#c62828; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { text-align:center; padding:28px 16px 8px; }
+  h1 { margin:0; font-size:2rem; letter-spacing:-.02em; }
+  header p { margin:4px 0 0; opacity:.65; }
+  main { max-width:980px; margin:0 auto; padding:16px; display:grid; gap:20px; grid-template-columns:1fr 1fr; }
+  @media (max-width:760px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; }
+  label { display:block; font-weight:700; font-size:.9rem; margin:14px 0 6px; }
+  label:first-child { margin-top:0; }
+  input[type=url] { width:100%; padding:12px 14px; font-size:1rem; border:2px solid var(--line); border-radius:10px; background:#fff; }
+  input[type=url]:focus { outline:none; border-color:var(--ok); }
+  .err { color:var(--bad); font-size:.9rem; min-height:1.3em; margin-top:6px; }
+  .themes { display:flex; flex-wrap:wrap; gap:8px; }
+  .themes button { border:2px solid var(--line); background:#fff; border-radius:999px; padding:6px 14px; font-weight:600; cursor:pointer; display:flex; gap:8px; align-items:center; }
+  .themes button[aria-pressed=true] { border-color:var(--ok); background:#eef7ee; }
+  .dot { width:14px; height:14px; border-radius:50%; display:inline-block; }
+  .colors { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .colors label { margin:0; font-weight:600; font-size:.8rem; }
+  input[type=color] { width:100%; height:40px; border:2px solid var(--line); border-radius:8px; padding:2px; background:#fff; }
+  .warn { background:#fff4e5; border:1px solid #ffcc80; border-radius:10px; padding:10px 12px; margin-top:12px; font-size:.9rem; display:none; }
+  .warn button { margin-left:8px; }
+  .stage { perspective:900px; display:grid; place-items:center; min-height:340px; }
+  #tilt { transition:transform .08s linear; transform-style:preserve-3d; }
+  canvas { max-width:100%; height:auto; border-radius:12px; box-shadow:0 18px 30px -12px rgba(0,0,0,.35); }
+  .status { text-align:center; font-size:.9rem; margin-top:10px; min-height:1.4em; }
+  .status.ok { color:var(--ok); font-weight:600; }
+  .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+  button.primary { background:var(--ok); color:#fff; border:0; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; }
+  button.primary:disabled { opacity:.4; cursor:not-allowed; }
+  button.ghost { background:#fff; border:2px solid var(--line); border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; }
+  footer { text-align:center; opacity:.55; font-size:.8rem; padding:8px 16px 28px; }
+  code { background:#0001; padding:0 .3em; border-radius:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌳 ICQR Magic Tree</h1>
+  <p>3D QR Code Generator · turn any link into a tree that still scans</p>
+</header>
+
+<main>
+  <section class="card">
+    <label for="url">Your link</label>
+    <input id="url" type="url" inputmode="url" placeholder="https://example.com" autocomplete="off" value="https://example.com">
+    <div class="err" id="err" role="alert"></div>
+
+    <label>Season</label>
+    <div class="themes" id="themes"></div>
+
+    <label>Colors</label>
+    <div class="colors">
+      <div><label for="cFoliage">Foliage</label><input id="cFoliage" type="color"></div>
+      <div><label for="cTrunk">Trunk</label><input id="cTrunk" type="color"></div>
+      <div><label for="cBg">Background</label><input id="cBg" type="color"></div>
+    </div>
+    <div class="warn" id="warn"><span id="warnText"></span><button class="ghost" id="fix">Fix it</button></div>
+
+    <p class="status" id="info" style="text-align:left;opacity:.6;margin-top:16px">
+      served by API container <code id="host">…</code>
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="stage"><div id="tilt"><canvas id="cv" width="420" height="500"></canvas></div></div>
+    <div class="status" id="status"></div>
+    <div class="actions">
+      <button class="primary" id="dl" disabled>Download PNG</button>
+      <button class="ghost" id="share" disabled>Copy share link</button>
+    </div>
+  </section>
+</main>
+<footer>Your link is never stored unless you press “Copy share link”.</footer>
+<script src="app.js"></script>
+</body>
+</html>
