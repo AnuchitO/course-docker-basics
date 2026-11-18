@@ -38,41 +38,52 @@ duration: 90min
 
 ---
 
-# Where are you now?
+# Before you start
 
-Get the workshop code first:
+<div class="grid grid-cols-3 gap-5 mt-8">
+
+<div v-click class="card">
+  <div class="text-3xl">🐳</div>
+  <div class="font-700 text-lg mt-1">Install Docker Desktop</div>
+  <div class="opacity-60 text-sm mt-1">Then check it works:</div>
 
 ```bash
-git clone https://github.com/AnuchitO/docker-qadev.git
+docker --version
 ```
 
-<div class="grid grid-cols-2 gap-6 mt-8">
-
-<div class="card" v-click>
-  <div class="text-xl font-700 mb-2">🐳 Docker</div>
-  <div class="flex gap-3"><span class="chip">✅ I have Docker</span><span class="chip">❌ I don't have Docker</span></div>
 </div>
 
-<div class="card" v-click>
-  <div class="text-xl font-700 mb-2">🐹 Golang</div>
-  <div class="flex gap-3"><span class="chip">✅ I know Go</span><span class="chip">❌ I don't know Go</span></div>
+<div v-click class="card">
+  <div class="text-3xl">📁</div>
+  <div class="font-700 text-lg mt-1">Get the course code</div>
+  <div class="opacity-60 text-sm mt-1">Download it (link under the video) and open a terminal in the <code>demo/</code> folder.</div>
+</div>
+
+<div v-click class="card">
+  <div class="text-3xl">⌨️</div>
+  <div class="font-700 text-lg mt-1">No Go needed</div>
+  <div class="opacity-60 text-sm mt-1">Docker builds and runs everything. You only type commands.</div>
 </div>
 
 </div>
 
-<div v-click class="mt-8 text-center opacity-70">Either way — you will be fine. That's the whole point of Docker.</div>
+<div v-click class="mt-8 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">appears on every hands-on step. Pause the video, run it, then press play.</span></div>
 
 ---
 layout: center
 class: text-center
 ---
 
-# Run the app <span class="gradient-text">inside</span> Docker
+<h1 style="border-left: none; padding-left: 0">Meet <span class="gradient-text">Magic Tree</span> 🌳</h1>
 
-<div class="flex items-center justify-center gap-6 mt-10">
-  <div v-click class="card text-4xl">📦 app</div>
+<div class="opacity-70 mt-2">Paste a link, get a QR code shaped like a tree. We will build it <b>one container at a time</b>.</div>
+
+<div class="flex items-center justify-center gap-5 mt-10">
+  <div v-click class="card text-center w-44"><div class="text-4xl">🌐</div><div class="font-700">web</div><div class="opacity-60 text-xs">the page (nginx)</div></div>
   <div v-click class="arrow">→</div>
-  <div v-click class="card glow pulse text-4xl">🐳 docker</div>
+  <div v-click class="card text-center w-44"><div class="text-4xl">⚙️</div><div class="font-700">api</div><div class="opacity-60 text-xs">makes the QR (Go)</div></div>
+  <div v-click class="arrow">→</div>
+  <div v-click class="card glow text-center w-44"><div class="text-4xl">🐘</div><div class="font-700">db</div><div class="opacity-60 text-xs">themes &amp; shares (Postgres)</div></div>
 </div>
 
 ---
@@ -152,12 +163,12 @@ layout: center
 </div>
 
 <div class="relative">
-  <div v-click="5" class="image-tag"><span>💿</span> todo-app:1.0</div>
+  <div v-click="5" class="image-tag"><span>💿</span> magic-api:1.0</div>
   <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
-    <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.23-alpine</code></div>
+    <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
     <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
     <div v-click="3" class="layer l3"><span class="who">your code</span><code>COPY . .</code></div>
-    <div v-click="4" class="layer l4"><span class="who">build</span><code>RUN go build -o server .</code></div>
+    <div v-click="4" class="layer l4"><span class="who">build</span><code>RUN go build -o api .</code></div>
   </div>
 </div>
 
@@ -180,21 +191,21 @@ RUN <command>
 ```
 
 ```dockerfile
-FROM golang:1.23-alpine
+FROM golang:1.25-alpine
 RUN <command>
 ```
 
 ```dockerfile
-FROM golang:1.23-alpine
+FROM golang:1.25-alpine
 RUN go mod download
 ```
 
 ```dockerfile
-FROM golang:1.23-alpine
+FROM golang:1.25-alpine
 WORKDIR /app
 COPY . .
-RUN go build -o server .
-CMD ["./server"]
+RUN go build -o api .
+CMD ["./api"]
 ```
 ````
 
@@ -222,7 +233,7 @@ class: text-center
 <div class="flex items-center justify-center gap-8 mt-2">
   <div class="card glow text-center"><div class="text-5xl">💿</div><div class="font-700">image</div></div>
   <div class="arrow">→</div>
-  <ContainerBig name="todo-app" :open="$clicks >= 1" :width="400" />
+  <ContainerBig name="magic-api" :open="$clicks >= 1" :width="400" />
 </div>
 
 <div v-click="1" class="mt-4 text-center"><span class="chip">docker run</span> — the doors open and the app starts</div>
@@ -277,138 +288,287 @@ class: text-center
 
 ---
 
-# Build &amp; run
+# Step 1 · Run your first container
 
-```bash {all|1|2}
-docker build -t anuchito/docker-qadev .
-docker run anuchito/docker-qadev
+<Stepper :n="1" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
+
+<div>
+
+```bash {1|2}
+docker build -t magic-web ./web
+docker run -d --name web -p 3000:80 magic-web
 ```
 
-<div class="flex items-center justify-center gap-4 mt-10">
-  <div class="card text-center">📄 Dockerfile</div>
-  <div v-click="1" class="arrow">build →</div>
-  <div v-click="1" class="card text-center">💿 image</div>
-  <div v-click="2" class="arrow">run →</div>
-  <div v-click="2" class="card glow text-center">📦 container</div>
+<div class="mt-4 text-sm opacity-80 leading-relaxed">
+<code>-d</code> run in the background · <code>--name</code> give it a name<br>
+<code>-p 3000:80</code> <b>host</b> port 3000 → <b>container</b> port 80
 </div>
 
----
-layout: center
----
-
-# Registry
-
-<div class="flex items-center justify-center gap-6 mt-10">
-  <div v-click class="card text-center"><div class="text-4xl">💻</div><div>you</div></div>
-  <div v-click class="arrow">push →</div>
-  <div v-click class="card glow text-center pulse"><div class="text-4xl">🗄️</div><div class="font-700">Registry</div><div class="opacity-60 text-xs">Docker Hub</div></div>
-  <div v-click class="arrow">← pull</div>
-  <div v-click class="card text-center"><div class="text-4xl">🧑‍💻</div><div>teammate</div></div>
-</div>
-
-<div v-click class="grid grid-cols-2 gap-6 mt-10">
-  <div class="card text-center opacity-80">source code → <b>git</b> → GitHub</div>
-  <div class="card text-center">image → <b>registry</b> → Docker Hub</div>
-</div>
-
----
-layout: center
-class: text-center
----
-
-<div class="chip mb-4">Breakout room</div>
-
-# 🛠️ Workshop
-
-<div class="text-left text-xl mt-6 inline-block">
-
-<v-clicks>
-
-1. `docker pull anuchito/docker-qadev`
-2. `docker run` it on port **3000**
-3. `docker exec` into the container, then `go test ./...`
-4. Remove everything — and do it all once more
-
-</v-clicks>
+<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
 
 </div>
 
-<div class="opacity-50 mt-6 text-sm">Use Docker Desktop to watch what happens</div>
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  Open <b>http://localhost:3000</b>
+  <div class="mt-2">The page loads, but says:</div>
+  <div class="out mt-1">API not reachable</div>
+  <div class="mt-3 text-sm opacity-70">One container works alone. It just has nobody to talk to yet.</div>
+</div>
 
----
-
-# Two containers, one network
-
-<div class="host mt-8">
-  <div class="label">Host Machine</div>
-  <div class="net">
-    <div class="label">todo.network</div>
-    <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-      <div v-click class="card glow text-center">
-        <div class="text-3xl">🟩</div><div class="font-700">todo-app</div>
-        <code class="text-xs">http://todo-app:3000</code>
-      </div>
-      <div v-click class="w-24"><div class="flow" /></div>
-      <div v-click class="card text-center">
-        <div class="text-3xl">🗃️</div><div class="font-700">todo-database</div>
-        <code class="text-xs">http://mysql.todo.net:5432</code>
-      </div>
-    </div>
-  </div>
 </div>
 
 ---
 
-# Config &amp; development loop
+# Step 2 · A second container: the API
 
-<div class="grid grid-cols-2 gap-6 mt-8">
+<Stepper :n="2" class="absolute top-6 right-10" />
 
-<div v-click class="card">
-  <div class="text-2xl">🧾 File DB → real DB</div>
-  <div class="mt-2 opacity-70">The app finds the database through an environment variable:</div>
+<div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
+
+<div>
+
+```bash {1|2|3}
+docker build -t magic-api ./api
+docker run -d --name api -p 8080:8080 magic-api
+curl localhost:8080/api/health
+```
+
+<div class="mt-4 text-sm opacity-80 leading-relaxed">
+The Go API starts on its own, with built-in themes and <b>no database</b>.
+</div>
+
+<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  <div class="out">{"db":"not connected",<br>"host":"bd9a1a742cb4",<br>"status":"ok"}</div>
+  <div class="mt-3 text-sm opacity-70"><code>host</code> is the container ID. Remember it: we use it in step 7.</div>
+  <div class="mt-2 text-sm opacity-70">The page at :3000 still says “API not reachable”: containers are <b>isolated</b>.</div>
+</div>
+
+</div>
+
+---
+
+# Step 3 · Connect them with a network
+
+<Stepper :n="3" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-4">
+
+<div>
+
+```bash {1|2|3|4}
+docker rm -f web api
+docker network create magic
+docker run -d --name api --network magic magic-api
+docker run -d --name web --network magic -p 3000:80 magic-web
+```
+
+<div class="mt-4 text-sm opacity-80 leading-relaxed">
+On the same network, <b>web</b> reaches the API by its name: <code>http://api:8080</code>.<br>
+The API has no <code>-p</code>: only <b>web</b> is open to the outside.
+</div>
+
+<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  Refresh <b>http://localhost:3000</b>
+  <div class="mt-2">🌳 A QR tree appears, and the badge shows <b>served by API container …</b></div>
+  <div class="mt-3 text-sm opacity-70">Season buttons work (built-in themes). “Copy share link” says it needs a database.</div>
+</div>
+
+</div>
+
+---
+
+# Step 4 · Add the database
+
+<Stepper :n="4" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-1 gap-3 mt-2">
+
+<div>
+
+```bash {1-4|5-8}
+docker run -d --name db --network magic \
+  -e POSTGRES_USER=magic -e POSTGRES_PASSWORD=magic -e POSTGRES_DB=magictree \
+  -v "$PWD/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro" \
+  postgres:16-alpine
+docker rm -f api
+docker run -d --name api --network magic \
+  -e DATABASE_URL="postgres://magic:magic@db:5432/magictree?sslmode=disable" \
+  magic-api
+```
+
+<div class="mt-3 text-sm opacity-80 leading-relaxed">
+<code>-e</code> sets an <b>environment variable</b>: that is how the API learns where the database is.
+</div>
+
+<div class="mt-3"><span class="try">⏸ Pause &amp; try</span> <span class="small ml-2">wait ~5 seconds, then</span> <code>curl localhost:3000/api/health</code></div>
+
+</div>
+
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  <div class="out">{"db":"connected",<br>"shared_trees":0, ...}</div>
+  <div class="mt-3">Themes now come from <b>Postgres</b>. Click <b>Copy share link</b>: it works.</div>
+</div>
+
+</div>
+
+---
+
+# Step 5 · Keep the data: a volume
+
+<Stepper :n="5" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-2 gap-8 mt-4">
+
+<div class="card bad">
+  <div class="label-bad">❌ Without a volume</div>
 
 ```bash
-MYSQL_HOST=mysql.todo.net
+docker rm -f db
+# start db again (same command as step 4)
+```
+
+<div class="text-sm opacity-80">Delete the container, and the shared trees are <b>gone</b>: <code>shared_trees: 0</code>.</div>
+</div>
+
+<div v-click class="card good">
+  <div class="label-good">✅ With a volume</div>
+
+```bash {1|3}
+docker rm -f db
+docker run -d --name db --network magic \
+  -v tree-data:/var/lib/postgresql/data \
+  ...same as step 4
+docker restart api
+```
+
+<div class="text-sm opacity-80">Delete and recreate: the trees are <b>still there</b>.</div>
+</div>
+
+</div>
+
+<div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">share a tree, remove <code>db</code>, start it again, then check <code>/api/health</code>.</span></div>
+
+---
+
+# Step 6 · One command: Docker Compose
+
+<Stepper :n="6" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.3fr_1fr] gap-6 mt-2">
+
+<div class="compact">
+
+```yaml {1-5|6-11|12-22}
+services:
+  web:
+    build: ./web
+    ports: ["3000:80"]
+    depends_on: [api]
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgres://magic:magic@db:5432/magictree?sslmode=disable
+    depends_on: { db: { condition: service_healthy } }
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: magic
+      POSTGRES_PASSWORD: magic
+      POSTGRES_DB: magictree
+    volumes:
+      - tree-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+volumes:
+  tree-data:
 ```
 
 </div>
 
-<div v-click class="card">
-  <div class="text-2xl">♻️ Auto reload</div>
-  <div class="mt-2 opacity-70">Mount your source into the container — edit on the host, the app restarts by itself.</div>
+<div>
+
+<div class="card">
+  <div class="text-sm opacity-70">First, clean up the manual containers:</div>
+
+```bash
+docker rm -f web api db
+docker network rm magic
+```
+
+  <div class="text-sm opacity-70 mt-2">Then everything, with one command:</div>
+
+```bash
+docker compose up --build
+```
+
+</div>
+
+<div v-click class="mt-3 text-center"><span class="try">⏸ Pause &amp; try</span></div>
+
 </div>
 
 </div>
 
 ---
 
-# Many networks, many apps
+# Step 7 · Scale the API
 
-<div class="host mt-6">
-  <div class="label">Host Machine</div>
-  <div class="grid grid-cols-2 gap-6">
-    <div class="net">
-      <div class="label">todo.network</div>
-      <div class="flex gap-3 items-center justify-center">
-        <div class="card text-center text-sm">todo-app<br><code>:3000</code></div>
-        <div class="flow w-12" />
-        <div class="card text-center text-sm">todo-database<br><code>:5432</code></div>
-      </div>
-    </div>
-    <div v-click class="net alt">
-      <div class="label">another.network</div>
-      <div class="flex justify-center">
-        <div class="card text-center text-sm">todo-app<br><code>:3000</code></div>
-      </div>
-    </div>
-  </div>
-  <div v-click class="flex justify-around mt-4 text-sm">
-    <span class="chip">http://localhost:3000 ↑</span>
-    <span class="chip">http://localhost:4000 ↑</span>
-  </div>
+<Stepper :n="7" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
+
+<div>
+
+```bash {1|2-3}
+docker compose up -d --scale api=3
+for i in 1 2 3 4 5 6; do
+  curl -s localhost:3000/api/health; echo; done
+```
+
+<div class="mt-4 text-sm opacity-80 leading-relaxed">
+Three copies of the <b>same image</b>. Compose gives them one name, <code>api</code>, and requests are spread between them.
 </div>
 
-<div v-click class="mt-4 text-center opacity-70">Same container port, different host ports — networks keep them apart.</div>
+<div class="mt-5"><span class="try">⏸ Pause &amp; try</span> <span class="small ml-2">finish with</span> <code>docker compose down</code></div>
+
+</div>
+
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  <div class="out">"host":"4d633404bd51"<br>"host":"a7a19b993e2b"<br>"host":"dc88b4d8a103"<br>...</div>
+  <div class="flex gap-2 mt-3"><Ctr v-for="n in 3" :key="n" /></div>
+  <div class="mt-2 text-sm opacity-70">Three different container IDs: one image, three containers.</div>
+</div>
+
+</div>
+
+---
+layout: center
+---
+
+# What you built
+
+<div class="grid grid-cols-2 gap-4 mt-6 text-left">
+  <div v-click class="card"><b>1 · docker run</b><div class="small">starts a container from an image</div></div>
+  <div v-click class="card"><b>2 · -p host:container</b><div class="small">opens a door to the outside</div></div>
+  <div v-click class="card"><b>3 · network</b><div class="small">containers find each other by name</div></div>
+  <div v-click class="card"><b>4 · -e variable</b><div class="small">config without changing the image</div></div>
+  <div v-click class="card"><b>5 · volume</b><div class="small">data outlives the container</div></div>
+  <div v-click class="card"><b>6 · compose</b><div class="small">the whole stack in one file</div></div>
+</div>
 
 ---
 layout: center

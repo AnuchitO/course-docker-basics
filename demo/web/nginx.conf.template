@@ -1,0 +1,15 @@
+server {
+  listen 80;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # Docker's built-in DNS. Resolving at request time (not at startup) lets this
+  # container run on its own, before an "api" container exists.
+  resolver 127.0.0.11 valid=5s;
+
+  location /api/ {
+    set $api ${API_URL};
+    proxy_pass $api;
+    proxy_set_header Host $host;
+  }
+}

@@ -89,3 +89,17 @@ func TestShareTree(t *testing.T) {
 		t.Fatalf("missing: %d", c)
 	}
 }
+
+func TestWithoutDatabase(t *testing.T) {
+	h := (&server{store: memStore{}, host: "t"}).routes()
+	if rec := do(h, "GET", "/api/health", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "not connected") {
+		t.Fatalf("health: %d %s", rec.Code, rec.Body)
+	}
+	if rec := do(h, "GET", "/api/themes", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "christmas") {
+		t.Fatalf("themes: %d", rec.Code)
+	}
+	body := `{"url":"https://example.com","theme":"spring","foliage":"#2f7d32","trunk":"#6d4c41","background":"#f6f1e7"}`
+	if c := do(h, "POST", "/api/trees", body).Code; c != 503 {
+		t.Fatalf("share without db should be 503, got %d", c)
+	}
+}

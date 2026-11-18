@@ -33,7 +33,10 @@ type Tree struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-var errNotFound = errors.New("not found")
+var (
+	errNotFound = errors.New("not found")
+	errNoDB     = errors.New("no database connected")
+)
 
 // Store is everything the handlers need from the database.
 // Keeping it an interface lets the tests run without Postgres.

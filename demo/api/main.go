@@ -37,12 +37,13 @@ func (s *server) routes() http.Handler {
 }
 
 func (s *server) health(w http.ResponseWriter, r *http.Request) {
+	// the API is healthy even without a database; "db" tells which mode it is in
 	if err := s.store.Ping(r.Context()); err != nil {
-		fail(w, http.StatusServiceUnavailable, "database not reachable")
+		writeJSON(w, 200, map[string]any{"status": "ok", "host": s.host, "db": "not connected"})
 		return
 	}
 	n, _ := s.store.CountTrees(r.Context())
-	writeJSON(w, 200, map[string]any{"status": "ok", "host": s.host, "shared_trees": n})
+	writeJSON(w, 200, map[string]any{"status": "ok", "host": s.host, "db": "connected", "shared_trees": n})
 }
 
 func (s *server) themes(w http.ResponseWriter, r *http.Request) {
@@ -106,6 +107,10 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 		in.Theme = in.Theme[:40]
 	}
 	saved, err := s.store.SaveTree(r.Context(), in)
+	if errors.Is(err, errNoDB) {
+		fail(w, http.StatusServiceUnavailable, "sharing needs a database: start the db container first")
+		return
+	}
 	if err != nil {
 		fail(w, 500, "could not save")
 		return
@@ -117,6 +122,10 @@ func (s *server) getTree(w http.ResponseWriter, r *http.Request) {
 	t, err := s.store.GetTree(r.Context(), r.PathValue("id"))
 	if errors.Is(err, errNotFound) {
 		fail(w, 404, "tree not found")
+		return
+	}
+	if errors.Is(err, errNoDB) {
+		fail(w, http.StatusServiceUnavailable, "no database connected")
 		return
 	}
 	if err != nil {
@@ -134,11 +143,18 @@ func env(k, def string) string {
 }
 
 func main() {
-	// DATABASE_URL is the one setting that changes between laptop, container and compose.
-	dsn := env("DATABASE_URL", "postgres://magic:magic@localhost:5432/magictree?sslmode=disable")
-	store, err := connect(context.Background(), dsn, 30*time.Second)
-	if err != nil {
-		log.Fatalf("database: %v", err)
+	// DATABASE_URL is the one setting that changes between steps of the lesson:
+	// not set -> built-in themes, no sharing. Set -> Postgres.
+	var store Store = memStore{}
+	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
+		pg, err := connect(context.Background(), dsn, 30*time.Second)
+		if err != nil {
+			log.Fatalf("database: %v", err)
+		}
+		store = pg
+		log.Print("connected to the database")
+	} else {
+		log.Print("DATABASE_URL not set: running without a database")
 	}
 	host, _ := os.Hostname()
 	s := &server{store: store, host: host}
