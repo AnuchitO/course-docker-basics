@@ -1,6 +1,6 @@
 # ICQR Magic Tree (demo for the Docker Basics course)
 
-Paste a link, get a QR code drawn as a tree. Three containers:
+Paste a link, get a QR code on a 3D island with a tree (click the scene to reveal the flat, scannable code). Three containers:
 
 | service | what | image |
 |---|---|---|

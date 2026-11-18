@@ -4,90 +4,413 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ICQR Magic Tree · 3D QR Code Generator</title>
-<meta name="description" content="Turn any link into a 3D QR tree that still scans. QR code generator with seasonal themes and custom colors.">
+<meta name="description" content="Turn any link into a 3D QR tree island that still scans. QR code generator with seasonal themes and custom colors.">
 <meta name="keywords" content="QR code generator, 3D QR code, QR tree, interactive QR, seasonal themes, custom QR">
 <meta name="theme-color" content="#f6f1e7">
 <meta property="og:title" content="ICQR Magic Tree · 3D QR Code Generator">
-<meta property="og:description" content="Turn any link into a QR code shaped like a tree.">
+<meta property="og:description" content="Turn any link into a QR code island with a magic tree.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="/og.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
 <style>
-  :root { --bg:#f6f1e7; --ink:#2b2a26; --card:#fffdf8; --line:#e4dccb; --ok:#2f7d32; --bad:#c62828; }
+  :root { --ink:#2b2a26; --ok:#2f7d32; --bad:#c62828; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
-  header { text-align:center; padding:28px 16px 8px; }
-  h1 { margin:0; font-size:2rem; letter-spacing:-.02em; }
-  header p { margin:4px 0 0; opacity:.65; }
-  main { max-width:980px; margin:0 auto; padding:16px; display:grid; gap:20px; grid-template-columns:1fr 1fr; }
-  @media (max-width:760px){ main{ grid-template-columns:1fr; } }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; }
-  label { display:block; font-weight:700; font-size:.9rem; margin:14px 0 6px; }
-  label:first-child { margin-top:0; }
-  input[type=url] { width:100%; padding:12px 14px; font-size:1rem; border:2px solid var(--line); border-radius:10px; background:#fff; }
+  html, body { margin:0; height:100%; overflow:hidden; color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  body { background: radial-gradient(ellipse at 50% 30%, #fffaf0 0%, #f6f1e7 55%, #e9dfca 100%); }
+  canvas#scene { position:fixed; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none; }
+  canvas#scene:active { cursor:grabbing; }
+
+  .panel { position:fixed; left:16px; top:16px; width:340px; max-height:calc(100% - 32px); overflow:auto;
+    padding:16px 16px 14px; border-radius:20px;
+    background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7);
+    -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4);
+    box-shadow:0 12px 40px rgba(60,40,10,.18); }
+  .head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  h1 { margin:0; font-size:1.25rem; letter-spacing:-.02em; }
+  .sub { margin:0; font-size:.8rem; opacity:.65; }
+  #fold { display:none; border:0; background:#0001; border-radius:8px; padding:4px 10px; font-weight:700; cursor:pointer; }
+  label.t { display:block; font-weight:700; font-size:.78rem; margin:12px 0 5px; text-transform:uppercase; letter-spacing:.05em; opacity:.7; }
+  input[type=url] { width:100%; padding:10px 12px; font-size:.95rem; border:2px solid rgba(0,0,0,.08); border-radius:12px; background:rgba(255,255,255,.85); }
   input[type=url]:focus { outline:none; border-color:var(--ok); }
-  .err { color:var(--bad); font-size:.9rem; min-height:1.3em; margin-top:6px; }
-  .themes { display:flex; flex-wrap:wrap; gap:8px; }
-  .themes button { border:2px solid var(--line); background:#fff; border-radius:999px; padding:6px 14px; font-weight:600; cursor:pointer; display:flex; gap:8px; align-items:center; }
-  .themes button[aria-pressed=true] { border-color:var(--ok); background:#eef7ee; }
-  .dot { width:14px; height:14px; border-radius:50%; display:inline-block; }
-  .colors { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .colors label { margin:0; font-weight:600; font-size:.8rem; }
-  input[type=color] { width:100%; height:40px; border:2px solid var(--line); border-radius:8px; padding:2px; background:#fff; }
-  .warn { background:#fff4e5; border:1px solid #ffcc80; border-radius:10px; padding:10px 12px; margin-top:12px; font-size:.9rem; display:none; }
-  .warn button { margin-left:8px; }
-  .stage { perspective:900px; display:grid; place-items:center; min-height:340px; }
-  #tilt { transition:transform .08s linear; transform-style:preserve-3d; }
-  canvas { max-width:100%; height:auto; border-radius:12px; box-shadow:0 18px 30px -12px rgba(0,0,0,.35); }
-  .status { text-align:center; font-size:.9rem; margin-top:10px; min-height:1.4em; }
-  .status.ok { color:var(--ok); font-weight:600; }
-  .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
-  button.primary { background:var(--ok); color:#fff; border:0; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; }
+  .err { color:var(--bad); font-size:.82rem; min-height:1.2em; margin-top:4px; }
+  .themes { display:flex; flex-wrap:wrap; gap:6px; }
+  .themes button { border:2px solid transparent; background:rgba(255,255,255,.8); border-radius:999px; padding:5px 11px; font-weight:600; font-size:.82rem; cursor:pointer; display:flex; gap:6px; align-items:center; }
+  .themes button[aria-pressed=true] { border-color:var(--ok); }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+  .colors { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .colors div span { display:block; font-size:.72rem; font-weight:600; margin-bottom:3px; }
+  input[type=color] { width:100%; height:34px; border:2px solid rgba(0,0,0,.08); border-radius:10px; padding:2px; background:#fff; }
+  .warn { display:none; background:#fff4e5; border:1px solid #ffcc80; border-radius:10px; padding:8px 10px; margin-top:10px; font-size:.82rem; }
+  .warn button { margin-left:6px; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  button.primary { background:var(--ok); color:#fff; border:0; border-radius:12px; padding:9px 14px; font-weight:700; cursor:pointer; }
   button.primary:disabled { opacity:.4; cursor:not-allowed; }
-  button.ghost { background:#fff; border:2px solid var(--line); border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; }
-  footer { text-align:center; opacity:.55; font-size:.8rem; padding:8px 16px 28px; }
+  button.ghost { background:rgba(255,255,255,.85); border:2px solid rgba(0,0,0,.08); border-radius:12px; padding:7px 12px; font-weight:600; cursor:pointer; }
+  .status { font-size:.82rem; min-height:1.3em; margin-top:10px; }
+  .status.ok { color:var(--ok); font-weight:600; }
+  .host { font-size:.75rem; opacity:.6; margin-top:6px; }
   code { background:#0001; padding:0 .3em; border-radius:4px; }
+  .hint { position:fixed; left:50%; bottom:14px; transform:translateX(-50%); padding:6px 14px; border-radius:999px; font-size:.8rem; font-weight:600;
+    background:rgba(255,255,255,.6); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); pointer-events:none; white-space:nowrap; }
+  .panel.folded .fold-me { display:none; }
+
+  @media (max-width: 760px) {
+    .panel { left:8px; right:8px; top:auto; bottom:8px; width:auto; max-height:46%; border-radius:18px; }
+    #fold { display:block; }
+    .hint { top:10px; bottom:auto; }
+  }
 </style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
 </head>
 <body>
-<header>
-  <h1>🌳 ICQR Magic Tree</h1>
-  <p>3D QR Code Generator · turn any link into a tree that still scans</p>
-</header>
+<canvas id="scene"></canvas>
 
-<main>
-  <section class="card">
-    <label for="url">Your link</label>
-    <input id="url" type="url" inputmode="url" placeholder="https://example.com" autocomplete="off" value="https://example.com">
+<section class="panel" id="panel">
+  <div class="head">
+    <div><h1>🌳 ICQR Magic Tree</h1><p class="sub">3D QR Code Generator</p></div>
+    <button id="fold" aria-label="Show or hide the controls">▾</button>
+  </div>
+
+  <div class="fold-me">
+    <label class="t" for="url">Your link</label>
+    <input id="url" type="url" inputmode="url" autocomplete="off" placeholder="https://example.com" value="https://example.com">
     <div class="err" id="err" role="alert"></div>
 
-    <label>Season</label>
+    <label class="t">Season</label>
     <div class="themes" id="themes"></div>
 
-    <label>Colors</label>
+    <label class="t">Colors</label>
     <div class="colors">
-      <div><label for="cFoliage">Foliage</label><input id="cFoliage" type="color"></div>
-      <div><label for="cTrunk">Trunk</label><input id="cTrunk" type="color"></div>
-      <div><label for="cBg">Background</label><input id="cBg" type="color"></div>
+      <div><span>Foliage</span><input id="cFoliage" type="color" value="#f4a6c0" aria-label="Foliage color"></div>
+      <div><span>Ground tiles</span><input id="cGround" type="color" value="#e6f4d4" aria-label="Ground color"></div>
+      <div><span>Blocks &amp; trunk</span><input id="cBlock" type="color" value="#4a3426" aria-label="Block color"></div>
     </div>
     <div class="warn" id="warn"><span id="warnText"></span><button class="ghost" id="fix">Fix it</button></div>
+  </div>
 
-    <p class="status" id="info" style="text-align:left;opacity:.6;margin-top:16px">
-      served by API container <code id="host">…</code>
-    </p>
-  </section>
+  <div class="actions">
+    <button class="primary" id="toggle">📱 Scan view</button>
+    <button class="primary" id="dl" disabled>Download PNG</button>
+    <button class="ghost" id="share" disabled>Copy share link</button>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="host fold-me">served by API container <code id="host">…</code> · your link is only stored if you press share</div>
+</section>
 
-  <section class="card">
-    <div class="stage"><div id="tilt"><canvas id="cv" width="420" height="500"></canvas></div></div>
-    <div class="status" id="status"></div>
-    <div class="actions">
-      <button class="primary" id="dl" disabled>Download PNG</button>
-      <button class="ghost" id="share" disabled>Copy share link</button>
-    </div>
-  </section>
-</main>
-<footer>Your link is never stored unless you press “Copy share link”.</footer>
-<script src="app.js"></script>
+<div class="hint" id="hint">Drag to rotate · scroll to zoom · click the scene to reveal the QR</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const lerp = (a, b, t) => a + (b - a) * t;
+
+/* ------------------------------------------------------------------ API */
+async function api(path, opts) {
+  const r = await fetch('/api' + path, opts);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'request failed');
+  return j;
+}
+
+/* ------------------------------------------------------------- contrast */
+const lum = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+
+/* ---------------------------------------------------------------- state */
+const S = { matrix: null, verified: false, themes: [], theme: null, view: 'tree', k: 0, anim: null };
+const colors = () => ({ foliage: $('cFoliage').value, ground: $('cGround').value, block: $('cBlock').value, accent: S.theme?.accent || '#ffffff' });
+
+/* ---------------------------------------------------------- three setup */
+const cv = $('scene');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.5, 4000);
+const controls = new OrbitControls(camera, cv);
+controls.enableDamping = true; controls.enablePan = false; controls.maxPolarAngle = 1.48;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0xd9c7a6, 1.2); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.05;
+scene.add(sun, sun.target);
+
+const world = new THREE.Group(); scene.add(world);   // everything that depends on the QR size
+const tree = new THREE.Group(); world.add(tree);
+
+let N = 25, SIZE = 33;               // modules, island width (incl. quiet zone)
+let islandParts = [], blocks = [];   // things to dispose when rebuilding
+const QUIET = 4;
+
+/* ------------------------------------------------------------ rng/hash */
+function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+/* ------------------------------------------------------------ the island */
+function clearGroup(g) {
+  [...g.children].forEach((o) => { g.remove(o); o.traverse?.((m) => { m.geometry?.dispose(); }); });
+}
+let islandGroup = new THREE.Group(); world.add(islandGroup);
+
+function buildIsland() {
+  clearGroup(islandGroup);
+  blocks = [];
+  const c = colors();
+  N = S.matrix ? S.matrix.length : 25;
+  SIZE = N + QUIET * 2;
+
+  const dirt = new THREE.Mesh(new THREE.BoxGeometry(SIZE + 0.6, 2.2, SIZE + 0.6),
+    new THREE.MeshStandardMaterial({ color: new THREE.Color('#8a6a48'), roughness: 1 }));
+  dirt.position.y = -1.1 - 0.001; dirt.receiveShadow = true; dirt.castShadow = true;
+  const ground = new THREE.Mesh(new THREE.BoxGeometry(SIZE, 0.4, SIZE),
+    new THREE.MeshStandardMaterial({ color: new THREE.Color(c.ground), roughness: 0.95 }));
+  ground.position.y = -0.2; ground.receiveShadow = true;
+  islandGroup.add(dirt, ground);
+
+  if (S.matrix) {
+    const inFinder = (x, y) => (x < 7 && y < 7) || (x >= N - 7 && y < 7) || (x < 7 && y >= N - 7);
+    const body = [], finder = [];
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
+      if (S.matrix[y][x] === '1') (inFinder(x, y) ? finder : body).push([x, y]);
+
+    const make = (list, h, color) => {
+      const m = new THREE.InstancedMesh(new THREE.BoxGeometry(0.96, h, 0.96),
+        new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness: 0.8 }), list.length);
+      const d = new THREE.Object3D();
+      list.forEach(([x, y], i) => {
+        // row 0 is at -z, so that the scan view (looking down, screen-up = -z) is not mirrored
+        d.position.set(x - N / 2 + 0.5, h / 2, y - N / 2 + 0.5); d.updateMatrix(); m.setMatrixAt(i, d.matrix);
+      });
+      m.castShadow = true; m.receiveShadow = true; m.userData.h = h;
+      islandGroup.add(m); blocks.push(m);
+    };
+    make(body, 0.55, c.block);
+    make(finder, 1.15, new THREE.Color(c.block).lerp(new THREE.Color('#ffffff'), 0.12)); // taller "stone bases"
+  }
+
+  // light + camera framing depend on island size
+  const R = SIZE * 0.75;
+  Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: SIZE * 4 });
+  sun.shadow.camera.updateProjectionMatrix();
+  sun.position.set(SIZE * 0.7, SIZE * 1.1, SIZE * 0.55); sun.target.position.set(0, 0, 0);
+  controls.minDistance = SIZE * 0.5; controls.maxDistance = SIZE * 4;
+  buildTree();
+  applyK(S.k);
+  if (S.view === 'scan') placeCamera(scanPose()); else if (!S.posed) { placeCamera(treePose()); S.posed = true; }
+}
+
+/* -------------------------------------------------------------- the tree */
+function buildTree() {
+  clearGroup(tree);
+  const c = colors(), rand = rng(hash($('url').value || 'tree'));
+  const trunkG = new THREE.Group(), canopy = new THREE.Group(); tree.add(trunkG, canopy);
+  tree.userData = { trunkG, canopy };
+
+  const wood = new THREE.MeshStandardMaterial({ color: new THREE.Color(c.block).lerp(new THREE.Color('#8a5a34'), 0.55), roughness: 0.9, flatShading: true });
+  const leafCols = [new THREE.Color(c.foliage), new THREE.Color(c.foliage).lerp(new THREE.Color('#ffffff'), 0.25),
+    new THREE.Color(c.foliage).lerp(new THREE.Color(c.accent), 0.7), new THREE.Color(c.foliage).lerp(new THREE.Color('#000000'), 0.12)];
+  const leafMats = leafCols.map((col) => new THREE.MeshStandardMaterial({ color: col, roughness: 0.85, flatShading: true }));
+  const ico = new THREE.IcosahedronGeometry(1, 1);
+  const up = new THREE.Vector3(0, 1, 0);
+
+  const cluster = (p, scale) => {
+    const n = 4 + Math.floor(rand() * 3);
+    for (let i = 0; i < n; i++) {
+      const m = new THREE.Mesh(ico, leafMats[Math.floor(rand() * leafMats.length)]);
+      m.position.set(p.x + (rand() - 0.5) * 2.2, p.y + (rand() - 0.2) * 1.6, p.z + (rand() - 0.5) * 2.2);
+      m.scale.setScalar((0.9 + rand() * 0.9) * scale);
+      m.castShadow = true; m.userData.s = m.scale.x; canopy.add(m);
+    }
+  };
+  const branch = (start, dir, len, r0, depth) => {
+    const end = start.clone().addScaledVector(dir, len), r1 = r0 * 0.68;
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 7), wood);
+    m.position.copy(start).add(end).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(up, dir);
+    m.castShadow = true; trunkG.add(m);
+    if (depth === 0) { cluster(end, 1); return; }
+    const kids = depth >= 3 ? 2 : 2 + (rand() < 0.5 ? 1 : 0), twist = rand() * Math.PI * 2;
+    for (let i = 0; i < kids; i++) {
+      const d = dir.clone();
+      const axis = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).cross(dir).normalize();
+      d.applyAxisAngle(axis, 0.4 + rand() * 0.4);
+      d.applyAxisAngle(dir, twist + (i * Math.PI * 2) / kids + (rand() - 0.5));
+      d.y += 0.3; d.normalize();
+      branch(end, d, len * (0.7 + rand() * 0.12), r1, depth - 1);
+    }
+  };
+  branch(new THREE.Vector3(0, 0, 0), new THREE.Vector3((rand() - 0.5) * 0.15, 1, (rand() - 0.5) * 0.15).normalize(), 4.6, 0.6, 4);
+
+  tree.userData.base = SIZE * 0.042;
+}
+
+/* ---------------------------------------------- scan / tree view blending */
+// k = 0 tree view, 1 scan view. The tree shrinks away, blocks sink, shadows fade, so the QR is flat and clean.
+function applyK(k) {
+  const ts = tree.userData.base || 1, grow = 1 - smooth(k / 0.8);
+  tree.scale.setScalar(Math.max(ts * grow, 1e-4));
+  tree.rotation.y = k * 2.4; tree.visible = grow > 0.01;
+  blocks.forEach((b) => { b.scale.y = lerp(1, 0.2, smooth(k)); });
+  sun.intensity = lerp(1.0, 0, smooth(k)); hemi.intensity = lerp(1.2, 2.4, smooth(k)); // scan view: no sun, no shadows, true colours
+}
+
+/* ------------------------------------------------------------- camera */
+let area = { w: innerWidth, h: innerHeight, dx: 0, dy: 0 };
+function fitDistance(extent, fov) {
+  const m = Math.min(area.w, area.h), H = innerHeight;
+  return (extent * H / m) / (2 * Math.tan(THREE.MathUtils.degToRad(fov) / 2));
+}
+const treePose = () => ({ theta: Math.PI / 4, phi: 1.0, r: fitDistance(SIZE * 1.6, 35), fov: 35, ty: SIZE * 0.12 });
+const scanPose = () => ({ theta: 0, phi: 0.0012, r: fitDistance(SIZE * 1.04, 10), fov: 10, ty: 0 });
+function poseOfCamera() {
+  const off = camera.position.clone().sub(controls.target), s = new THREE.Spherical().setFromVector3(off);
+  return { theta: s.theta, phi: s.phi, r: s.radius, fov: camera.fov, ty: controls.target.y };
+}
+function placeCamera(p) {
+  camera.fov = p.fov; camera.near = Math.max(0.5, p.r * 0.2); camera.far = p.r * 6; camera.updateProjectionMatrix();
+  controls.target.set(0, p.ty, 0);
+  camera.position.setFromSpherical(new THREE.Spherical(p.r, p.phi, p.theta)).add(controls.target);
+  camera.lookAt(controls.target);
+}
+function setView(view) {
+  if (S.view === view && S.anim) return;
+  S.view = view;
+  const from = poseOfCamera(), to = view === 'scan' ? scanPose() : treePose();
+  let dth = to.theta - from.theta; dth = Math.atan2(Math.sin(dth), Math.cos(dth)); // shortest way round
+  S.anim = { t0: performance.now(), dur: 1300, from, to, dth, k0: S.k, k1: view === 'scan' ? 1 : 0 };
+  controls.enabled = false;
+  $('toggle').textContent = view === 'scan' ? '🌳 Tree view' : '📱 Scan view';
+  $('hint').textContent = view === 'scan' ? 'Point your phone camera at the screen · click to bring the tree back' : 'Drag to rotate · scroll to zoom · click the scene to reveal the QR';
+}
+
+function layout() {
+  const W = innerWidth, H = innerHeight, r = $('panel').getBoundingClientRect(), mobile = W <= 760;
+  renderer.setSize(W, H, false); camera.aspect = W / H;
+  if (mobile) { area = { w: W, h: Math.max(120, H - r.height - 16), dx: 0, dy: r.height / 2 }; }
+  else { const used = r.right + 16; area = { w: Math.max(200, W - used), h: H, dx: used / 2, dy: 0 }; }
+  camera.setViewOffset(W, H, -area.dx, area.dy, W, H);
+  if (S.view === 'scan' && !S.anim) placeCamera(scanPose());
+  else if (!S.anim && S.k === 0 && !S.userMoved) placeCamera(treePose());
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', layout);
+new ResizeObserver(layout).observe($('panel'));
+controls.addEventListener('start', () => { S.userMoved = true; });
+
+/* --------------------------------------------------------------- loop */
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const t = clock.getElapsedTime();
+  if (S.anim) {
+    const a = S.anim, p = smooth((performance.now() - a.t0) / a.dur);
+    const cur = { theta: a.from.theta + a.dth * p, phi: lerp(a.from.phi, a.to.phi, p), r: lerp(a.from.r, a.to.r, p), fov: lerp(a.from.fov, a.to.fov, p), ty: lerp(a.from.ty, a.to.ty, p) };
+    placeCamera(cur); S.k = lerp(a.k0, a.k1, p); applyK(S.k);
+    if (p >= 1) { S.anim = null; S.k = a.k1; controls.enabled = S.view === 'tree'; if (S.view === 'tree') { controls.update(); } }
+  } else if (controls.enabled) controls.update();
+  if (tree.userData.canopy && S.k < 0.2) tree.userData.canopy.rotation.z = Math.sin(t * 0.8) * 0.012;
+  renderer.render(scene, camera);
+});
+
+/* ------------------------------------------------------------ UI logic */
+let timer;
+const refresh = () => { clearTimeout(timer); timer = setTimeout(generate, 250); };
+
+async function generate() {
+  S.verified = false; setButtons();
+  try {
+    const d = await api('/qr', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: $('url').value.trim() }) });
+    S.matrix = d.matrix; S.verified = d.verified; $('host').textContent = d.host; $('err').textContent = '';
+    $('status').textContent = '✔ verified: the API decoded the code back to your link'; $('status').className = 'status ok';
+  } catch (e) { S.matrix = null; $('err').textContent = e.message; $('status').textContent = ''; }
+  buildIsland(); checkContrast(); setButtons();
+}
+
+function checkContrast() {
+  const ratio = contrast($('cBlock').value, $('cGround').value), bad = ratio < 3;
+  $('warn').style.display = bad ? 'block' : 'none';
+  if (bad) $('warnText').textContent = `Blocks and ground are too close (${ratio.toFixed(1)}:1). Phones may not scan it.`;
+  return !bad;
+}
+$('fix').onclick = () => { $('cBlock').value = '#2b1d14'; $('cGround').value = '#f6f1e7'; recolor(); };
+function setButtons() { const ok = !!(S.verified && S.matrix && checkContrast()); $('dl').disabled = !ok; $('share').disabled = !ok; }
+
+function setColors(c) { $('cFoliage').value = c.foliage; $('cGround').value = c.background; $('cBlock').value = c.trunk; }
+function pick(t) {
+  S.theme = t; setColors(t);
+  document.querySelectorAll('#themes button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.slug === t.slug));
+  recolor();
+}
+function recolor() { buildIsland(); checkContrast(); setButtons(); }
+['cFoliage', 'cGround', 'cBlock'].forEach((id) => $(id).addEventListener('input', recolor));
+$('url').addEventListener('input', refresh);
+
+async function loadThemes() {
+  const d = await api('/themes'); S.themes = d.themes; $('host').textContent = d.host;
+  $('themes').innerHTML = '';
+  S.themes.forEach((t) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<span class="dot" style="background:${t.foliage}"></span>${t.name}`; b.dataset.slug = t.slug; b.onclick = () => { pick(t); refresh(); };
+    $('themes').append(b);
+  });
+  const id = new URLSearchParams(location.search).get('t');
+  if (id) { try { const t = await api('/trees/' + id); $('url').value = t.url; S.theme = S.themes.find((x) => x.slug === t.theme) || S.themes[0]; setColors(t); return generate(); } catch (e) {} }
+  pick(S.themes[0]); generate();
+}
+
+/* ---------------------------------------------------- toggle & actions */
+$('toggle').onclick = () => setView(S.view === 'tree' ? 'scan' : 'tree');
+let down = null;
+cv.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+cv.addEventListener('pointerup', (e) => {
+  if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 400) setView(S.view === 'tree' ? 'scan' : 'tree');
+  down = null;
+});
+$('fold').onclick = () => { $('panel').classList.toggle('folded'); layout(); };
+
+// render now, then copy onto a cream background (the WebGL buffer is cleared after presenting)
+function snapshot() {
+  renderer.render(scene, camera);
+  const out = document.createElement('canvas'); out.width = cv.width; out.height = cv.height;
+  const g = out.getContext('2d'); g.fillStyle = '#f6f1e7'; g.fillRect(0, 0, out.width, out.height); g.drawImage(cv, 0, 0);
+  return out;
+}
+$('dl').onclick = () => {
+  const a = document.createElement('a'); a.download = S.view === 'scan' ? 'magic-tree-scan.png' : 'magic-tree.png';
+  a.href = snapshot().toDataURL('image/png'); a.click();
+};
+$('share').onclick = async () => {
+  try {
+    const c = colors();
+    const t = await api('/trees', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: $('url').value.trim(), theme: S.theme ? S.theme.slug : 'custom', foliage: c.foliage, trunk: c.block, background: c.ground }) });
+    const link = `${location.origin}/?t=${t.id}`;
+    await navigator.clipboard.writeText(link).catch(() => {});
+    $('status').textContent = '🔗 share link copied: ' + link; $('status').className = 'status ok';
+  } catch (e) { $('status').textContent = e.message; $('status').className = 'status'; }
+};
+
+// for tests / curious students: window.__mt.project(x, y) gives the screen position of module (x, y)
+window.__mt = { S, snapshot, scene, project(x, y) { const v = new THREE.Vector3(x - N / 2 + 0.5, 0.3, y - N / 2 + 0.5).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; } };
+
+layout();
+buildIsland();
+loadThemes().catch((e) => { $('err').textContent = 'API not reachable: ' + e.message; });
+</script>
 </body>
 </html>

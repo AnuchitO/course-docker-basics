@@ -313,9 +313,9 @@ docker run -d --name web -p 3000:80 magic-web
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   Open <b>http://localhost:3000</b>
-  <div class="mt-2">The page loads, but says:</div>
+  <div class="mt-2">A 3D island with a tree appears, but under the link box it says:</div>
   <div class="out mt-1">API not reachable</div>
-  <div class="mt-3 text-sm opacity-70">One container works alone. It just has nobody to talk to yet.</div>
+  <div class="mt-3 text-sm opacity-70">One container works alone. There is no QR code yet: the page has nobody to ask.</div>
 </div>
 
 </div>
@@ -382,8 +382,8 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   Refresh <b>http://localhost:3000</b>
-  <div class="mt-2">🌳 A QR tree appears, and the badge shows <b>served by API container …</b></div>
-  <div class="mt-3 text-sm opacity-70">Season buttons work (built-in themes). “Copy share link” says it needs a database.</div>
+  <div class="mt-2">🌳 The island now carries a <b>QR code</b> under the tree. Click the scene (or <b>Scan view</b>) and the tree parts so the code is flat and scannable.</div>
+  <div class="mt-3 text-sm opacity-70">The panel shows <b>served by API container …</b>. Seasons work (built-in themes); “Copy share link” says it needs a database.</div>
 </div>
 
 </div>

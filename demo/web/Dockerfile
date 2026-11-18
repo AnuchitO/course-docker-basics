@@ -3,4 +3,4 @@ FROM nginx:1.27-alpine
 ENV API_URL=http://api:8080
 # the official image fills ${API_URL} in this template when the container starts
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-COPY index.html app.js og.svg /usr/share/nginx/html/
+COPY index.html og.svg /usr/share/nginx/html/

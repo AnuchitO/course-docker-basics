@@ -6,6 +6,7 @@ server {
   # Docker's built-in DNS. Resolving at request time (not at startup) lets this
   # container run on its own, before an "api" container exists.
   resolver 127.0.0.11 valid=5s;
+  resolver_timeout 2s;
 
   location /api/ {
     set $api ${API_URL};

@@ -78,7 +78,7 @@ func TestShareTree(t *testing.T) {
 	if c := do(h, "POST", "/api/trees", ok).Code; c != 201 {
 		t.Fatalf("share: %d", c)
 	}
-	low := `{"url":"https://example.com","theme":"x","foliage":"#f6f1e8","trunk":"#6d4c41","background":"#f6f1e7"}`
+	low := `{"url":"https://example.com","theme":"x","foliage":"#2f7d32","trunk":"#f6f1e8","background":"#f6f1e7"}`
 	if c := do(h, "POST", "/api/trees", low).Code; c != 400 {
 		t.Fatalf("low contrast should be rejected, got %d", c)
 	}

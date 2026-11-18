@@ -98,8 +98,8 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if contrast(in.Foliage, in.Background) < minContrast {
-		fail(w, 400, "foliage and background are too similar to scan")
+	if contrast(in.Trunk, in.Background) < minContrast {
+		fail(w, 400, "blocks and ground are too similar to scan")
 		return
 	}
 	in.Theme = strings.TrimSpace(in.Theme)
