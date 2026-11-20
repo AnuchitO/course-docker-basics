@@ -26,7 +26,16 @@ func (f *fakeStore) GetTree(_ context.Context, id string) (Tree, error) {
 	}
 	return Tree{}, errNotFound
 }
-func (f *fakeStore) ListTrees(context.Context, int) ([]Tree, error) {
+func (f *fakeStore) LikeTree(_ context.Context, id string, d int) (int, error) {
+	t, ok := f.trees[id]
+	if !ok {
+		return 0, errNotFound
+	}
+	t.Likes += d
+	f.trees[id] = t
+	return t.Likes, nil
+}
+func (f *fakeStore) ListTrees(_ context.Context, _, _ string, _ int) ([]Tree, error) {
 	out := []Tree{}
 	for _, t := range f.trees {
 		out = append(out, t)
@@ -120,6 +129,17 @@ func TestGallery(t *testing.T) {
 	_ = json.Unmarshal(rec.Body.Bytes(), &got)
 	if rec.Code != 200 || len(got.Trees) != 1 || got.Trees[0].Name != "Docs" || got.Trees[0].Swatch != 2 {
 		t.Fatalf("list: %d %s", rec.Code, rec.Body)
+	}
+	rec = do(h, "POST", "/api/trees/abc/like", "")
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"likes":1`) {
+		t.Fatalf("like: %d %s", rec.Code, rec.Body)
+	}
+	if do(h, "POST", "/api/trees/nope/like", "").Code != 404 {
+		t.Fatal("like of a missing tree should be 404")
+	}
+	rec = do(h, "GET", "/api/trees", "")
+	if !strings.Contains(rec.Body.String(), `"matrix"`) {
+		t.Fatalf("list should carry matrices: %s", rec.Body)
 	}
 	// no name given: falls back to the text
 	do(h, "POST", "/api/trees", `{"url":"hello","season":"spring","swatch":0}`)

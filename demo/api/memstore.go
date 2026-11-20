@@ -17,9 +17,12 @@ var defaultThemes = Themes{
 	Swatches: []string{"#e98aab", "#a57ad6", "#e0473c"},
 }
 
-func (memStore) Ping(context.Context) error                     { return errNoDB }
-func (memStore) Themes(context.Context) (Themes, error)         { return defaultThemes, nil }
-func (memStore) SaveTree(context.Context, Tree) (Tree, error)   { return Tree{}, errNoDB }
-func (memStore) GetTree(context.Context, string) (Tree, error)  { return Tree{}, errNoDB }
-func (memStore) CountTrees(context.Context) (int, error)        { return 0, errNoDB }
-func (memStore) ListTrees(context.Context, int) ([]Tree, error) { return nil, errNoDB }
+func (memStore) Ping(context.Context) error                    { return errNoDB }
+func (memStore) Themes(context.Context) (Themes, error)        { return defaultThemes, nil }
+func (memStore) SaveTree(context.Context, Tree) (Tree, error)  { return Tree{}, errNoDB }
+func (memStore) GetTree(context.Context, string) (Tree, error) { return Tree{}, errNoDB }
+func (memStore) CountTrees(context.Context) (int, error)       { return 0, errNoDB }
+func (memStore) ListTrees(context.Context, string, string, int) ([]Tree, error) {
+	return nil, errNoDB
+}
+func (memStore) LikeTree(context.Context, string, int) (int, error) { return 0, errNoDB }

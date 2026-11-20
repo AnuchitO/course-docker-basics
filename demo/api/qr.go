@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"unicode/utf8"
 
 	"github.com/makiuchi-d/gozxing"
@@ -23,6 +24,20 @@ func validateURL(raw string) (string, error) {
 		return "", fmt.Errorf("that's %d characters. A garden fits up to %d", n, maxTextLen)
 	}
 	return raw, nil
+}
+
+var matrixCache sync.Map // text -> []string; a text always gives the same code
+
+// cachedMatrix is qrMatrix with a memory: the gallery asks for the same codes again and again.
+func cachedMatrix(text string) ([]string, error) {
+	if v, ok := matrixCache.Load(text); ok {
+		return v.([]string), nil
+	}
+	rows, err := qrMatrix(text)
+	if err == nil {
+		matrixCache.Store(text, rows)
+	}
+	return rows, err
 }
 
 // qrMatrix builds a QR code with the highest error correction (level Q) and

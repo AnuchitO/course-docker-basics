@@ -35,6 +35,8 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("POST /api/qr", s.qr)
 	mux.HandleFunc("GET /api/trees", s.listTrees)
 	mux.HandleFunc("POST /api/trees", s.saveTree)
+	mux.HandleFunc("POST /api/trees/{id}/like", s.like(1))
+	mux.HandleFunc("DELETE /api/trees/{id}/like", s.like(-1))
 	mux.HandleFunc("GET /api/trees/{id}", s.getTree)
 	return mux
 }
@@ -122,9 +124,15 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, saved)
 }
 
-// GET /api/trees  ->  the saved gardens, newest first (presets are seeded by db/init.sql).
+// GET /api/trees?sort=new|popular&season=spring  ->  the saved gardens, each with its QR matrix
+// so the page can draw a thumbnail without a second request. Presets are seeded by db/init.sql.
 func (s *server) listTrees(w http.ResponseWriter, r *http.Request) {
-	trees, err := s.store.ListTrees(r.Context(), 24)
+	sort, season := r.URL.Query().Get("sort"), r.URL.Query().Get("season")
+	if season != "" && !seasonRe.MatchString(season) {
+		fail(w, 400, "unknown season")
+		return
+	}
+	trees, err := s.store.ListTrees(r.Context(), sort, season, 48)
 	if errors.Is(err, errNoDB) {
 		fail(w, http.StatusServiceUnavailable, "the gallery needs a database: start the db container first")
 		return
@@ -133,7 +141,29 @@ func (s *server) listTrees(w http.ResponseWriter, r *http.Request) {
 		fail(w, 500, "could not load the gallery")
 		return
 	}
+	for i := range trees {
+		if rows, err := cachedMatrix(trees[i].URL); err == nil {
+			trees[i].Matrix = rows
+		}
+	}
 	writeJSON(w, 200, map[string]any{"trees": trees, "host": s.host})
+}
+
+// like returns a handler that moves a tree's like counter by delta.
+func (s *server) like(delta int) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		n, err := s.store.LikeTree(r.Context(), r.PathValue("id"), delta)
+		switch {
+		case errors.Is(err, errNotFound):
+			fail(w, 404, "tree not found")
+		case errors.Is(err, errNoDB):
+			fail(w, http.StatusServiceUnavailable, "likes need a database: start the db container first")
+		case err != nil:
+			fail(w, 500, "could not like")
+		default:
+			writeJSON(w, 200, map[string]any{"id": r.PathValue("id"), "likes": n})
+		}
+	}
 }
 
 func (s *server) getTree(w http.ResponseWriter, r *http.Request) {

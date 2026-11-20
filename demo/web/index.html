@@ -28,13 +28,27 @@
     background:rgba(255,253,248,.7);color:var(--ink);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
   .iconbtn:hover{background:#fff}
   #galBtn{right:58px}
-  #gallery{display:grid;gap:8px;margin:12px 0 4px;max-height:52vh;overflow:auto}
-  .item{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;color:var(--ink)}
-  .item:hover{border-color:var(--accent)}
-  .item i{flex:0 0 22px;height:22px;border-radius:50%;box-shadow:0 0 0 1px var(--line)}
-  .item b{display:block;font-size:14px}
-  .item small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}
-  .item em{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--muted)}
+  #wall{position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;display:none;padding:0 16px 40px}
+  #wall.open{display:block}
+  .wallbar{position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 0 12px;background:var(--bg)}
+  .wallbar h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:22px;margin:0 auto 0 0}
+  .chip{border:1px solid var(--line);background:rgba(255,253,248,.7);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;cursor:pointer}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
+  .masonry{columns:4 200px;column-gap:14px;max-width:1100px;margin:0 auto}
+  .pin{break-inside:avoid;margin:0 0 14px;border-radius:18px;overflow:hidden;background:#fffdf8;border:1px solid var(--line);position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s}
+  .pin:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(60,45,30,.16)}
+  .pin canvas{display:block;width:100%}
+  .pin .cap{padding:9px 12px 11px}
+  .pin .cap b{display:block;font-size:13.5px;line-height:1.25}
+  .pin .cap small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pin .over{position:absolute;inset:0 0 auto 0;height:62%;display:flex;justify-content:space-between;align-items:flex-start;padding:10px;opacity:0;transition:opacity .15s;
+    background:linear-gradient(rgba(30,24,16,.35),transparent)}
+  .pin:hover .over,.pin:focus-within .over{opacity:1}
+  @media (hover:none){.pin .over{opacity:1;background:none}}
+  .pill2{border:0;border-radius:999px;padding:7px 13px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff}
+  .heart{border:0;border-radius:999px;padding:7px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:rgba(255,253,248,.92);color:var(--ink)}
+  .heart.on{color:#d8344f}
+  #wallNote{text-align:center;color:var(--muted);font-size:13px;margin:30px 0}
   #panel{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(520px,calc(100% - 24px));
     display:flex;flex-direction:column;align-items:center;gap:9px;z-index:2}
   .pill{font-size:12px;color:var(--muted);background:rgba(255,253,248,.65);border:1px solid var(--line);
@@ -131,14 +145,20 @@
   </div>
 </div>
 
-<div class="modal" id="galModal" role="dialog" aria-modal="true" aria-labelledby="galTitle">
-  <div class="card">
-    <button class="close" data-close aria-label="Close">×</button>
-    <h2 id="galTitle">Saved gardens</h2>
-    <p class="muted">Pick one to plant it again with its season and flower colour. Gardens come from the database.</p>
-    <div id="gallery"></div>
-    <p class="muted" id="galNote"></p>
+<div id="wall" role="dialog" aria-modal="true" aria-label="Garden gallery">
+  <div class="wallbar">
+    <h2>Gallery</h2>
+    <button class="chip on" data-sort="new">New</button>
+    <button class="chip" data-sort="popular">Popular</button>
+    <span style="width:8px"></span>
+    <button class="chip on" data-fs="">All</button>
+    <button class="chip" data-fs="spring">Spring</button>
+    <button class="chip" data-fs="summer">Summer</button>
+    <button class="chip" data-fs="autumn">Autumn</button>
+    <button class="iconbtn" id="wallClose" style="position:static;margin-left:6px" aria-label="Close gallery">×</button>
   </div>
+  <div class="masonry" id="gallery"></div>
+  <p id="wallNote"></p>
 </div>
 
 <div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
@@ -855,30 +875,80 @@ function openModal(id){ $(id).classList.add('open'); }
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
   if(e.target===m || e.target.hasAttribute('data-close')) m.classList.remove('open');
 }));
-document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal.open,#wall.open').forEach(m=>m.classList.remove('open')); });
 /* gallery: saved gardens live in the database, the API lists them */
 const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wall = { sort:'new', season:'' };
+const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('qr-garden-likes')||'[]')); }catch(e){ return new Set(); } })();
+const saveLiked = () => { try{ localStorage.setItem('qr-garden-likes', JSON.stringify([...LIKED])); }catch(e){} };
+// a tiny top-down garden: dark modules are flower beds, light ones are stone. Heights differ per card, like a pin board.
+function thumb(t){
+  const m = t.matrix, n = m ? m.length : 25, c = document.createElement('canvas');
+  const hash = [...t.id].reduce((a,ch) => a*31 + ch.charCodeAt(0) >>> 0, 7);
+  const ratio = [1, 1.18, 1.35][hash % 3], W = 360, H = Math.round(W*ratio);
+  c.width = W; c.height = H;
+  const g = c.getContext('2d'), pad = 26, cell = (W - 2*pad) / (n + 2), top = (H - cell*(n+2)) / 2;
+  g.fillStyle = SEASON_BG[t.season] || '#f5efe6'; g.fillRect(0,0,W,H);
+  const x0 = pad + cell, y0 = top + cell;
+  g.fillStyle = '#fffdf8'; g.fillRect(pad, top, cell*(n+2), cell*(n+2));
+  const flower = SWATCHES[t.swatch % SWATCHES.length];
+  for(let r=0;r<n;r++) for(let q=0;q<n;q++){
+    if(!m){ break; }
+    if(m[r][q] !== '1') continue;
+    const finder = (r<7&&q<7)||(r<7&&q>=n-7)||(r>=n-7&&q<7);
+    g.fillStyle = finder ? '#2f6b4f' : ((r*7+q*13+hash) % 5 === 0 ? flower : '#5b9a6f');
+    g.beginPath(); g.roundRect ? g.roundRect(x0+q*cell+.5, y0+r*cell+.5, cell-1, cell-1, cell*.28) : g.rect(x0+q*cell, y0+r*cell, cell-1, cell-1); g.fill();
+  }
+  return c;
+}
+function plant(t){
+  state.text = t.url; $('#url').value = t.url;
+  if(SEASON_BG[t.season]) state.season = t.season;
+  state.swatch = t.swatch % SWATCHES.length;
+  persist(); syncUI(); rebuildLook(); regenerate();
+  $('#wall').classList.remove('open');
+}
+async function toggleLike(t, btn, e){
+  e.stopPropagation();
+  const on = !LIKED.has(t.id);
+  try{
+    const d = await api('/trees/'+t.id+'/like', { method: on ? 'POST' : 'DELETE' });
+    on ? LIKED.add(t.id) : LIKED.delete(t.id); saveLiked();
+    btn.classList.toggle('on', on); btn.textContent = (on ? '♥ ' : '♡ ') + d.likes;
+  }catch(err){ toast(err.message, 3000); }
+}
 async function loadGallery(){
-  const box = $('#gallery'), note = $('#galNote');
+  const box = $('#gallery'), note = $('#wallNote');
   box.innerHTML = ''; note.textContent = 'Loading…';
   try{
-    const d = await api('/trees');
-    note.textContent = d.trees.length ? '' : 'Nothing saved yet. Press the bookmark button to save your garden.';
+    const d = await api('/trees?sort='+wall.sort+'&season='+wall.season);
+    note.textContent = d.trees.length ? '' : 'Nothing here yet. Press the bookmark button to save your garden.';
     d.trees.forEach(t => {
-      const b = document.createElement('button'); b.className = 'item';
-      b.innerHTML = '<i style="background:'+esc(SWATCHES[t.swatch % SWATCHES.length])+'"></i><span><b>'+esc(t.name || t.url)+'</b><small>'+esc(t.url)+'</small></span><em>'+esc(t.season)+'</em>';
-      b.addEventListener('click', () => {
-        state.text = t.url; $('#url').value = t.url;
-        if(SEASON_BG[t.season]) state.season = t.season;
-        state.swatch = t.swatch % SWATCHES.length;
-        persist(); syncUI(); rebuildLook(); regenerate();
-        $('#galModal').classList.remove('open');
-      });
-      box.appendChild(b);
+      const card = document.createElement('div'); card.className = 'pin'; card.tabIndex = 0;
+      card.appendChild(thumb(t));
+      const over = document.createElement('div'); over.className = 'over';
+      const plantBtn = document.createElement('button'); plantBtn.className = 'pill2'; plantBtn.textContent = 'Plant';
+      const heart = document.createElement('button'); heart.className = 'heart' + (LIKED.has(t.id) ? ' on' : '');
+      heart.textContent = (LIKED.has(t.id) ? '♥ ' : '♡ ') + t.likes;
+      heart.addEventListener('click', e => toggleLike(t, heart, e));
+      over.append(plantBtn, heart);
+      const cap = document.createElement('div'); cap.className = 'cap';
+      cap.innerHTML = '<b>'+esc(t.name || t.url)+'</b><small>'+esc(t.url)+'</small>';
+      card.append(over, cap);
+      card.addEventListener('click', () => plant(t));
+      card.addEventListener('keydown', e => { if(e.key==='Enter') plant(t); });
+      box.appendChild(card);
     });
   }catch(e){ note.textContent = e.message; }
 }
-$('#galBtn').addEventListener('click', () => { openModal('#galModal'); loadGallery(); });
+document.querySelectorAll('#wall [data-sort]').forEach(b => b.addEventListener('click', () => {
+  wall.sort = b.dataset.sort; document.querySelectorAll('#wall [data-sort]').forEach(x => x.classList.toggle('on', x===b)); loadGallery();
+}));
+document.querySelectorAll('#wall [data-fs]').forEach(b => b.addEventListener('click', () => {
+  wall.season = b.dataset.fs; document.querySelectorAll('#wall [data-fs]').forEach(x => x.classList.toggle('on', x===b)); loadGallery();
+}));
+$('#galBtn').addEventListener('click', () => { $('#wall').classList.add('open'); loadGallery(); });
+$('#wallClose').addEventListener('click', () => $('#wall').classList.remove('open'));
 $('#saveBtn').addEventListener('click', async () => {
   try{
     await api('/trees', post({ url:state.text.trim(), season:state.season, swatch:state.swatch }));
