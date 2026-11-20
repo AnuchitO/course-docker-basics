@@ -910,14 +910,28 @@ function thumb(t, W = 360){
   const g = c.getContext('2d'), pad = W*26/360, cell = (W - 2*pad) / (n + 2), top = (H - cell*(n+2)) / 2;
   g.fillStyle = SEASON_BG[t.season] || '#f5efe6'; g.fillRect(0,0,W,H);
   const x0 = pad + cell, y0 = top + cell;
-  g.fillStyle = '#fffdf8'; g.fillRect(pad, top, cell*(n+2), cell*(n+2));
-  const flower = SWATCHES[t.swatch % SWATCHES.length];
-  for(let r=0;r<n;r++) for(let q=0;q<n;q++){
-    if(!m){ break; }
+  // same colours the 3D garden uses for this season and flower colour: stone paths, grass, soil beds with blossoms
+  const R = mulberry(hash), season = ['spring','summer','autumn'].includes(t.season) ? t.season : 'spring';
+  const pal = palette(season, SWATCHES[t.swatch % SWATCHES.length], R), hex = col => '#' + col.getHexString();
+  const rr = (x, y, w, h, rad) => { g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, rad) : g.rect(x, y, w, h); g.fill(); };
+  const S2 = n + 2, X = pad, Y = top;
+  for(let r=0;r<S2;r++) for(let q=0;q<S2;q++){            // stone paths everywhere first
+    g.fillStyle = hex(pal.light()); g.fillRect(X + q*cell, Y + r*cell, cell + .5, cell + .5);
+  }
+  for(let r=0;r<n && m;r++) for(let q=0;q<n;q++){
     if(m[r][q] !== '1') continue;
     const finder = (r<7&&q<7)||(r<7&&q>=n-7)||(r>=n-7&&q<7);
-    g.fillStyle = finder ? '#2f6b4f' : ((r*7+q*13+hash) % 5 === 0 ? flower : '#5b9a6f');
-    g.beginPath(); g.roundRect ? g.roundRect(x0+q*cell+.5, y0+r*cell+.5, cell-1, cell-1, cell*.28) : g.rect(x0+q*cell, y0+r*cell, cell-1, cell-1); g.fill();
+    const dx = (q-(n-1)/2)/(n/2), dz = (r-(n-1)/2)/(n/2);
+    const bed = !finder && Math.hypot(dx, dz) < .64 + (R()-.5)*.22;
+    const x = X + (q+1)*cell, y = Y + (r+1)*cell;
+    if(bed){                                                  // soil bed with four blocks of blossom / leaf
+      g.fillStyle = hex(pal.bedBase()); g.fillRect(x, y, cell + .5, cell + .5);
+      const h = cell/2;
+      for(let i=0;i<4;i++){ g.fillStyle = hex(pal.bedPuff()); rr(x + (i&1)*h + .6, y + (i>>1)*h + .6, h - 1.2, h - 1.2, h*.22); }
+    } else {                                                  // grass block with a couple of tufts
+      g.fillStyle = hex(pal.grassBase()); g.fillRect(x, y, cell + .5, cell + .5);
+      for(let i=0;i<3;i++){ g.fillStyle = hex(pal.blade()); rr(x + R()*cell*.7, y + R()*cell*.7, cell*.3, cell*.3, cell*.1); }
+    }
   }
   return c;
 }
@@ -944,14 +958,6 @@ async function plant(t, card){
   const apply = () => { state.text = t.url; $('#url').value = t.url;
     if(SEASON_BG[t.season]) state.season = t.season;
     state.swatch = t.swatch % SWATCHES.length; persist(); syncUI(); rebuildLook(); };
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){   // no flying, no wave: a plain fade, but still QR code first, then the tree
-    grow = 1; growGo = false;
-    apply(); await regenerate().catch(() => {});
-    p = 1; pTarget = 1; setMode(true);
-    await anim(wallEl, [{opacity:1},{opacity:0}], { duration:300, easing:'ease' });
-    wallEl.classList.remove('open'); wallEl.getAnimations().forEach(a => a.cancel());
-    await wait(900); setMode(false); planting = false; return;
-  }
   // geometry of the QR square on screen (where the live scene draws it)
   const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
   const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
