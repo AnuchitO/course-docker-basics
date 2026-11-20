@@ -20,5 +20,5 @@ The course builds it step by step (run all commands from this `demo/` folder):
 6. `docker compose up --build`
 7. `docker compose up -d --scale api=3` and watch the `host` field change
 
-Privacy: a link is stored only when the user presses "Copy share link".
+Gallery: the bookmark button saves the current garden (text, season, colour) to Postgres; the grid button lists saved gardens (four presets are seeded) and replants the one you pick. Nothing is stored unless you press bookmark. After upgrading, run `docker compose down -v` once so db/init.sql re-runs (it adds the `name` column).
 Tests: `cd api && go test ./...`

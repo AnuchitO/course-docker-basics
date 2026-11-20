@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type server struct {
@@ -31,6 +33,7 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("GET /api/health", s.health)
 	mux.HandleFunc("GET /api/themes", s.themes)
 	mux.HandleFunc("POST /api/qr", s.qr)
+	mux.HandleFunc("GET /api/trees", s.listTrees)
 	mux.HandleFunc("POST /api/trees", s.saveTree)
 	mux.HandleFunc("GET /api/trees/{id}", s.getTree)
 	return mux
@@ -92,6 +95,17 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	in.URL = link
+	in.Name = strings.TrimSpace(in.Name)
+	if utf8.RuneCountInString(in.Name) > 40 {
+		fail(w, 400, "name is too long (max 40 characters)")
+		return
+	}
+	if in.Name == "" {
+		in.Name = link
+		if r := []rune(link); len(r) > 40 {
+			in.Name = string(r[:40]) + "…"
+		}
+	}
 	if !seasonRe.MatchString(in.Season) || in.Swatch < 0 || in.Swatch > 9 {
 		fail(w, 400, "unknown season or colour")
 		return
@@ -106,6 +120,20 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 201, saved)
+}
+
+// GET /api/trees  ->  the saved gardens, newest first (presets are seeded by db/init.sql).
+func (s *server) listTrees(w http.ResponseWriter, r *http.Request) {
+	trees, err := s.store.ListTrees(r.Context(), 24)
+	if errors.Is(err, errNoDB) {
+		fail(w, http.StatusServiceUnavailable, "the gallery needs a database: start the db container first")
+		return
+	}
+	if err != nil {
+		fail(w, 500, "could not load the gallery")
+		return
+	}
+	writeJSON(w, 200, map[string]any{"trees": trees, "host": s.host})
 }
 
 func (s *server) getTree(w http.ResponseWriter, r *http.Request) {

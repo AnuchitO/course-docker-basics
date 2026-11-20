@@ -28,6 +28,7 @@ type Themes struct {
 // Tree is a garden the user explicitly chose to share.
 type Tree struct {
 	ID        string    `json:"id"`
+	Name      string    `json:"name"`
 	URL       string    `json:"url"`
 	Season    string    `json:"season"`
 	Swatch    int       `json:"swatch"`
@@ -46,6 +47,7 @@ type Store interface {
 	Themes(ctx context.Context) (Themes, error)
 	SaveTree(ctx context.Context, t Tree) (Tree, error)
 	GetTree(ctx context.Context, id string) (Tree, error)
+	ListTrees(ctx context.Context, limit int) ([]Tree, error)
 	CountTrees(ctx context.Context) (int, error)
 }
 
@@ -112,21 +114,39 @@ func (s *pgStore) Themes(ctx context.Context) (Themes, error) {
 func (s *pgStore) SaveTree(ctx context.Context, t Tree) (Tree, error) {
 	t.ID = newID()
 	err := s.pool.QueryRow(ctx,
-		`INSERT INTO trees (id, url, season, swatch)
-		 VALUES ($1,$2,$3,$4) RETURNING created_at`,
-		t.ID, t.URL, t.Season, t.Swatch).Scan(&t.CreatedAt)
+		`INSERT INTO trees (id, name, url, season, swatch)
+		 VALUES ($1,$2,$3,$4,$5) RETURNING created_at`,
+		t.ID, t.Name, t.URL, t.Season, t.Swatch).Scan(&t.CreatedAt)
 	return t, err
 }
 
 func (s *pgStore) GetTree(ctx context.Context, id string) (Tree, error) {
 	var t Tree
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, url, season, swatch, created_at FROM trees WHERE id = $1`, id).
-		Scan(&t.ID, &t.URL, &t.Season, &t.Swatch, &t.CreatedAt)
+		`SELECT id, name, url, season, swatch, created_at FROM trees WHERE id = $1`, id).
+		Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return t, errNotFound
 	}
 	return t, err
+}
+
+func (s *pgStore) ListTrees(ctx context.Context, limit int) ([]Tree, error) {
+	rows, err := s.pool.Query(ctx,
+		`SELECT id, name, url, season, swatch, created_at FROM trees ORDER BY created_at DESC, id LIMIT $1`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []Tree{}
+	for rows.Next() {
+		var t Tree
+		if err := rows.Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.CreatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
 }
 
 func (s *pgStore) CountTrees(ctx context.Context) (int, error) {

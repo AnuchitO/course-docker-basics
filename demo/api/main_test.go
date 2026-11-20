@@ -26,6 +26,13 @@ func (f *fakeStore) GetTree(_ context.Context, id string) (Tree, error) {
 	}
 	return Tree{}, errNotFound
 }
+func (f *fakeStore) ListTrees(context.Context, int) ([]Tree, error) {
+	out := []Tree{}
+	for _, t := range f.trees {
+		out = append(out, t)
+	}
+	return out, nil
+}
 func (f *fakeStore) CountTrees(context.Context) (int, error) { return len(f.trees), nil }
 
 func do(h http.Handler, method, path, body string) *httptest.ResponseRecorder {
@@ -99,5 +106,26 @@ func TestWithoutDatabase(t *testing.T) {
 	body := `{"url":"https://example.com","season":"spring","swatch":0}`
 	if c := do(h, "POST", "/api/trees", body).Code; c != 503 {
 		t.Fatalf("share without db should be 503, got %d", c)
+	}
+}
+
+func TestGallery(t *testing.T) {
+	h := (&server{store: &fakeStore{trees: map[string]Tree{}}}).routes()
+	rec := do(h, "POST", "/api/trees", `{"name":"Docs","url":"https://docs.docker.com","season":"summer","swatch":2}`)
+	if rec.Code != 201 {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	rec = do(h, "GET", "/api/trees", "")
+	var got struct{ Trees []Tree }
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || len(got.Trees) != 1 || got.Trees[0].Name != "Docs" || got.Trees[0].Swatch != 2 {
+		t.Fatalf("list: %d %s", rec.Code, rec.Body)
+	}
+	// no name given: falls back to the text
+	do(h, "POST", "/api/trees", `{"url":"hello","season":"spring","swatch":0}`)
+	// without a database the gallery says so
+	rec = do((&server{store: memStore{}}).routes(), "GET", "/api/trees", "")
+	if rec.Code != 503 {
+		t.Fatalf("no db: %d", rec.Code)
 	}
 }
