@@ -900,12 +900,12 @@ const wall = { sort:'new', season:'' };
 const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('qr-garden-likes')||'[]')); }catch(e){ return new Set(); } })();
 const saveLiked = () => { try{ localStorage.setItem('qr-garden-likes', JSON.stringify([...LIKED])); }catch(e){} };
 // a tiny top-down garden: dark modules are flower beds, light ones are stone. Heights differ per card, like a pin board.
-function thumb(t){
+function thumb(t, W = 360){
   const m = t.matrix, n = m ? m.length : 25, c = document.createElement('canvas');
   const hash = [...t.id].reduce((a,ch) => a*31 + ch.charCodeAt(0) >>> 0, 7);
-  const ratio = [1, 1.18, 1.35][hash % 3], W = 360, H = Math.round(W*ratio);
+  const ratio = [1, 1.18, 1.35][hash % 3], H = Math.round(W*ratio);
   c.width = W; c.height = H;
-  const g = c.getContext('2d'), pad = 26, cell = (W - 2*pad) / (n + 2), top = (H - cell*(n+2)) / 2;
+  const g = c.getContext('2d'), pad = W*26/360, cell = (W - 2*pad) / (n + 2), top = (H - cell*(n+2)) / 2;
   g.fillStyle = SEASON_BG[t.season] || '#f5efe6'; g.fillRect(0,0,W,H);
   const x0 = pad + cell, y0 = top + cell;
   g.fillStyle = '#fffdf8'; g.fillRect(pad, top, cell*(n+2), cell*(n+2));
@@ -930,12 +930,25 @@ const anim = (el, kf, o) => el.animate(kf, { fill:'forwards', easing:'cubic-bezi
 async function plant(t, card){
   if(planting) return; planting = true;
   const wallEl = $('#wall'), canvasEl = card.querySelector('canvas'), r = card.getBoundingClientRect();
+  // the flying copy is redrawn at the size it will land at (times the screen's pixel ratio), so it stays sharp when it zooms
+  const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
+  const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
+  const k = qrPx / (r.width * (360 - 52) / 360);
   const fly = document.createElement('img');
-  fly.src = canvasEl.toDataURL();
+  fly.src = thumb(t, Math.min(3000, Math.ceil(r.width * k * Math.min(devicePixelRatio || 1, 2)))).toDataURL();
+  try{ await fly.decode(); }catch(e){}
   Object.assign(fly.style, { position:'fixed', left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px',
     objectFit:'cover', borderRadius:'18px', zIndex:30, boxShadow:'0 18px 50px rgba(60,45,30,.28)', pointerEvents:'none', willChange:'transform,opacity,filter' });
   document.body.appendChild(fly);
   // the scene behind the wall: new garden, QR mode, bare slab waiting to grow
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){   // no flying, no spiral: just swap and show the tree
+    fly.remove();
+    state.text = t.url; $('#url').value = t.url;
+    if(SEASON_BG[t.season]) state.season = t.season;
+    state.swatch = t.swatch % SWATCHES.length;
+    persist(); syncUI(); rebuildLook(); await regenerate().catch(() => {});
+    wallEl.classList.remove('open'); setMode(false); planting = false; return;
+  }
   grow = 0; growGo = false;
   state.text = t.url; $('#url').value = t.url;
   if(SEASON_BG[t.season]) state.season = t.season;
@@ -946,16 +959,21 @@ async function plant(t, card){
 
   const rest = [...wallEl.querySelectorAll('.pin, .wallbar')].filter(x => x !== card);
   card.style.visibility = 'hidden';
-  rest.forEach((x,i) => anim(x, [{opacity:1, transform:'none'},{opacity:0, transform:'scale(.94)'}], { duration:300, delay:i*6 }));
-  await wait(120);
+  rest.forEach(x => {   // the others fall away in a wave, nearest to the chosen card first
+    const b = x.getBoundingClientRect(), d = Math.hypot(b.left + b.width/2 - (r.left + r.width/2), b.top + b.height/2 - (r.top + r.height/2));
+    anim(x, [{opacity:1, transform:'none'},{opacity:0, transform:'scale(.92)'}], { duration:300, delay:Math.min(220, d*.35) });
+  });
+  await wait(160);
 
   // the card lands on the footprint of the 3D QR code, so the hand-over is seamless
-  const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
-  const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
-  const k = qrPx / (r.width * (360 - 52) / 360);
   const dx = vw/2 - (r.left + r.width/2), dy = cy - (r.top + r.height/2);
   const to = `translate(${dx}px,${dy}px) scale(${k})`;
-  const zoom = anim(fly, [{ transform:'none' }, { transform:`translate(${dx}px,${dy*.55}px) scale(${k*.9})`, offset:.55 }, { transform:to }], { duration:880, easing:'cubic-bezier(.3,.9,.3,1)' });
+  // while it flies, the card is cropped from the whole pin down to just the QR square, so it lands as the code itself
+  const side = r.width*(360 - 52)/360, cl = (r.width - side)/2, ct = (r.height - side)/2;
+  const crop = `inset(${ct}px ${cl}px ${ct}px ${cl}px round 5px)`;
+  const zoom = anim(fly, [{ transform:'none', clipPath:'inset(0px 0px 0px 0px round 18px)' },
+                          { transform:`translate(${dx}px,${dy*.55}px) scale(${k*.9})`, clipPath:'inset(0px 0px 0px 0px round 18px)', offset:.3 },
+                          { transform:to, clipPath:crop }], { duration:900, easing:'cubic-bezier(.3,.9,.3,1)' });
   await Promise.all([zoom, ready.catch(() => {})]);
 
   // ring of light + the garden builds itself
