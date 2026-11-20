@@ -12,25 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Theme is one seasonal colour set. Rows live in the Postgres `themes` table.
-type Theme struct {
+// Season sets the page background for one season (rows of the `seasons` table).
+type Season struct {
 	Slug       string `json:"slug"`
 	Name       string `json:"name"`
-	Foliage    string `json:"foliage"`
-	Trunk      string `json:"trunk"`
 	Background string `json:"background"`
-	Accent     string `json:"accent"`
 }
 
-// Tree is a tree the user explicitly chose to share.
+// Themes is everything the page needs to dress the garden: seasons and flower colours.
+type Themes struct {
+	Seasons  []Season `json:"seasons"`
+	Swatches []string `json:"swatches"`
+}
+
+// Tree is a garden the user explicitly chose to share.
 type Tree struct {
-	ID         string    `json:"id"`
-	URL        string    `json:"url"`
-	Theme      string    `json:"theme"`
-	Foliage    string    `json:"foliage"`
-	Trunk      string    `json:"trunk"`
-	Background string    `json:"background"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID        string    `json:"id"`
+	URL       string    `json:"url"`
+	Season    string    `json:"season"`
+	Swatch    int       `json:"swatch"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 var (
@@ -42,7 +43,7 @@ var (
 // Keeping it an interface lets the tests run without Postgres.
 type Store interface {
 	Ping(ctx context.Context) error
-	Themes(ctx context.Context) ([]Theme, error)
+	Themes(ctx context.Context) (Themes, error)
 	SaveTree(ctx context.Context, t Tree) (Tree, error)
 	GetTree(ctx context.Context, id string) (Tree, error)
 	CountTrees(ctx context.Context) (int, error)
@@ -75,20 +76,35 @@ func connect(ctx context.Context, dsn string, wait time.Duration) (*pgStore, err
 
 func (s *pgStore) Ping(ctx context.Context) error { return s.pool.Ping(ctx) }
 
-func (s *pgStore) Themes(ctx context.Context) ([]Theme, error) {
-	rows, err := s.pool.Query(ctx,
-		`SELECT slug, name, foliage, trunk, background, accent FROM themes ORDER BY position`)
+func (s *pgStore) Themes(ctx context.Context) (Themes, error) {
+	out := Themes{Seasons: []Season{}, Swatches: []string{}}
+	rows, err := s.pool.Query(ctx, `SELECT slug, name, background FROM seasons ORDER BY position`)
 	if err != nil {
-		return nil, err
+		return out, err
+	}
+	for rows.Next() {
+		var x Season
+		if err := rows.Scan(&x.Slug, &x.Name, &x.Background); err != nil {
+			rows.Close()
+			return out, err
+		}
+		out.Seasons = append(out.Seasons, x)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return out, err
+	}
+	rows, err = s.pool.Query(ctx, `SELECT hex FROM swatches ORDER BY position`)
+	if err != nil {
+		return out, err
 	}
 	defer rows.Close()
-	out := []Theme{}
 	for rows.Next() {
-		var t Theme
-		if err := rows.Scan(&t.Slug, &t.Name, &t.Foliage, &t.Trunk, &t.Background, &t.Accent); err != nil {
-			return nil, err
+		var h string
+		if err := rows.Scan(&h); err != nil {
+			return out, err
 		}
-		out = append(out, t)
+		out.Swatches = append(out.Swatches, h)
 	}
 	return out, rows.Err()
 }
@@ -96,17 +112,17 @@ func (s *pgStore) Themes(ctx context.Context) ([]Theme, error) {
 func (s *pgStore) SaveTree(ctx context.Context, t Tree) (Tree, error) {
 	t.ID = newID()
 	err := s.pool.QueryRow(ctx,
-		`INSERT INTO trees (id, url, theme, foliage, trunk, background)
-		 VALUES ($1,$2,$3,$4,$5,$6) RETURNING created_at`,
-		t.ID, t.URL, t.Theme, t.Foliage, t.Trunk, t.Background).Scan(&t.CreatedAt)
+		`INSERT INTO trees (id, url, season, swatch)
+		 VALUES ($1,$2,$3,$4) RETURNING created_at`,
+		t.ID, t.URL, t.Season, t.Swatch).Scan(&t.CreatedAt)
 	return t, err
 }
 
 func (s *pgStore) GetTree(ctx context.Context, id string) (Tree, error) {
 	var t Tree
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, url, theme, foliage, trunk, background, created_at FROM trees WHERE id = $1`, id).
-		Scan(&t.ID, &t.URL, &t.Theme, &t.Foliage, &t.Trunk, &t.Background, &t.CreatedAt)
+		`SELECT id, url, season, swatch, created_at FROM trees WHERE id = $1`, id).
+		Scan(&t.ID, &t.URL, &t.Season, &t.Swatch, &t.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return t, errNotFound
 	}

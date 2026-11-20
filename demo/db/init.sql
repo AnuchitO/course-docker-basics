@@ -1,27 +1,30 @@
-CREATE TABLE IF NOT EXISTS themes (
+CREATE TABLE IF NOT EXISTS seasons (
   slug       text PRIMARY KEY,
   name       text NOT NULL,
-  foliage    text NOT NULL,
-  trunk      text NOT NULL,
   background text NOT NULL,
-  accent     text NOT NULL,
   position   int  NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS swatches (
+  hex      text PRIMARY KEY,
+  position int NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS trees (
   id         text PRIMARY KEY,
   url        text NOT NULL,
-  theme      text NOT NULL,
-  foliage    text NOT NULL,
-  trunk      text NOT NULL,
-  background text NOT NULL,
+  season     text NOT NULL,
+  swatch     int  NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-INSERT INTO themes (slug, name, foliage, trunk, background, accent, position) VALUES
-  ('spring', 'Spring', '#f4a6c0', '#4a3426', '#e6f4d4', '#ffffff', 1),
-  ('summer', 'Summer', '#2e9e57', '#3b2d22', '#e3f6e6', '#a7f3d0', 2),
-  ('autumn', 'Autumn', '#e8761c', '#4a2c1c', '#f7ead3', '#c62828', 3),
-  ('winter', 'Winter', '#bcd8ee', '#2f3a45', '#eef4fb', '#ffffff', 4),
-  ('christmas', 'Christmas', '#1f7a3a', '#3b2418', '#fdf6ec', '#dc2626', 5)
+INSERT INTO seasons (slug, name, background, position) VALUES
+  ('spring', 'Spring', '#f5efe6', 1),
+  ('summer', 'Summer', '#eef2e4', 2),
+  ('autumn', 'Autumn', '#f6ece0', 3)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO swatches (hex, position) VALUES
+  ('#e98aab', 1), ('#a57ad6', 2), ('#e0473c', 3),
+  ('#e9a426', 4), ('#3d8fe6', 5), ('#2fae9b', 6)
 ON CONFLICT DO NOTHING;

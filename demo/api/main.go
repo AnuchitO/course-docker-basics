@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
+	"regexp"
 	"time"
 )
 
@@ -52,7 +52,7 @@ func (s *server) themes(w http.ResponseWriter, r *http.Request) {
 		fail(w, 500, "could not load themes")
 		return
 	}
-	writeJSON(w, 200, map[string]any{"host": s.host, "themes": t})
+	writeJSON(w, 200, map[string]any{"host": s.host, "seasons": t.Seasons, "swatches": t.Swatches})
 }
 
 type qrReq struct {
@@ -92,19 +92,9 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	in.URL = link
-	for _, c := range []string{in.Foliage, in.Trunk, in.Background} {
-		if !hexRe.MatchString(c) {
-			fail(w, 400, "colours must look like #1a2b3c")
-			return
-		}
-	}
-	if contrast(in.Trunk, in.Background) < minContrast {
-		fail(w, 400, "blocks and ground are too similar to scan")
+	if !seasonRe.MatchString(in.Season) || in.Swatch < 0 || in.Swatch > 9 {
+		fail(w, 400, "unknown season or colour")
 		return
-	}
-	in.Theme = strings.TrimSpace(in.Theme)
-	if len(in.Theme) > 40 {
-		in.Theme = in.Theme[:40]
 	}
 	saved, err := s.store.SaveTree(r.Context(), in)
 	if errors.Is(err, errNoDB) {
@@ -134,6 +124,8 @@ func (s *server) getTree(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, t)
 }
+
+var seasonRe = regexp.MustCompile(`^[a-z]{3,12}$`)
 
 func env(k, def string) string {
 	if v := os.Getenv(k); v != "" {

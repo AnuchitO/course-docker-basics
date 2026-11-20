@@ -12,8 +12,8 @@ import (
 type fakeStore struct{ trees map[string]Tree }
 
 func (f *fakeStore) Ping(context.Context) error { return nil }
-func (f *fakeStore) Themes(context.Context) ([]Theme, error) {
-	return []Theme{{Slug: "spring", Name: "Spring"}}, nil
+func (f *fakeStore) Themes(context.Context) (Themes, error) {
+	return defaultThemes, nil
 }
 func (f *fakeStore) SaveTree(_ context.Context, t Tree) (Tree, error) {
 	t.ID = "abc"
@@ -74,13 +74,13 @@ func TestQRMatrixIsSquareAndVerified(t *testing.T) {
 func TestShareTree(t *testing.T) {
 	st := &fakeStore{trees: map[string]Tree{}}
 	h := (&server{store: st}).routes()
-	ok := `{"url":"https://example.com","theme":"spring","foliage":"#2f7d32","trunk":"#6d4c41","background":"#f6f1e7"}`
+	ok := `{"url":"https://example.com","season":"spring","swatch":1}`
 	if c := do(h, "POST", "/api/trees", ok).Code; c != 201 {
 		t.Fatalf("share: %d", c)
 	}
-	low := `{"url":"https://example.com","theme":"x","foliage":"#2f7d32","trunk":"#f6f1e8","background":"#f6f1e7"}`
-	if c := do(h, "POST", "/api/trees", low).Code; c != 400 {
-		t.Fatalf("low contrast should be rejected, got %d", c)
+	bad := `{"url":"https://example.com","season":"spring","swatch":99}`
+	if c := do(h, "POST", "/api/trees", bad).Code; c != 400 {
+		t.Fatalf("unknown colour should be rejected, got %d", c)
 	}
 	if c := do(h, "GET", "/api/trees/abc", "").Code; c != 200 {
 		t.Fatalf("get: %d", c)
@@ -95,10 +95,10 @@ func TestWithoutDatabase(t *testing.T) {
 	if rec := do(h, "GET", "/api/health", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "not connected") {
 		t.Fatalf("health: %d %s", rec.Code, rec.Body)
 	}
-	if rec := do(h, "GET", "/api/themes", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "christmas") {
+	if rec := do(h, "GET", "/api/themes", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "autumn") {
 		t.Fatalf("themes: %d", rec.Code)
 	}
-	body := `{"url":"https://example.com","theme":"spring","foliage":"#2f7d32","trunk":"#6d4c41","background":"#f6f1e7"}`
+	body := `{"url":"https://example.com","season":"spring","swatch":0}`
 	if c := do(h, "POST", "/api/trees", body).Code; c != 503 {
 		t.Fatalf("share without db should be 503, got %d", c)
 	}

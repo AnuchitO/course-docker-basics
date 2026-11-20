@@ -1,12 +1,12 @@
 # ICQR Magic Tree (demo for the Docker Basics course)
 
-Paste a link, get a QR code on a 3D island with a tree (click the scene to reveal the flat, scannable code). Three containers:
+Paste a link, get a 3D garden with a cherry-blossom tree. Tap the garden: the blossoms fly into flower beds and form a flat, scannable QR code. (Visual design ported from the "QR Garden" prototype.) Three containers:
 
 | service | what | image |
 |---|---|---|
 | `web` | the page, nginx forwards `/api` to the API | `./web` |
 | `api` | Go service: validates the link, builds and **verifies** the QR (level H) | `./api` |
-| `db`  | Postgres: seasonal themes and shared trees | `postgres:16-alpine` |
+| `db`  | Postgres: season colours, flower colours and shared gardens | `postgres:16-alpine` |
 
 Run everything: `docker compose up --build` → http://localhost:3000
 

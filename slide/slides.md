@@ -76,14 +76,14 @@ class: text-center
 
 <h1 style="border-left: none; padding-left: 0">Meet <span class="gradient-text">Magic Tree</span> 🌳</h1>
 
-<div class="opacity-70 mt-2">Paste a link, get a QR code shaped like a tree. We will build it <b>one container at a time</b>.</div>
+<div class="opacity-70 mt-2">Paste a link, get a QR code that grows from a tree. We will build it <b>one container at a time</b>.</div>
 
 <div class="flex items-center justify-center gap-5 mt-10">
   <div v-click class="card text-center w-44"><div class="text-4xl">🌐</div><div class="font-700">web</div><div class="opacity-60 text-xs">the page (nginx)</div></div>
   <div v-click class="arrow">→</div>
   <div v-click class="card text-center w-44"><div class="text-4xl">⚙️</div><div class="font-700">api</div><div class="opacity-60 text-xs">makes the QR (Go)</div></div>
   <div v-click class="arrow">→</div>
-  <div v-click class="card glow text-center w-44"><div class="text-4xl">🐘</div><div class="font-700">db</div><div class="opacity-60 text-xs">themes &amp; shares (Postgres)</div></div>
+  <div v-click class="card glow text-center w-44"><div class="text-4xl">🐘</div><div class="font-700">db</div><div class="opacity-60 text-xs">colours &amp; shares (Postgres)</div></div>
 </div>
 
 ---
@@ -313,9 +313,9 @@ docker run -d --name web -p 3000:80 magic-web
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   Open <b>http://localhost:3000</b>
-  <div class="mt-2">A 3D island with a tree appears, but under the link box it says:</div>
+  <div class="mt-2">A cherry-blossom tree on a bare garden appears, but under the colour dots it says:</div>
   <div class="out mt-1">API not reachable</div>
-  <div class="mt-3 text-sm opacity-70">One container works alone. There is no QR code yet: the page has nobody to ask.</div>
+  <div class="mt-3 text-sm opacity-70">One container works alone. There is no QR code yet: the page has nobody to ask. Only 3 flower colours.</div>
 </div>
 
 </div>
@@ -382,8 +382,8 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   Refresh <b>http://localhost:3000</b>
-  <div class="mt-2">🌳 The island now carries a <b>QR code</b> under the tree. Click the scene (or <b>Scan view</b>) and the tree parts so the code is flat and scannable.</div>
-  <div class="mt-3 text-sm opacity-70">The panel shows <b>served by API container …</b>. Seasons work (built-in themes); “Copy share link” says it needs a database.</div>
+  <div class="mt-2">🌳 The garden now carries a <b>QR code</b> under the tree. <b>Tap the garden</b>: the blossoms fly into flower beds and the code appears, flat and scannable.</div>
+  <div class="mt-3 text-sm opacity-70">The header shows <b>API &lt;container id&gt;</b>. Seasons work; the 🔗 link button says it needs a database.</div>
 </div>
 
 </div>
@@ -420,7 +420,7 @@ docker run -d --name api --network magic \
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   <div class="out">{"db":"connected",<br>"shared_trees":0, ...}</div>
-  <div class="mt-3">Themes now come from <b>Postgres</b>. Click <b>Copy share link</b>: it works.</div>
+  <div class="mt-3">The colour dots now come from <b>Postgres</b>: <b>6 flower colours</b> instead of 3. Press the 🔗 button: a share link works.</div>
 </div>
 
 </div>
@@ -460,7 +460,7 @@ docker restart api
 
 </div>
 
-<div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">share a tree, remove <code>db</code>, start it again, then check <code>/api/health</code>.</span></div>
+<div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">share a garden, remove <code>db</code>, start it again, then check <code>/api/health</code>.</span></div>
 
 ---
 
