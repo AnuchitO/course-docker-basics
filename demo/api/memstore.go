@@ -26,3 +26,4 @@ func (memStore) ListTrees(context.Context, string, string, int) ([]Tree, error) 
 	return nil, errNoDB
 }
 func (memStore) LikeTree(context.Context, string, int) (int, error) { return 0, errNoDB }
+func (memStore) ScanTree(context.Context, string) (Tree, error)     { return Tree{}, errNoDB }

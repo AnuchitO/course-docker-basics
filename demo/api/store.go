@@ -30,6 +30,8 @@ type Tree struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Likes     int       `json:"likes"`
+	Scans     int       `json:"scans"`
+	Link      string    `json:"link,omitempty"`   // what the QR code encodes: <this site>/api/r/<id>; filled in by the handlers
 	Matrix    []string  `json:"matrix,omitempty"` // filled in by the list handler
 	URL       string    `json:"url"`
 	Season    string    `json:"season"`
@@ -51,6 +53,7 @@ type Store interface {
 	GetTree(ctx context.Context, id string) (Tree, error)
 	ListTrees(ctx context.Context, sort, season string, limit int) ([]Tree, error)
 	LikeTree(ctx context.Context, id string, delta int) (int, error)
+	ScanTree(ctx context.Context, id string) (Tree, error)
 	CountTrees(ctx context.Context) (int, error)
 }
 
@@ -126,8 +129,8 @@ func (s *pgStore) SaveTree(ctx context.Context, t Tree) (Tree, error) {
 func (s *pgStore) GetTree(ctx context.Context, id string) (Tree, error) {
 	var t Tree
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, name, url, season, swatch, likes, created_at FROM trees WHERE id = $1`, id).
-		Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.Likes, &t.CreatedAt)
+		`SELECT id, name, url, season, swatch, likes, scans, created_at FROM trees WHERE id = $1`, id).
+		Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.Likes, &t.Scans, &t.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return t, errNotFound
 	}
@@ -136,12 +139,15 @@ func (s *pgStore) GetTree(ctx context.Context, id string) (Tree, error) {
 
 func (s *pgStore) ListTrees(ctx context.Context, sort, season string, limit int) ([]Tree, error) {
 	order := "created_at DESC, id"
-	if sort == "popular" {
+	switch sort {
+	case "popular":
 		order = "likes DESC, created_at DESC, id"
+	case "scans":
+		order = "scans DESC, created_at DESC, id"
 	}
-	// order is picked from two fixed strings above, never from user input
+	// order is picked from fixed strings above, never from user input
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, name, url, season, swatch, likes, created_at FROM trees
+		`SELECT id, name, url, season, swatch, likes, scans, created_at FROM trees
 		 WHERE $1 = '' OR season = $1 ORDER BY `+order+` LIMIT $2`, season, limit)
 	if err != nil {
 		return nil, err
@@ -150,7 +156,7 @@ func (s *pgStore) ListTrees(ctx context.Context, sort, season string, limit int)
 	out := []Tree{}
 	for rows.Next() {
 		var t Tree
-		if err := rows.Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.Likes, &t.CreatedAt); err != nil {
+		if err := rows.Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.Likes, &t.Scans, &t.CreatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, t)
@@ -167,6 +173,19 @@ func (s *pgStore) LikeTree(ctx context.Context, id string, delta int) (int, erro
 		return 0, errNotFound
 	}
 	return n, err
+}
+
+// ScanTree counts one scan and returns the tree, in a single statement so replicas never lose a count.
+func (s *pgStore) ScanTree(ctx context.Context, id string) (Tree, error) {
+	var t Tree
+	err := s.pool.QueryRow(ctx,
+		`UPDATE trees SET scans = scans + 1 WHERE id = $1
+		 RETURNING id, name, url, season, swatch, likes, scans, created_at`, id).
+		Scan(&t.ID, &t.Name, &t.URL, &t.Season, &t.Swatch, &t.Likes, &t.Scans, &t.CreatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return t, errNotFound
+	}
+	return t, err
 }
 
 func (s *pgStore) CountTrees(ctx context.Context) (int, error) {

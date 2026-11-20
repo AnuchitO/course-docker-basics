@@ -26,6 +26,15 @@ func (f *fakeStore) GetTree(_ context.Context, id string) (Tree, error) {
 	}
 	return Tree{}, errNotFound
 }
+func (f *fakeStore) ScanTree(_ context.Context, id string) (Tree, error) {
+	t, ok := f.trees[id]
+	if !ok {
+		return t, errNotFound
+	}
+	t.Scans++
+	f.trees[id] = t
+	return t, nil
+}
 func (f *fakeStore) LikeTree(_ context.Context, id string, d int) (int, error) {
 	t, ok := f.trees[id]
 	if !ok {
@@ -147,5 +156,26 @@ func TestGallery(t *testing.T) {
 	rec = do((&server{store: memStore{}}).routes(), "GET", "/api/trees", "")
 	if rec.Code != 503 {
 		t.Fatalf("no db: %d", rec.Code)
+	}
+}
+
+func TestScan(t *testing.T) {
+	h := (&server{store: &fakeStore{trees: map[string]Tree{}}}).routes()
+	do(h, "POST", "/api/trees", `{"url":"https://docs.docker.com","season":"spring","swatch":0}`)
+	rec := do(h, "GET", "/api/r/abc", "")
+	if rec.Code != 302 || rec.Header().Get("Location") != "https://docs.docker.com" || rec.Header().Get("Cache-Control") != "no-store" {
+		t.Fatalf("redirect: %d %v", rec.Code, rec.Header())
+	}
+	do(h, "GET", "/api/r/abc", "")
+	rec = do(h, "GET", "/api/trees", "")
+	var got struct{ Trees []Tree }
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if got.Trees[0].Scans != 2 || !strings.HasSuffix(got.Trees[0].Link, "/api/r/abc") {
+		t.Fatalf("scans/link: %+v", got.Trees[0])
+	}
+	// plain text is shown on a page, not redirected
+	do(h, "POST", "/api/trees", `{"url":"hello garden","season":"spring","swatch":0}`)
+	if do(h, "GET", "/api/r/nope", "").Code != 404 {
+		t.Fatal("unknown id should be 404")
 	}
 }

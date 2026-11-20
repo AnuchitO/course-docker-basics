@@ -41,6 +41,7 @@
   .pin canvas{display:block;width:100%}
   .pin .cap{padding:9px 12px 11px}
   .pin .cap b{display:block;font-size:13.5px;line-height:1.25}
+  .pin .cap .scans{color:var(--accent);font-weight:600;margin-top:5px}
   .pin .cap small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pin .over{position:absolute;inset:0 0 auto 0;height:62%;display:flex;justify-content:space-between;align-items:flex-start;padding:10px;opacity:0;transition:opacity .15s;
     background:linear-gradient(rgba(30,24,16,.35),transparent)}
@@ -151,6 +152,7 @@
     <h2>Gallery</h2>
     <button class="chip on" data-sort="new">New</button>
     <button class="chip" data-sort="popular">Popular</button>
+    <button class="chip" data-sort="scans">Most scanned</button>
     <span style="width:8px"></span>
     <button class="chip on" data-fs="">All</button>
     <button class="chip" data-fs="spring">Spring</button>
@@ -783,7 +785,7 @@ const fromMatrix = rows => ({ getModuleCount:() => rows.length, isDark:(r,c) => 
 const emptyQR = { getModuleCount:() => 25, isDark:() => false };   // a bare garden: shown until the API answers
 let currentQR = null, reqId = 0;
 async function regenerate(){
-  const text = state.text.trim() || 'https://example.com', err = $('#err'), id = ++reqId;
+  const text = state.link || state.text.trim() || 'https://example.com', err = $('#err'), id = ++reqId;
   try{
     const d = await api('/qr', post({url:text}));
     if(id !== reqId) return;
@@ -888,8 +890,8 @@ canvas.addEventListener('keydown', e => { if(e.key===' '||e.key==='Enter'){ e.pr
 const input = $('#url');
 input.value = state.text;
 let deb = 0;
-input.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(() => { state.text = input.value; persist(); regenerate(); }, 350); });
-input.addEventListener('keydown', e => { if(e.key==='Enter'){ clearTimeout(deb); state.text = input.value; persist(); regenerate(); input.blur(); } });
+input.addEventListener('input', () => { state.link = null; clearTimeout(deb); deb = setTimeout(() => { state.text = input.value; persist(); regenerate(); }, 350); });
+input.addEventListener('keydown', e => { if(e.key==='Enter'){ state.link = null; clearTimeout(deb); state.text = input.value; persist(); regenerate(); input.blur(); } });
 
 document.querySelectorAll('.seg[data-season]').forEach(b => b.addEventListener('click', () => {
   state.season = b.dataset.season; persist(); syncUI(); rebuildLook(); audio.season();
@@ -976,7 +978,7 @@ function grabScene(box){   // box = {x,y,w} in CSS px; returns a data URL of tha
 async function plant(t, card){
   if(planting) return; planting = true;
   const wallEl = $('#wall'), r = card.getBoundingClientRect();
-  const apply = () => { state.text = t.url; $('#url').value = t.url;
+  const apply = () => { state.text = t.url; state.link = t.link || null; $('#url').value = t.url;
     if(SEASON_BG[t.season]) state.season = t.season;
     state.swatch = t.swatch % SWATCHES.length; persist(); syncUI(); rebuildLook(); };
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){   // no flying, no wave: a plain fade, but still QR code first, then the tree
@@ -1069,7 +1071,7 @@ async function loadGallery(){
       heart.addEventListener('click', e => toggleLike(t, heart, e));
       over.append(plantBtn, heart);
       const cap = document.createElement('div'); cap.className = 'cap';
-      cap.innerHTML = '<b>'+esc(t.name || t.url)+'</b><small>'+esc(t.url)+'</small>';
+      cap.innerHTML = '<b>'+esc(t.name || t.url)+'</b><small>'+esc(t.url)+'</small><small class="scans">◎ '+t.scans.toLocaleString()+(t.scans===1?' scan':' scans')+'</small>';
       card.append(over, cap);
       card.addEventListener('click', () => plant(t, card));
       card.addEventListener('keydown', e => { if(e.key==='Enter') plant(t, card); });
@@ -1087,8 +1089,9 @@ $('#galBtn').addEventListener('click', () => { $('#wall').classList.add('open');
 $('#wallClose').addEventListener('click', () => $('#wall').classList.remove('open'));
 $('#saveBtn').addEventListener('click', async () => {
   try{
-    await api('/trees', post({ url:state.text.trim(), season:state.season, swatch:state.swatch }));
-    toast('Saved to the gallery');
+    const saved = await api('/trees', post({ url:state.text.trim(), season:state.season, swatch:state.swatch }));
+    state.link = saved.link; regenerate();   // from now on the code points at our server, so its scans can be counted
+    toast('Saved. Scans of this code are now counted');
   }catch(e){ toast(e.message, 3000); }
 });
 $('#infoBtn').addEventListener('click', () => openModal('#infoModal'));

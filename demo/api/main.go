@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -35,6 +37,7 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("POST /api/qr", s.qr)
 	mux.HandleFunc("GET /api/trees", s.listTrees)
 	mux.HandleFunc("POST /api/trees", s.saveTree)
+	mux.HandleFunc("GET /api/r/{id}", s.scan)
 	mux.HandleFunc("POST /api/trees/{id}/like", s.like(1))
 	mux.HandleFunc("DELETE /api/trees/{id}/like", s.like(-1))
 	mux.HandleFunc("GET /api/trees/{id}", s.getTree)
@@ -121,6 +124,7 @@ func (s *server) saveTree(w http.ResponseWriter, r *http.Request) {
 		fail(w, 500, "could not save")
 		return
 	}
+	saved.Link = trackingLink(r, saved.ID)
 	writeJSON(w, 201, saved)
 }
 
@@ -142,11 +146,51 @@ func (s *server) listTrees(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i := range trees {
-		if rows, err := cachedMatrix(trees[i].URL); err == nil {
+		trees[i].Link = trackingLink(r, trees[i].ID)
+		if rows, err := cachedMatrix(trees[i].Link); err == nil {
 			trees[i].Matrix = rows
 		}
 	}
 	writeJSON(w, 200, map[string]any{"trees": trees, "host": s.host})
+}
+
+// trackingLink is what a saved garden's QR code encodes. It points back at this site, so a scan reaches
+// the API first: that is the only moment we can count it.
+func trackingLink(r *http.Request, id string) string {
+	scheme := "http"
+	if r.Header.Get("X-Forwarded-Proto") == "https" || r.TLS != nil {
+		scheme = "https"
+	}
+	return scheme + "://" + r.Host + "/api/r/" + id
+}
+
+var landing = template.Must(template.New("l").Parse(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Name}}</title><body style="font-family:system-ui;max-width:32rem;margin:15vh auto;padding:0 1.2rem;line-height:1.5">
+<h1 style="font-size:1.3rem">{{.Name}}</h1><p style="white-space:pre-wrap;word-break:break-word;background:#f5efe6;padding:1rem;border-radius:12px">{{.URL}}</p>
+<p style="color:#8c8274;font-size:.85rem">Scanned {{.Scans}} times · QR Garden</p>`))
+
+// GET /api/r/{id}  <- what a phone opens after scanning. Counts the scan, then sends the visitor on:
+// a web link gets a 302 redirect, anything else (text, Wi-Fi, mailto) gets a small page that shows it.
+func (s *server) scan(w http.ResponseWriter, r *http.Request) {
+	count := s.store.ScanTree
+	if r.Method == http.MethodHead { // link checkers and previews often send HEAD first: look, don't count
+		count = func(ctx context.Context, id string) (Tree, error) { return s.store.GetTree(ctx, id) }
+	}
+	t, err := count(r.Context(), r.PathValue("id"))
+	switch {
+	case errors.Is(err, errNotFound):
+		fail(w, 404, "this garden does not exist")
+		return
+	case err != nil:
+		fail(w, 503, "could not open this garden")
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store") // a cached redirect would hide later scans
+	if u, err := url.Parse(t.URL); err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != "" {
+		http.Redirect(w, r, t.URL, http.StatusFound)
+		return
+	}
+	_ = landing.Execute(w, t)
 }
 
 // like returns a handler that moves a tree's like counter by delta.
