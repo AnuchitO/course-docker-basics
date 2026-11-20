@@ -618,7 +618,8 @@ function build(qr){
   for(const sx of [-half,half]) for(const sz of [-half,half]) for(const y of [0,-1.34]) pts.push(new V3(sx,y,sz));
   const bpts = [];
   for(const bx of [treeBox.min.x,treeBox.max.x]) for(const by of [treeBox.min.y,treeBox.max.y]) for(const bz of [treeBox.min.z,treeBox.max.z]) bpts.push(new V3(bx,by,bz));
-  boundsTree = viewBounds(ISO.yaw, ISO.pitch, pts.concat(bpts), 1.04);
+  boundPts = pts.concat(bpts);
+  boundsTree = viewBounds(ISO.yaw, ISO.pitch, boundPts, 1.04);
   boundsQR = viewBounds(TOP.yaw, TOP.pitch, pts.filter(p=>p.y===0), 1.08);
 
   pose(p, true);
@@ -805,7 +806,8 @@ async function loadThemes(){
 }
 
 /* ---------------- animation ---------------- */
-let onRendered = null, userYaw = 0, yawVel = 0;
+let onRendered = null, userYaw = 0, yawVel = 0, userPitch = 0, boundPts = [];
+const PITCH_MIN = .22, PITCH_MAX = 1.3;   // how far the tree can be tilted (radians above the horizon)
 let p = 1, pTarget = 1, last = performance.now(), time = 0;
 const _m = new THREE.Matrix4(), _c = new THREE.Color();
 function tick(now){
@@ -817,12 +819,13 @@ function tick(now){
   if(growGo && grow < 1) grow = Math.min(1, grow + dt/1.5);
   const ig = grow < 1 || growWas; growWas = grow < 1;
   if(!dragging && yawVel){ userYaw += yawVel; yawVel *= Math.pow(.04, dt); if(Math.abs(yawVel) < 1e-4) yawVel = 0; }   // coast after a flick
-  if(pTarget > .5){ yawVel = 0; userYaw = Math.atan2(Math.sin(userYaw), Math.cos(userYaw)); }                          // heading for the QR code: take the short way back
+  if(pTarget > .5){ yawVel = 0; userYaw = Math.atan2(Math.sin(userYaw), Math.cos(userYaw)); if(p >= 1) userPitch = 0; }                          // heading for the QR code: take the short way back
   yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e) + userYaw*(1 - e);
-  pitchObj.rotation.x = -lerp(ISO.pitch, TOP.pitch, e);
+  pitchObj.rotation.x = -(lerp(ISO.pitch, TOP.pitch, e) + userPitch*(1 - e));
   if(boundsTree){
-    frame({ cx:lerp(boundsTree.cx,boundsQR.cx,e), cy:lerp(boundsTree.cy,boundsQR.cy,e),
-            w:lerp(boundsTree.w,boundsQR.w,e), h:lerp(boundsTree.h,boundsQR.h,e) });
+    const bt = userPitch ? viewBounds(ISO.yaw, ISO.pitch + userPitch, boundPts, 1.04) : boundsTree;   // keep the tree in frame while tilted
+    frame({ cx:lerp(bt.cx,boundsQR.cx,e), cy:lerp(bt.cy,boundsQR.cy,e),
+            w:lerp(bt.w,boundsQR.w,e), h:lerp(bt.h,boundsQR.h,e) });
   }
   setLights(e);
 
@@ -861,15 +864,18 @@ function setMode(qrMode){
 }
 /* hold and drag to spin the tree; a short tap still flips between tree and QR code.
    The spin fades out as the scene flattens into the QR code, so the code is always upright and scannable. */
-let down = null, dragging = false, lastX = 0;
-canvas.addEventListener('pointerdown', e => { down = {x:e.clientX, y:e.clientY}; dragging = false; lastX = e.clientX; yawVel = 0; });
+let down = null, dragging = false, lastX = 0, lastY = 0;
+canvas.addEventListener('pointerdown', e => { down = {x:e.clientX, y:e.clientY}; dragging = false; lastX = e.clientX; lastY = e.clientY; yawVel = 0; });
 canvas.addEventListener('pointermove', e => {
   if(!down) return;
   if(!dragging && Math.hypot(e.clientX-down.x, e.clientY-down.y) > 6 && pTarget < .5){
     dragging = true; canvas.setPointerCapture(e.pointerId); canvas.classList.add('dragging');
   }
-  if(dragging){ const d = (e.clientX - lastX) * .008; userYaw += d; yawVel = d; }
-  lastX = e.clientX;
+  if(dragging){
+    const d = -(e.clientX - lastX) * .008; userYaw += d; yawVel = d;              // the garden follows the pointer
+    userPitch = clamp(ISO.pitch + userPitch + (e.clientY - lastY) * .006, PITCH_MIN, PITCH_MAX) - ISO.pitch;   // drag down = look from higher up
+  }
+  lastX = e.clientX; lastY = e.clientY;
 });
 function endDrag(e){
   if(down && !dragging && Math.hypot(e.clientX-down.x, e.clientY-down.y) < 10){ setMode(pTarget < .5); audio.blip(); }
@@ -990,7 +996,7 @@ async function plant(t, card){
   // 1. the real scene, finished and in QR view, behind the gallery
   grow = 1; growGo = false;
   apply(); await regenerate().catch(() => {});
-  p = 1; pTarget = 1; userYaw = 0; yawVel = 0; setMode(true); hint.style.opacity = 0;
+  p = 1; pTarget = 1; userYaw = 0; yawVel = 0; userPitch = 0; setMode(true); hint.style.opacity = 0;
   const shot = await grabScene({ x: vw/2 - qrPx/2, y: cy - qrPx/2, w: qrPx });
 
   // the flying card: a 2D thumbnail drawn at landing size, with the 3D capture laid over its QR square
