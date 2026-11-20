@@ -342,6 +342,37 @@ G.wingR = wingGeometry(1); G.wingL = wingGeometry(-1);
 G.body = new THREE.CylinderGeometry(.03, .05, .52, 6).rotateX(Math.PI/2);
 const ZAX = new V3(0,0,1);
 MAT.bloom = new THREE.MeshLambertMaterial({color:0xffffff, vertexColors:true, side:THREE.DoubleSide});
+MAT.branch = MAT.inst.clone();   // same look as MAT.inst, but it can wear the QR code (the ground tiles must not)
+/* "Canopy" view: the QR code is projected onto the tree from the camera's direction. Every pixel of a blossom, leaf or branch
+   works out which module it covers and blends towards dark green or cream, so the module edges stay crisp however small the leaves. */
+const QRU = { uQR:{value:null}, uQ:{value:0}, uInfo:{value:new THREE.Vector4(27, 1, 25, 0)},
+              uDark:{value:new THREE.Color('#3f7f2c')}, uLight:{value:new THREE.Color('#fffaf0')} };
+function wearQR(mat){
+  mat.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, QRU);
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+        vec4 wp_ = vec4(transformed, 1.0);
+        #ifdef USE_INSTANCING
+          wp_ = instanceMatrix * wp_;
+        #endif
+        vWP = (modelMatrix * wp_).xyz;`);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+        varying vec3 vWP;
+        uniform sampler2D uQR; uniform float uQ; uniform vec4 uInfo; uniform vec3 uDark; uniform vec3 uLight;`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        if(uQ > 0.0){
+          vec2 g = vec2(vWP.x + uInfo.x*.5, vWP.z - vWP.y*uInfo.w + uInfo.x*.5) - uInfo.y;   // grid cell under this pixel, as the camera sees it
+          float dark = 0.0;
+          if(g.x >= 0.0 && g.y >= 0.0 && g.x < uInfo.z && g.y < uInfo.z) dark = texture2D(uQR, (floor(g) + .5)/uInfo.z).r;
+          float lum = dot(diffuseColor.rgb, vec3(.333));
+          vec3 want = dark > .5 ? uDark*(.72 + .45*lum) : uLight*(.9 + .1*lum);
+          diffuseColor.rgb = mix(diffuseColor.rgb, want, uQ*.94);
+        }`);
+  };
+  mat.needsUpdate = true;
+}
+wearQR(MAT.bloom); wearQR(MAT.branch);
 const UP = new V3(0,1,0), XAX = new V3(1,0,0);
 const smooth01 = t => { t = clamp(t,0,1); return t*t*(3-2*t); };
 
@@ -554,7 +585,6 @@ function build(qr){
   }
   const zero = new V3(.001,.001,.001);
   tr.puffs.forEach((pf,j) => {
-    pf.free = (!B || slot[j] < 0) && j % 6 === 0;   // some of the blossoms with no bed square left over stay on the sapling
     if(!B){ pf.ep = new V3(0,.02,0); pf.es = zero; pf.tc = pf.c; }
     else {
       const bd = beds[owner[j]];
@@ -571,11 +601,18 @@ function build(qr){
     pf.delay = .02 + .2*(1 - clamp(pf.sp.y/Math.max(1, treeBox.max.y), 0, 1)) + G2()*.12;
   });
 
+  // hand the code to the shaders: one texel per module, 255 = dark
+  { const data = new Uint8Array(N*N); for(let r=0;r<N;r++) for(let c=0;c<N;c++) data[r*N + c] = qr.isDark(r, c) ? 255 : 0;
+    const tex = new THREE.DataTexture(data, N, N, THREE.LuminanceFormat, THREE.UnsignedByteType);
+    tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.needsUpdate = true;
+    if(QRU.uQR.value) QRU.uQR.value.dispose();
+    QRU.uQR.value = tex; QRU.uInfo.value.set(S, margin, N, 1/Math.tan(SAP_PITCH));
+    QRU.uDark.value.copy(pal.grassBase()).multiplyScalar(.8); }
   const tileIM   = makeIM(G.tile, MAT.inst, tiles, false, true);
   const decorIM  = makeIM(G.blade, MAT.flat, decor.map(b=>({m:new THREE.Matrix4(), c:b.c})), true, true);
   const flowerIM = makeIM(G.bloom, MAT.bloom, flowers.map(f=>({m:new THREE.Matrix4(), c:f.c})), true, false);
   const bladeIM  = makeIM(G.blade, MAT.flat, blades.map(b=>({m:new THREE.Matrix4(), c:b.c})), true, true);
-  const branchIM = makeIM(G.branch, MAT.inst, tr.branches.map(b=>({m:new THREE.Matrix4(), c:b.c})), true, true);
+  const branchIM = makeIM(G.branch, MAT.branch, tr.branches.map(b=>({m:new THREE.Matrix4(), c:b.c})), true, true);
   const blooms = [], leaves = [];
   tr.puffs.forEach(pf => { const list = pf.kind==='bloom' ? blooms : leaves; pf.si = list.length; list.push({m:new THREE.Matrix4(), c:pf.c}); });
   // the crown casts dappled shade on the garden but doesn't darken itself, so the blossoms stay luminous
@@ -634,7 +671,7 @@ let lastPose = -1;
 const _fq = new THREE.Quaternion();
 function pose(pp, force){
   if(!T) return;
-  const ssc = lerp(1, SAP_SCALE, sap);               // the sapling is the tree at half size
+  const gp = Math.max(pp, sap);                     // the ground follows whichever is further along: the QR morph or the canopy view
   const sway = 1 - smooth01(pp*3);                 // the crown breathes in the wind until the transform starts
   const changed = force || pp !== lastPose;
   if(!changed && sway === 0) return;
@@ -643,20 +680,19 @@ function pose(pp, force){
   // branches pull back into the trunk, twigs first
   T.branches.forEach((b,i) => {
     const st = b.depth/6*.42;
-    const f = lerp(1 - easeInOut(clamp((pp - st)/.4, 0, 1)), 1, sap);
+    const f = 1 - easeInOut(clamp((pp - st)/.4, 0, 1));
     const start = b.parent < 0 ? _pv.set(0,0,0) : _pv.copy(T.ends[b.parent]);
-    const L = b.len*f*ssc, r = b.rad*(.35 + .65*f)*Math.sqrt(ssc);
+    const L = b.len*f, r = b.rad*(.35 + .65*f);
     if(f <= .001) _ps.set(1e-4,1e-4,1e-4); else _ps.set(r, L*1.04, r);
     _pm.compose(start, b.q, _ps); T.branchIM.setMatrixAt(i, _pm);
     T.ends[i].copy(start).addScaledVector(b.dir, L);
+
   });
 
   // each blossom / leaf flies along a curve, folds shut and turns into a block that locks into its square
   T.puffs.forEach((pf,i) => {
-    const fr = sap > 0 && pf.free;
-    const e = easeInOut(clamp((pp - pf.delay)/.6, 0, 1)) * (fr ? 1 - sap : 1), u = 1 - e;
+    const e = easeInOut(clamp((pp - pf.delay)/.6, 0, 1)), u = 1 - e;
     _pv.copy(pf.sp).multiplyScalar(u*u).addScaledVector(pf.cp, 2*u*e).addScaledVector(pf.ep, e*e);
-    if(fr) _pv.multiplyScalar(ssc);
     if(sway > 0){
       const w = sway * T.k * (.25 + .75*clamp(pf.sp.y/T.H, 0, 1));
       _pv.x += Math.sin(time*1.3 + pf.sp.x*.25 + pf.sp.z*.18) * .09 * w;
@@ -665,7 +701,7 @@ function pose(pp, force){
     // the living piece
     _pq.copy(pf.sq).slerp(IDQ, e);
     if(sway > 0){ _fq.setFromAxisAngle(XAX, Math.sin(time*2.1 + pf.ph) * .14 * sway); _pq.multiply(_fq); }
-    _ps.setScalar(Math.max(1e-4, pf.s * (fr ? ssc : 1) * (1 - smooth01((e - .18)/.37))));
+    _ps.setScalar(Math.max(1e-4, pf.s * (1 - smooth01((e - .18)/.37))));
     _pm.compose(_pv, _pq, _ps); (pf.kind==='bloom' ? T.bloomIM : T.leafIM).setMatrixAt(pf.si, _pm);
     // the block it becomes
     if(changed){
@@ -678,7 +714,7 @@ function pose(pp, force){
   });
   T.bloomIM.instanceMatrix.needsUpdate = true; T.leafIM.instanceMatrix.needsUpdate = true;
   // corner meadows: sway in the wind, then sink into the ground as the code forms
-  const fd = 1 - smooth01(pp/.35);
+  const fd = 1 - smooth01(gp/.35);
   T.decor.forEach((b,i) => {
     const wv = sway * Math.sin(time*1.8 + b.ph + b.x*.3) * .12;
     _pe.set(b.rx + wv, b.ry, b.rz + wv*.6); _pq.setFromEuler(_pe);
@@ -693,18 +729,18 @@ function pose(pp, force){
   });
   T.decorIM.instanceMatrix.needsUpdate = true; T.flowerIM.instanceMatrix.needsUpdate = true;
   if(!changed) return;
-  const fm = smooth01((pp - .08)/.4);
+  const fm = smooth01((gp - .08)/.4);
   T.decorTileIdx.forEach((ti,j) => { const d = T.decorTiles[j]; _pc.copy(d.moss).lerp(d.light, fm); T.tileIM.setColorAt(ti, _pc); });
 
   // grass lies down a little so the code reads flat from above
-  const fb = easeInOut(clamp((pp - .15)/.6, 0, 1));
+  const fb = easeInOut(clamp((gp - .15)/.6, 0, 1));
   T.blades.forEach((b,i) => {
     _pe.set(b.rx*(1-fb), b.ry, b.rz*(1-fb)); _pq.setFromEuler(_pe);
     _pm.compose(_pv.set(b.x,wv(b.x,b.z),b.z), _pq, _ps.set(1, lerp(b.h, .22, fb), 1)); T.bladeIM.setMatrixAt(i, _pm);
   });
 
   // bed soil darkens as the blocks land
-  const ft = easeInOut(clamp((pp - .35)/.55, 0, 1));
+  const ft = easeInOut(clamp((gp - .35)/.55, 0, 1));
   T.bedTileIdx.forEach((ti,j) => { const bd = T.beds[j]; _pc.copy(bd.soil).lerp(bd.base, ft); T.tileIM.setColorAt(ti, _pc); });
 
   for(const im of [T.branchIM, T.puffIM, T.bladeIM]) im.instanceMatrix.needsUpdate = true;
@@ -813,8 +849,12 @@ async function loadThemes(){
 
 /* ---------------- animation ---------------- */
 let onRendered = null, userYaw = 0, yawVel = 0, userPitch = 0, boundPts = [];
-let sap = 0, sapTarget = 0, sapLast = 0;   // 'sapling' pose: 0 = full tree or plain QR, 1 = a half-size tree standing in the finished QR code
-const SAP_SCALE = .24, SAP_TILT = .3;   // any bigger and the crown hides too many modules for the code to decode
+/* 'canopy' view: the full tree stands over the QR code and every blossom, leaf and branch is coloured by the module it covers
+   (dark = deep green, light = cream), so from above the crown itself reads as the code. sapT is raw progress, sap its eased value.
+   The colouring is done per pixel in the material shaders (see QRU / wearQR). */
+let sap = 0, sapT = 0, sapTarget = 0, sapLast = 0;
+const SAP_PITCH = 1.3;   // camera angle (radians above the horizon) in that view; the projection is corrected for it
+const mixB = (a, b, t) => ({ cx:lerp(a.cx,b.cx,t), cy:lerp(a.cy,b.cy,t), w:lerp(a.w,b.w,t), h:lerp(a.h,b.h,t) });
 const PITCH_MIN = .22, PITCH_MAX = 1.3;   // how far the tree can be tilted (radians above the horizon)
 let p = 1, pTarget = 1, last = performance.now(), time = 0;
 const _m = new THREE.Matrix4(), _c = new THREE.Color();
@@ -828,21 +868,25 @@ function tick(now){
   const ig = grow < 1 || growWas; growWas = grow < 1;
   if(!dragging && yawVel){ userYaw += yawVel; yawVel *= Math.pow(.04, dt); if(Math.abs(yawVel) < 1e-4) yawVel = 0; }   // coast after a flick
   if(pTarget > .5){ yawVel = 0; userYaw = Math.atan2(Math.sin(userYaw), Math.cos(userYaw)); if(p >= 1) userPitch = 0; }                          // heading for the QR code: take the short way back
-  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e) + userYaw*(1 - e);
-  pitchObj.rotation.x = -(lerp(ISO.pitch, TOP.pitch, e) + userPitch*(1 - e) - SAP_TILT*sap*e);   // tilted a little so the sapling reads as a tree
+  const cb = Math.max(e, sap);   // 0 = tree camera, 1 = looking down
+  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, cb) + userYaw*(1 - cb);
+  pitchObj.rotation.x = -(lerp(lerp(ISO.pitch, TOP.pitch, e), SAP_PITCH, sap*(1 - e)) + userPitch*(1 - cb));
   if(boundsTree){
-    const bt = userPitch ? viewBounds(ISO.yaw, ISO.pitch + userPitch, boundPts, 1.04) : boundsTree;   // keep the tree in frame while tilted
+    let bt = userPitch ? viewBounds(ISO.yaw, ISO.pitch + userPitch, boundPts, 1.04) : boundsTree;   // keep the tree in frame while tilted
+    if(sap > 0) bt = mixB(bt, viewBounds(0, SAP_PITCH, boundPts, 1.04), sap*(1 - e));              // and in the canopy view
     frame({ cx:lerp(bt.cx,boundsQR.cx,e), cy:lerp(bt.cy,boundsQR.cy,e),
             w:lerp(bt.w,boundsQR.w,e), h:lerp(bt.h,boundsQR.h,e) });
   }
-  setLights(e);
+  setLights(Math.max(e, sap*.45));   // keep some sun in the canopy view: its shading and shadow are what make it read as a tree
 
-  if(sap !== sapTarget) sap = sapTarget > sap ? Math.min(sapTarget, sap + dt/1.7) : Math.max(sapTarget, sap - dt/1.7);
+  if(view === 'qr' && p >= 1 && (sapT > 0 || sapTarget > 0)){ sapT = 0; sapTarget = 0; }   // the flat code needs no canopy colouring
+  if(sapT !== sapTarget) sapT = sapTarget > sapT ? Math.min(sapTarget, sapT + dt/1.7) : Math.max(sapTarget, sapT - dt/1.7);
+  sap = easeInOut(sapT); QRU.uQ.value = sap;
   const sc = sap !== sapLast; sapLast = sap;
   pose(p, ig || sc); if(ig) applyTiles();
-  updateButterflies(time, p);
+  updateButterflies(time, Math.max(p, sap));
   if(petals){
-    const vis = clamp(1 - p*3, 0, 1);
+    const vis = clamp(1 - p*3, 0, 1) * (1 - sap);
     const groundY = 0.02;
     for(let i=0;i<petalData.length;i++){
       const d = petalData[i];
@@ -868,10 +912,11 @@ function tick(now){
 
 /* ---------------- interaction ---------------- */
 const hint = $('#hint');
-const HINTS = { tree:'Tap the garden to reveal the QR code', both:'A little tree and a scannable code. Tap for the full code', qr:'Tap to bring the tree back' };
+const HINTS = { tree:'Tap the garden to reveal the QR code', both:'The tree is the code: scan the canopy. Tap for the full code', qr:'Tap to bring the tree back' };
 let view = 'qr';
 function setView(v){
-  view = v; pTarget = v === 'tree' ? 0 : 1; sapTarget = v === 'both' ? 1 : 0;
+  sapTarget = (v === 'both' || (v === 'qr' && view === 'both')) ? 1 : 0;   // going on to the flat code keeps the canopy colours until the morph ends
+  view = v; pTarget = v === 'qr' ? 1 : 0;   // the canopy view keeps the full tree up; only the plain code flattens it
   hint.textContent = HINTS[v];
 }
 const setMode = qrMode => setView(qrMode ? 'qr' : 'tree');
@@ -1010,7 +1055,7 @@ async function plant(t, card){
   // 1. the real scene, finished and in QR view, behind the gallery
   grow = 1; growGo = false;
   apply(); await regenerate().catch(() => {});
-  p = 1; pTarget = 1; sap = 0; userYaw = 0; yawVel = 0; userPitch = 0; setMode(true); hint.style.opacity = 0;
+  p = 1; pTarget = 1; sap = 0; sapT = 0; view = 'tree'; userYaw = 0; yawVel = 0; userPitch = 0; setMode(true); hint.style.opacity = 0;
   const shot = await grabScene({ x: vw/2 - qrPx/2, y: cy - qrPx/2, w: qrPx });
 
   // the flying card: a 2D thumbnail drawn at landing size, with the 3D capture laid over its QR square
