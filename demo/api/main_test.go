@@ -43,10 +43,8 @@ func TestQR(t *testing.T) {
 	}{
 		{"valid", `{"url":"https://example.com/hello"}`, 200},
 		{"empty", `{"url":""}`, 400},
-		{"javascript scheme", `{"url":"javascript:alert(1)"}`, 400},
-		{"ftp scheme", `{"url":"ftp://example.com"}`, 400},
-		{"no host", `{"url":"https://"}`, 400},
-		{"too long", `{"url":"https://a.com/` + strings.Repeat("x", 600) + `"}`, 400},
+		{"plain text", `{"url":"hello garden"}`, 200},
+		{"too long", `{"url":"https://a.com/` + strings.Repeat("x", 300) + `"}`, 400},
 		{"bad json", `nope`, 400},
 	}
 	for _, c := range cases {

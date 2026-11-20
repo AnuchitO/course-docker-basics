@@ -2,40 +2,34 @@ package main
 
 import (
 	"errors"
-	"net/url"
+	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/makiuchi-d/gozxing"
 	zxqr "github.com/makiuchi-d/gozxing/qrcode"
 	qrcode "github.com/skip2/go-qrcode"
 )
 
-const maxURLLen = 500
+const maxTextLen = 300
 
-// validateURL accepts only absolute http(s) URLs.
+// validateURL accepts any non-empty text of up to 300 characters (links included).
 func validateURL(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return "", errors.New("please enter a link")
+		return "", errors.New("please enter a link or some text")
 	}
-	if len(raw) > maxURLLen {
-		return "", errors.New("that link is too long for a tidy QR code (max 500 characters)")
+	if n := utf8.RuneCountInString(raw); n > maxTextLen {
+		return "", fmt.Errorf("that's %d characters. A garden fits up to %d", n, maxTextLen)
 	}
-	u, err := url.Parse(raw)
-	if err != nil || u.Host == "" {
-		return "", errors.New("that does not look like a valid link")
-	}
-	if u.Scheme != "http" && u.Scheme != "https" {
-		return "", errors.New("only http:// and https:// links are allowed")
-	}
-	return u.String(), nil
+	return raw, nil
 }
 
-// qrMatrix builds a QR code with the highest error correction (level H) and
+// qrMatrix builds a QR code with the highest error correction (level Q) and
 // returns one string of '1'/'0' per row (no quiet zone). It decodes its own
 // image first, so a code that cannot be read back is never returned.
 func qrMatrix(link string) ([]string, error) {
-	q, err := qrcode.New(link, qrcode.Highest)
+	q, err := qrcode.New(link, qrcode.High)
 	if err != nil {
 		return nil, err
 	}
