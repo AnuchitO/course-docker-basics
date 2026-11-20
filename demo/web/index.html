@@ -20,7 +20,8 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);transition:background-color .8s ease;
     font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
-  canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:pointer;touch-action:manipulation;outline:none}
+  canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;outline:none}
+  canvas#c.dragging{cursor:grabbing}
   .brand{position:fixed;top:16px;left:18px;display:flex;align-items:center;gap:10px;user-select:none;pointer-events:none}
   .brand b{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:21px;letter-spacing:-.01em;display:block;line-height:1}
   .brand small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
@@ -804,7 +805,7 @@ async function loadThemes(){
 }
 
 /* ---------------- animation ---------------- */
-let onRendered = null;
+let onRendered = null, userYaw = 0, yawVel = 0;
 let p = 1, pTarget = 1, last = performance.now(), time = 0;
 const _m = new THREE.Matrix4(), _c = new THREE.Color();
 function tick(now){
@@ -815,7 +816,9 @@ function tick(now){
 
   if(growGo && grow < 1) grow = Math.min(1, grow + dt/1.5);
   const ig = grow < 1 || growWas; growWas = grow < 1;
-  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e);
+  if(!dragging && yawVel){ userYaw += yawVel; yawVel *= Math.pow(.04, dt); if(Math.abs(yawVel) < 1e-4) yawVel = 0; }   // coast after a flick
+  if(pTarget > .5){ yawVel = 0; userYaw = Math.atan2(Math.sin(userYaw), Math.cos(userYaw)); }                          // heading for the QR code: take the short way back
+  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e) + userYaw*(1 - e);
   pitchObj.rotation.x = -lerp(ISO.pitch, TOP.pitch, e);
   if(boundsTree){
     frame({ cx:lerp(boundsTree.cx,boundsQR.cx,e), cy:lerp(boundsTree.cy,boundsQR.cy,e),
@@ -856,12 +859,24 @@ function setMode(qrMode){
   pTarget = qrMode ? 1 : 0;
   hint.textContent = qrMode ? 'Tap to bring the tree back' : 'Tap the garden to reveal the QR code';
 }
-let down = null;
-canvas.addEventListener('pointerdown', e => { down = {x:e.clientX, y:e.clientY}; });
-canvas.addEventListener('pointerup', e => {
-  if(down && Math.hypot(e.clientX-down.x, e.clientY-down.y) < 10){ setMode(pTarget < .5); audio.blip(); }
-  down = null;
+/* hold and drag to spin the tree; a short tap still flips between tree and QR code.
+   The spin fades out as the scene flattens into the QR code, so the code is always upright and scannable. */
+let down = null, dragging = false, lastX = 0;
+canvas.addEventListener('pointerdown', e => { down = {x:e.clientX, y:e.clientY}; dragging = false; lastX = e.clientX; yawVel = 0; });
+canvas.addEventListener('pointermove', e => {
+  if(!down) return;
+  if(!dragging && Math.hypot(e.clientX-down.x, e.clientY-down.y) > 6 && pTarget < .5){
+    dragging = true; canvas.setPointerCapture(e.pointerId); canvas.classList.add('dragging');
+  }
+  if(dragging){ const d = (e.clientX - lastX) * .008; userYaw += d; yawVel = d; }
+  lastX = e.clientX;
 });
+function endDrag(e){
+  if(down && !dragging && Math.hypot(e.clientX-down.x, e.clientY-down.y) < 10){ setMode(pTarget < .5); audio.blip(); }
+  down = null; dragging = false; canvas.classList.remove('dragging');
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', () => { down = null; dragging = false; canvas.classList.remove('dragging'); });
 canvas.addEventListener('keydown', e => { if(e.key===' '||e.key==='Enter'){ e.preventDefault(); setMode(pTarget<.5); } });
 
 const input = $('#url');
@@ -975,7 +990,7 @@ async function plant(t, card){
   // 1. the real scene, finished and in QR view, behind the gallery
   grow = 1; growGo = false;
   apply(); await regenerate().catch(() => {});
-  p = 1; pTarget = 1; setMode(true); hint.style.opacity = 0;
+  p = 1; pTarget = 1; userYaw = 0; yawVel = 0; setMode(true); hint.style.opacity = 0;
   const shot = await grabScene({ x: vw/2 - qrPx/2, y: cy - qrPx/2, w: qrPx });
 
   // the flying card: a 2D thumbnail drawn at landing size, with the 3D capture laid over its QR square
