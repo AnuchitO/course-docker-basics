@@ -958,6 +958,14 @@ async function plant(t, card){
   const apply = () => { state.text = t.url; $('#url').value = t.url;
     if(SEASON_BG[t.season]) state.season = t.season;
     state.swatch = t.swatch % SWATCHES.length; persist(); syncUI(); rebuildLook(); };
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){   // no flying, no wave: a plain fade, but still QR code first, then the tree
+    grow = 1; growGo = false;
+    apply(); await regenerate().catch(() => {});
+    p = 1; pTarget = 1; setMode(true);
+    await anim(wallEl, [{opacity:1},{opacity:0}], { duration:300, easing:'ease' });
+    wallEl.classList.remove('open'); wallEl.getAnimations().forEach(a => a.cancel());
+    await wait(900); setMode(false); planting = false; return;
+  }
   // geometry of the QR square on screen (where the live scene draws it)
   const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
   const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
