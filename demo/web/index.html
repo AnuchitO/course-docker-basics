@@ -464,6 +464,20 @@ function buildTree(R, k, pal){
   return { branches, puffs, box };
 }
 
+/* ---- "grow" intro: the garden builds itself in a ripple from the centre (0 = bare slab, 1 = finished) ---- */
+let grow = 1, growGo = true, growWas = false;
+const backOut = t => { t = clamp(t,0,1) - 1; return 1 + 2.70158*t*t*t + 1.70158*t*t; };
+function rip(x, z){ return grow >= 1 ? 1 : backOut(grow*1.75 - Math.hypot(x,z)/(S*.72)*.75); }
+const _tp = new V3(), _tq = new THREE.Quaternion(), _ts = new V3(), _tm = new THREE.Matrix4();
+function applyTiles(){
+  if(!T || !T.tiles) return;
+  T.tiles.forEach((t,i) => {
+    const e = t.m.elements, x = e[12], z = e[14], r = rip(x, z);
+    _tm.compose(_tp.set(x, -(1 - r)*1.7, z), _tq.identity(), _ts.set(1,1,1)); T.tileIM.setMatrixAt(i, _tm);
+  });
+  T.tileIM.instanceMatrix.needsUpdate = true;
+}
+
 function build(qr){
   clearWorld();
   const N = qr.getModuleCount(), margin = 1; S = N + 2*margin;
@@ -563,7 +577,7 @@ function build(qr){
   const leafIM   = makeIM(G.leaf, MAT.bloom, leaves, true, false);
   const puffIM   = makeIM(G.cube, MAT.flat, tr.puffs.map(p=>({m:new THREE.Matrix4(), c:p.c})), true, true);
   world.add(tileIM, bladeIM, branchIM, bloomIM, leafIM, puffIM, decorIM, flowerIM);
-  T = { tileIM, decorIM, flowerIM, decor, flowers, decorTiles, decorTileIdx, bladeIM, branchIM, puffIM, bloomIM, leafIM, k, H:Math.max(1, treeBox.max.y), blades, beds, bedTileIdx, branches:tr.branches, puffs:tr.puffs,
+  T = { tiles, tileIM, decorIM, flowerIM, decor, flowers, decorTiles, decorTileIdx, bladeIM, branchIM, puffIM, bloomIM, leafIM, k, H:Math.max(1, treeBox.max.y), blades, beds, bedTileIdx, branches:tr.branches, puffs:tr.puffs,
         ends: tr.branches.map(()=>new V3()) };
 
   // falling petals / pollen / leaves
@@ -646,7 +660,7 @@ function pose(pp, force){
     // the block it becomes
     if(changed){
       const g = smooth01((e - .25)/.35);
-      if(g <= 0) _ps.set(1e-4,1e-4,1e-4); else _ps.set(pf.s*.5, pf.s*.5, pf.s*.5).lerp(pf.es, e).multiplyScalar(g);
+      if(g <= 0) _ps.set(1e-4,1e-4,1e-4); else _ps.set(pf.s*.5, pf.s*.5, pf.s*.5).lerp(pf.es, e).multiplyScalar(g * rip(pf.ep.x, pf.ep.z));
       _pq.copy(pf.sq).slerp(IDQ, Math.min(1, e*1.15));
       _pm.compose(_pv, _pq, _ps); T.puffIM.setMatrixAt(i, _pm);
       _pc.copy(pf.c).lerp(pf.tc, e); T.puffIM.setColorAt(i, _pc);
@@ -676,7 +690,7 @@ function pose(pp, force){
   const fb = easeInOut(clamp((pp - .15)/.6, 0, 1));
   T.blades.forEach((b,i) => {
     _pe.set(b.rx*(1-fb), b.ry, b.rz*(1-fb)); _pq.setFromEuler(_pe);
-    _pm.compose(_pv.set(b.x,0,b.z), _pq, _ps.set(1, lerp(b.h, .22, fb), 1)); T.bladeIM.setMatrixAt(i, _pm);
+    const rg = rip(b.x, b.z); _pm.compose(_pv.set(b.x,0,b.z), _pq, _ps.set(rg, lerp(b.h, .22, fb)*rg, rg)); T.bladeIM.setMatrixAt(i, _pm);
   });
 
   // bed soil darkens as the blocks land
@@ -796,15 +810,19 @@ function tick(now){
   p = pTarget > p ? Math.min(pTarget, p+step) : Math.max(pTarget, p-step);
   const e = easeInOut(p);
 
-  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e);
+  if(growGo && grow < 1) grow = Math.min(1, grow + dt/1.7);
+  const ig = grow < 1 || growWas; growWas = grow < 1;
+  const ge = 1 - Math.pow(1 - grow, 3);                      // camera: a slow spiral pull-back while the garden grows
+  yawObj.rotation.y = lerp(ISO.yaw, TOP.yaw, e) + (1 - ge)*1.1;
   pitchObj.rotation.x = -lerp(ISO.pitch, TOP.pitch, e);
   if(boundsTree){
+    const zm = lerp(.42, 1, ge);
     frame({ cx:lerp(boundsTree.cx,boundsQR.cx,e), cy:lerp(boundsTree.cy,boundsQR.cy,e),
-            w:lerp(boundsTree.w,boundsQR.w,e), h:lerp(boundsTree.h,boundsQR.h,e) });
+            w:lerp(boundsTree.w,boundsQR.w,e)*zm, h:lerp(boundsTree.h,boundsQR.h,e)*zm });
   }
   setLights(e);
 
-  pose(p);
+  pose(p, ig); if(ig) applyTiles();
   updateButterflies(time, p);
   if(petals){
     const vis = clamp(1 - p*3, 0, 1);
@@ -904,43 +922,59 @@ function thumb(t){
 let planting = false;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const anim = (el, kf, o) => el.animate(kf, { fill:'forwards', easing:'cubic-bezier(.65,0,.25,1)', ...o }).finished;
-// card -> zoom to the centre -> the wall melts away to the QR code -> the QR grows into the tree
+/* The planting sequence:
+   1. the gallery falls away and the chosen card flies to the centre, landing exactly on the QR footprint
+   2. a ring of light ripples out; the card dissolves while real tiles rise out of the slab, centre first,
+      and the camera spirals back from a close-up
+   3. the finished QR code rests for a beat, then the blossoms flow out of the beds and the tree grows from it */
 async function plant(t, card){
   if(planting) return; planting = true;
   const wallEl = $('#wall'), canvasEl = card.querySelector('canvas'), r = card.getBoundingClientRect();
-  // a flying copy of the card's thumbnail, starting exactly where the card is
   const fly = document.createElement('img');
   fly.src = canvasEl.toDataURL();
   Object.assign(fly.style, { position:'fixed', left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px',
-    objectFit:'cover', borderRadius:'18px', zIndex:30, boxShadow:'0 18px 50px rgba(60,45,30,.28)', pointerEvents:'none' });
+    objectFit:'cover', borderRadius:'18px', zIndex:30, boxShadow:'0 18px 50px rgba(60,45,30,.28)', pointerEvents:'none', willChange:'transform,opacity,filter' });
   document.body.appendChild(fly);
-  // the page behind the wall switches to the new garden, already in QR mode
+  // the scene behind the wall: new garden, QR mode, bare slab waiting to grow
+  grow = 0; growGo = false;
   state.text = t.url; $('#url').value = t.url;
   if(SEASON_BG[t.season]) state.season = t.season;
   state.swatch = t.swatch % SWATCHES.length;
   persist(); syncUI(); rebuildLook();
   const ready = regenerate();
-  p = 1; pTarget = 1; setMode(true);
+  p = 1; pTarget = 1; setMode(true); hint.style.opacity = 0;
 
-  // 1. everything but the chosen card fades out
   const rest = [...wallEl.querySelectorAll('.pin, .wallbar')].filter(x => x !== card);
   card.style.visibility = 'hidden';
-  rest.forEach(x => anim(x, [{opacity:1},{opacity:0}], { duration:260 }));
-  await wait(200);
-  // 2. the thumbnail zooms into the centre of the screen
-  const vw = innerWidth, vh = innerHeight, size = Math.min(vw, vh) * .62;
-  const k = size / r.width, dx = vw/2 - (r.left + r.width/2), dy = (vh - panel.getBoundingClientRect().height)/2 - (r.top + r.height/2) + 20;
-  const zoom = anim(fly, [{ transform:'none' }, { transform:`translate(${dx}px,${dy}px) scale(${k})` }], { duration:820 });
+  rest.forEach((x,i) => anim(x, [{opacity:1, transform:'none'},{opacity:0, transform:'scale(.94)'}], { duration:300, delay:i*6 }));
+  await wait(120);
+
+  // the card lands on the footprint of the 3D QR code, so the hand-over is seamless
+  const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
+  const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
+  const k = qrPx / (r.width * (360 - 52) / 360);
+  const dx = vw/2 - (r.left + r.width/2), dy = cy - (r.top + r.height/2);
+  const to = `translate(${dx}px,${dy}px) scale(${k})`;
+  const zoom = anim(fly, [{ transform:'none' }, { transform:`translate(${dx}px,${dy*.55}px) scale(${k*.9})`, offset:.55 }, { transform:to }], { duration:880, easing:'cubic-bezier(.3,.9,.3,1)' });
   await Promise.all([zoom, ready.catch(() => {})]);
-  // 3. wall and thumbnail dissolve into the real 3D QR code underneath
-  await Promise.all([ anim(wallEl, [{opacity:1},{opacity:0}], { duration:520, easing:'ease' }),
-                      anim(fly, [{ transform:`translate(${dx}px,${dy}px) scale(${k})`, opacity:1 }, { transform:`translate(${dx}px,${dy}px) scale(${k*1.04})`, opacity:0 }], { duration:520, easing:'ease' }) ]);
+
+  // ring of light + the garden builds itself
+  const ring = document.createElement('div');
+  Object.assign(ring.style, { position:'fixed', left:(vw/2)+'px', top:cy+'px', width:qrPx+'px', height:qrPx+'px', margin:(-qrPx/2)+'px 0 0 '+(-qrPx/2)+'px',
+    borderRadius:'50%', border:'2px solid var(--accent)', zIndex:29, pointerEvents:'none' });
+  document.body.appendChild(ring);
+  anim(ring, [{ transform:'scale(.15)', opacity:.9 }, { transform:'scale(1.6)', opacity:0 }], { duration:1300, easing:'cubic-bezier(.2,.7,.3,1)' });
+  growGo = true; audio.blip();
+  anim(wallEl, [{opacity:1},{opacity:0}], { duration:420, easing:'ease' });
+  await wait(260);
+  await anim(fly, [{ transform:to, opacity:1, filter:'blur(0px)' }, { transform:to.replace(/scale\(([\d.]+)\)/, (m,v) => `scale(${v*1.06})`), opacity:0, filter:'blur(6px)' }], { duration:700, easing:'ease-in' });
   wallEl.classList.remove('open'); wallEl.getAnimations().forEach(a => a.cancel());
   rest.concat(card).forEach(x => { x.getAnimations().forEach(a => a.cancel()); x.style.visibility = ''; });
-  fly.remove();
-  // 4. let the QR code sit for a moment, then it grows into the tree
-  await wait(900);
-  setMode(false);
+  fly.remove(); ring.remove();
+  while(grow < 1) await wait(60);
+  // the finished QR code rests, then becomes the tree
+  hint.style.opacity = ''; await wait(1100);
+  setMode(false); audio.blip();
   planting = false;
 }
 async function toggleLike(t, btn, e){
