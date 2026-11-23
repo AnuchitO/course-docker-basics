@@ -465,7 +465,7 @@ docker run hello-world
 ```bash
 docker run -d --name tesla \
   alpine sleep 3600
-docker run -d --name toyota \
+docker run -d --name byd \
   alpine sleep 3600
 ```
 
@@ -486,7 +486,7 @@ docker exec tesla sh -c \
 
 ```bash
 docker exec tesla cat /note.txt
-docker exec toyota cat /note.txt
+docker exec byd cat /note.txt
 ```
 
   </div>
@@ -506,7 +506,7 @@ docker exec toyota cat /note.txt
       <div v-click="3" class="label-good mt-1">✅ finds it</div>
     </div>
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>toyota</code></div>
+      <div class="font-700">container <code>byd</code></div>
       <div v-click="2" class="mt-2 text-3xl opacity-30">🫙</div>
       <div v-click="2" class="small">untouched</div>
       <div v-click="3" class="label-bad mt-1">❌ not found</div>
@@ -583,7 +583,7 @@ docker exec tesla cat /note.txt
 
 <div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f tesla toyota</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f tesla byd</code></div>
 
 ---
 
