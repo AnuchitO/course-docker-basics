@@ -196,7 +196,7 @@ class: text-center
   <div class="w-24 text-right font-700 opacity-70">On the sea</div>
   <div class="card text-center w-64" style="padding: .6rem"><div class="grid grid-cols-3 gap-2"><img src="/img/photo-coffee.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-car.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-clothes.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div><div class="small mt-1">coffee, cars, clothes: anything</div></div>
   <div class="arrow">→</div>
-  <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Container</div><div class="small">same size, sealed</div></div>
+  <div class="card glow w-56 text-center" style="padding: .6rem"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 3.8rem; width: 100%; object-fit: cover" /><div class="font-700 mt-1">Container</div><div class="small">same size, sealed</div></div>
   <div class="arrow">→</div>
   <div class="card text-center" style="width: 21rem; padding: .6rem">
     <div class="grid grid-cols-3 gap-2"><img src="/img/photo-ship.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-truck.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-train.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div>
@@ -208,7 +208,7 @@ class: text-center
   <div class="w-24 text-right font-700" style="color: var(--blue)">Software</div>
   <div class="card text-center w-64" style="padding: .6rem"><img src="/img/photo-code.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><div class="small mt-1">your app, its tools, its settings</div></div>
   <div class="arrow">→</div>
-  <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Docker container</div><div class="small">same shape, sealed</div></div>
+  <div class="card glow w-56 text-center" style="padding: .6rem"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 3.8rem; width: 100%; object-fit: cover" /><div class="font-700 mt-1">Docker container</div><div class="small">same shape, sealed</div></div>
   <div class="arrow">→</div>
   <div class="card text-center" style="width: 21rem; padding: .6rem">
     <div class="grid grid-cols-3 gap-2"><img src="/img/photo-laptop.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-rack.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-dc.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div>
@@ -225,7 +225,7 @@ class: text-center
 
 <div v-click class="mt-3 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
 
-<div class="abs-bl m-4 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Unsplash photographers)</div>
+<div class="abs-bl m-2 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Unsplash photographers)</div>
 
 ---
 layout: center
@@ -233,47 +233,42 @@ layout: center
 
 # Docker life cycle
 
-<div class="grid grid-cols-[1fr_1.15fr_1fr_1.15fr_1.1fr] items-center gap-2 mt-8">
+<div class="text-xl opacity-80">Three steps. <b>Write it, pack it, start it.</b></div>
 
-  <div v-click class="card text-center min-w-0">
-    <div class="h-16 flex items-center justify-center"><DockerfileIcon /></div>
-    <div class="text-xl font-700 mt-1">Dockerfile</div>
-    <div class="text-sm">a <b>file</b></div>
-    <div class="small mt-1">like a recipe card</div>
+<div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-3 mt-6">
+
+  <div v-click class="card text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">STEP 1</div>
+    <div class="text-3xl font-800 mt-1">Write</div>
+    <div class="h-24 flex items-center justify-center"><DockerfileIcon /></div>
+    <div class="text-sm">List what your app needs, in a <b>text file</b>.</div>
+    <div class="mt-auto pt-3"><span class="chip">Docker calls it a Dockerfile</span></div>
   </div>
 
-  <div v-click class="text-center min-w-0">
-    <div class="small">turn the file into an image</div>
-    <div class="chip mt-1" style="font-size: 1.05rem">docker build</div>
-    <div class="small mt-1"><code>-t magic-web ./web</code></div>
-    <div class="arrow">→</div>
+  <div v-click class="arrow self-center">→</div>
+
+  <div v-click class="card text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
+    <div class="text-3xl font-800 mt-1">Pack</div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
+    <div class="text-sm">Docker packs it all into <b>one sealed box</b>.</div>
+    <div class="mt-auto pt-3"><span class="chip">That box is an Image</span><div class="small mt-1">type: <code>docker build</code></div></div>
   </div>
 
-  <div v-click class="card text-center min-w-0">
-    <div class="h-16 flex items-center justify-center text-5xl">💿</div>
-    <div class="text-xl font-700 mt-1">Image</div>
-    <div class="text-sm">a <b>sealed package</b></div>
-    <div class="small mt-1">like a meal kit</div>
-  </div>
+  <div v-click class="arrow self-center">→</div>
 
-  <div v-click class="text-center min-w-0">
-    <div class="small">start the image</div>
-    <div class="chip mt-1" style="font-size: 1.05rem">docker run</div>
-    <div class="small mt-1"><code>-d magic-web</code></div>
-    <div class="arrow">→</div>
-  </div>
-
-  <div v-click class="card glow text-center min-w-0">
-    <div class="h-16 flex items-center justify-center gap-1" style="zoom: .62"><Ctr v-for="n in 3" :key="n" /></div>
-    <div class="text-xl font-700 mt-1">Containers</div>
-    <div class="text-sm"><b>running</b> copies</div>
-    <div class="small mt-1">like meals served</div>
+  <div v-click class="card glow text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">STEP 3</div>
+    <div class="text-3xl font-800 mt-1">Start</div>
+    <div class="h-24 flex items-center justify-center gap-1" style="zoom: .8"><Ctr v-for="n in 3" :key="n" /></div>
+    <div class="text-sm">Open the box and your app <b>runs</b>. Open as many as you like.</div>
+    <div class="mt-auto pt-3"><span class="chip">A running box is a Container</span><div class="small mt-1">type: <code>docker run</code></div></div>
   </div>
 
 </div>
 
-<div v-click class="mt-9 text-center text-xl">
-  Build <b>once</b>. Run <b>as many times</b> as you like.
+<div v-click class="mt-8 text-center text-xl">
+  <b>Dockerfile</b> = the instructions &nbsp;·&nbsp; <b>Image</b> = the packed box &nbsp;·&nbsp; <b>Container</b> = the box, running
 </div>
 
 ---
