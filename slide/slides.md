@@ -228,6 +228,47 @@ class: text-center
 <div class="abs-bl m-2 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Unsplash photographers)</div>
 
 ---
+
+# On a host machine
+
+<Laptop name="Host Machine" width="640px" class="mt-4">
+  <div class="flex items-center gap-6">
+    <div class="flex flex-col gap-2">
+      <div v-click class="chip">📄 Dockerfile</div>
+      <div v-click class="chip">💿 image</div>
+    </div>
+    <div v-click class="arrow">→</div>
+    <div class="grid grid-cols-3 gap-3">
+      <Ctr v-for="n in 12" :key="n" v-click />
+    </div>
+  </div>
+</Laptop>
+
+<div v-click class="mt-6 text-center opacity-70">The host stays clean — everything lives inside isolated containers.</div>
+
+---
+
+# Everyone, same container
+
+<div class="grid grid-cols-3 gap-x-8 gap-y-12 mt-3">
+  <Laptop width="225px" v-for="(p, i) in [
+    { n: 'MeeN',     skin: '#f1c27d', hair: '#2b2118', shirt: '#2563eb', style: 'short' },
+    { n: 'Ika',      skin: '#e0ac69', hair: '#1c1917', shirt: '#db2777', style: 'long' },
+    { n: 'Pi',       skin: '#c68642', hair: '#292524', shirt: '#16a34a', style: 'cap' },
+    { n: 'AnuchitO', skin: '#f1c27d', hair: '#1c1917', shirt: '#7c3aed', style: 'short' },
+    { n: 'Tua',      skin: '#8d5524', hair: '#0c0a09', shirt: '#d97706', style: 'curly' },
+    { n: 'Sonali',   skin: '#e0ac69', hair: '#3b2a1e', shirt: '#0891b2', style: 'bun' },
+  ]" :key="p.n"
+          v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
+          :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
+    <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
+    <div class="chip">💿 image</div><Ctr />
+  </Laptop>
+</div>
+
+<div v-click class="mt-4 text-center text-xl">Six laptops · one image · <span class="gradient-text font-700">identical behaviour</span></div>
+
+---
 layout: center
 ---
 
@@ -379,47 +420,6 @@ class: text-center
 </div>
 
 <div v-click="3" class="mt-6 text-center text-xl">An image is the <b>class</b>, a container is an <b>instance</b>.</div>
-
----
-
-# On a host machine
-
-<Laptop name="Host Machine" width="640px" class="mt-4">
-  <div class="flex items-center gap-6">
-    <div class="flex flex-col gap-2">
-      <div v-click class="chip">📄 Dockerfile</div>
-      <div v-click class="chip">💿 image</div>
-    </div>
-    <div v-click class="arrow">→</div>
-    <div class="grid grid-cols-3 gap-3">
-      <Ctr v-for="n in 12" :key="n" v-click />
-    </div>
-  </div>
-</Laptop>
-
-<div v-click class="mt-6 text-center opacity-70">The host stays clean — everything lives inside isolated containers.</div>
-
----
-
-# Everyone, same container
-
-<div class="grid grid-cols-3 gap-x-8 gap-y-12 mt-3">
-  <Laptop width="225px" v-for="(p, i) in [
-    { n: 'MeeN',     skin: '#f1c27d', hair: '#2b2118', shirt: '#2563eb', style: 'short' },
-    { n: 'Ika',      skin: '#e0ac69', hair: '#1c1917', shirt: '#db2777', style: 'long' },
-    { n: 'Pi',       skin: '#c68642', hair: '#292524', shirt: '#16a34a', style: 'cap' },
-    { n: 'AnuchitO', skin: '#f1c27d', hair: '#1c1917', shirt: '#7c3aed', style: 'short' },
-    { n: 'Tua',      skin: '#8d5524', hair: '#0c0a09', shirt: '#d97706', style: 'curly' },
-    { n: 'Sonali',   skin: '#e0ac69', hair: '#3b2a1e', shirt: '#0891b2', style: 'bun' },
-  ]" :key="p.n"
-          v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
-          :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
-    <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
-    <div class="chip">💿 image</div><Ctr />
-  </Laptop>
-</div>
-
-<div v-click class="mt-4 text-center text-xl">Six laptops · one image · <span class="gradient-text font-700">identical behaviour</span></div>
 
 ---
 
