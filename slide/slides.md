@@ -154,7 +154,7 @@ class: text-center
   </div>
 </div>
 
-<div class="flex justify-center"><img src="/img/site-butterflies.gif" style="border-radius:12px; border:1px solid var(--card-line); width: 100%; max-width: 440px" /></div>
+<div class="flex justify-center"><img src="/img/site-butterflies.gif" style="border-radius:12px; border:1px solid var(--card-line); width: 100%; max-width: 520px" /></div>
 
 </div>
 
