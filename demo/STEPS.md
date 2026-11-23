@@ -120,3 +120,26 @@ curl localhost:3000/api/health
 After `down` + `up` the saved garden is **gone**: `shared_trees` is back to `10`.
 
 **Why:** `docker compose down` removes the db container, and the data lived inside it. We need a place for the data that is not the container: a volume.
+
+---
+
+## Step 6: keep the data with a named volume
+
+**Intent:** keep Postgres' files in a named volume `tree-data` (`/var/lib/postgresql` for the Postgres 18 image). The volume belongs to Docker, not to the container, so removing the container does not remove the data.
+
+```bash
+docker compose down -v          # start clean: also removes the volume left over from Step 5
+docker compose up -d
+curl localhost:3000/api/health  # shared_trees: 10
+# save a garden in the browser (bookmark button), or:
+curl -s -XPOST localhost:3000/api/trees -H 'content-type: application/json' \
+  -d '{"url":"https://example.com","season":"spring","swatch":1,"name":"my tree"}'
+curl localhost:3000/api/health  # shared_trees: 11
+docker compose down             # no -v: keep the volume
+docker compose up -d
+curl localhost:3000/api/health  # still 11
+docker volume ls | grep tree-data
+```
+
+**See:** the saved garden is **still there** after `down` + `up`: `shared_trees` stays `11`, and `docker volume ls` lists `<project>_tree-data`.
+Careful: `docker compose down -v` deletes the volume, and the data with it.

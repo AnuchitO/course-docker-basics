@@ -29,6 +29,7 @@ services:
       POSTGRES_PASSWORD: magic
       POSTGRES_DB: magictree
     volumes:
+      - tree-data:/var/lib/postgresql          # named volume: the data outlives the container
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro   # creates the tables and seeds ten gardens on first start
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U magic -d magictree"]
@@ -40,3 +41,6 @@ services:
 
 networks:
   magic:
+
+volumes:
+  tree-data:
