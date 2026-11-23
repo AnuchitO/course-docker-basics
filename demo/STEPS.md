@@ -143,3 +143,18 @@ docker volume ls | grep tree-data
 
 **See:** the saved garden is **still there** after `down` + `up`: `shared_trees` stays `11`, and `docker volume ls` lists `<project>_tree-data`.
 Careful: `docker compose down -v` deletes the volume, and the data with it.
+
+---
+
+## Step 7: scale the API
+
+**Intent:** no code change. Because the API is just a service with an alias, Compose can run three copies of it. The web asks for `api`, and Docker's DNS hands out the three containers in turn.
+
+```bash
+docker compose up -d --scale api=3
+sleep 6                          # nginx re-reads Docker's DNS every 5 seconds
+for i in 1 2 3 4 5 6; do curl -s localhost:3000/api/health; echo; done
+docker compose down              # finish (the volume stays)
+```
+
+**See:** three different `host` values (container ids): one image, three containers. Your data is still there.
