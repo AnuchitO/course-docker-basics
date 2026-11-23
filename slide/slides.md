@@ -178,11 +178,14 @@ class: text-center
 
 <div v-click class="flex items-center gap-4">
   <div class="w-24 text-right font-700" style="color: var(--blue)">Software</div>
-  <div class="card w-64 text-center"><div class="text-3xl">🧩 🔧 ⚙️</div><div class="small">your app, its tools, its settings</div></div>
+  <div class="card text-center w-64" style="padding: .6rem"><img src="/img/photo-code.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><div class="small mt-1">your app, its tools, its settings</div></div>
   <div class="arrow">→</div>
   <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Docker container</div><div class="small">same shape, sealed</div></div>
   <div class="arrow">→</div>
-  <div class="card text-center" style="width: 21rem"><div class="text-3xl">💻 🏢 ☁️</div><div class="small">any laptop, server or cloud</div></div>
+  <div class="card text-center" style="width: 21rem; padding: .6rem">
+    <div class="grid grid-cols-3 gap-2"><img src="/img/photo-laptop.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-rack.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-dc.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div>
+    <div class="small mt-1">any laptop, server or cloud</div>
+  </div>
 </div>
 
 </div>
@@ -194,7 +197,7 @@ class: text-center
 
 <div v-click class="mt-3 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
 
-<div class="abs-bl m-4 text-xs opacity-50">Photos: Petar Milošević (CC BY-SA 4.0), Tumwinekenneth (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), via Wikimedia Commons</div>
+<div class="abs-bl m-4 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Markus Spiske, Norbert Levajsics, D. Coetzee)</div>
 
 ---
 layout: center
