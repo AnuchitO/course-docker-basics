@@ -467,7 +467,7 @@ CMD ["./api"]
 
 <div class="text-2xl font-700 leading-snug">A <span class="gradient-text">stamp</span> of your app,<br>built from <b>layers</b>.</div>
 
-<div class="mt-3 flex items-center gap-3"><img src="/img/stamp.svg" style="height: 7rem; width: auto" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often as you like</div></div>
+<div class="mt-3 flex items-center gap-3"><img src="/img/stamp.svg" style="height: 9rem; width: auto" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often as you like</div></div>
 
 <div class="mt-5 flex flex-col gap-3">
   <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
