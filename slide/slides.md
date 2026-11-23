@@ -859,6 +859,77 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 ---
 
+# Now the API, written down
+
+<div class="text-lg opacity-80">The API gets its own service, <b>next to web</b>. <span class="opacity-70">(Step 2 and Step 3)</span></div>
+
+<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-2 mt-3">
+
+  <div class="text-center font-700 opacity-70">On the command line</div><div></div><div class="text-center font-700 opacity-70">In <code>docker-compose.yml</code></div>
+
+  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t magic-api ./api</code><span class="small">make the image</span></div></div>
+  <div v-click="1" class="arrow">→</div>
+  <div v-click="1"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>build: ./api</code><span class="small">same folder, same Dockerfile</span></div></div>
+
+  <div v-click="2"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--name api</code><span class="small">name the container</span></div></div>
+  <div v-click="2" class="arrow">→</div>
+  <div v-click="2"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>api:</code><span class="small">the service name</span></div></div>
+
+  <div v-click="3"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem">no <b>-p</b> on the API<span class="small">closed to the outside</span></div></div>
+  <div v-click="3" class="arrow">→</div>
+  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>no <b>ports:</b></b><span class="small">only web is open</span></div></div>
+
+  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--network magic</code><span class="small">connect the containers</span></div></div>
+  <div v-click="4" class="arrow">→</div>
+  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>nothing to write</b><span class="small">same network, automatically</span></div></div>
+
+  <div v-click="5"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>start api before web</code><span class="small">order matters</span></div></div>
+  <div v-click="5" class="arrow">→</div>
+  <div v-click="5"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>depends_on: [api]</code><span class="small">written under <b>web</b></span></div></div>
+
+</div>
+
+---
+
+# Run it, for real
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
+
+<div>
+
+```bash {1|2|3}
+docker compose up -d --build
+docker compose ps
+curl localhost:3000/api/health
+```
+
+<div v-click="1" class="out mt-3" style="font-size: .8rem; line-height: 1.35">
+Network demo_default  Created<br>
+Container demo-api-1  Started<br>
+Container demo-web-1  Started
+</div>
+
+<div v-click="2" class="out mt-2" style="font-size: .8rem; line-height: 1.35">
+NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SERVICE&nbsp;&nbsp;STATUS<br>
+demo-api-1&nbsp;&nbsp;api&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds<br>
+demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
+</div>
+
+<div v-click="3" class="out mt-2" style="font-size: .8rem">{"db":"not connected","host":"04db7b1d9b41","status":"ok"}</div>
+
+<div v-click="3" class="mt-3 text-sm opacity-80">One command, two containers, one network. No <code>docker run</code>, no <code>network create</code>.</div>
+
+</div>
+
+<div v-click="3" class="text-center">
+  <img src="/img/compose-result.jpg" style="height: 21rem; width: auto; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18)" />
+  <div class="small mt-1">the garden, started by Compose</div>
+</div>
+
+</div>
+
+---
+
 # Step 4 · Add the database
 
 <Stepper :n="4" class="absolute top-6 right-10" />
