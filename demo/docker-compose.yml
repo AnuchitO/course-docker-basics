@@ -1,0 +1,21 @@
+# The same two containers, written down once: docker compose up --build
+services:
+  web:
+    build: ./web
+    ports:
+      - "3000:80"          # http://localhost:3000
+    networks:
+      - magic
+    depends_on:
+      - api
+
+  api:
+    build: ./api
+    networks:
+      magic:
+        aliases:
+          - api            # other containers on "magic" can reach this one as http://api:8080
+    # no "ports:" any more: only the web container needs to be reachable from the laptop
+
+networks:
+  magic:

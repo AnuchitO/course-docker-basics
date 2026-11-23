@@ -79,3 +79,22 @@ docker logs web | tail -3
 
 **Could the published port work?** Yes, but by another name. `API_URL=http://host.docker.internal:8080` reaches the port published with `-p 8080:8080` (tested on Docker Desktop; Linux needs `--add-host=host.docker.internal:host-gateway`). The same goes for the database: with `-p 5432:5432`, the API connects through `host.docker.internal:5432`, while `localhost:5432` is refused.
 It works on a laptop, but every service has to publish a port (even the database), the call leaves the container and comes back through the host, and only one container can publish a given port, so it can't be scaled. The network and alias in Step 4 avoid all of that.
+
+---
+
+## Step 4: Docker Compose, a private network and an alias
+
+**Intent:** stop chaining `docker run` flags. One file describes both containers and puts them on a private network `magic`. The API gets the **alias** `api`, so the web can reach it as `http://api:8080`.
+Two matching edits in `web/`: `API_URL` changes from `http://localhost:8080` to `http://api:8080`, and nginx asks Docker's DNS for `api` on every request (so the API container can be recreated without restarting the web).
+The API has no `ports:` any more: only the web is open to your laptop.
+
+```bash
+git diff HEAD~1 -- web/                # review what changed
+docker rm -f web api
+docker compose up -d --build
+docker compose ps
+curl localhost:3000/api/health
+```
+
+**See:** both services `running`, and `{"db":"not connected","host":"<api container id>","status":"ok"}` through port 3000.
+`curl localhost:8080/api/health` now fails: the API is private. Open http://localhost:3000: the QR code is built and verified by the API.
