@@ -233,24 +233,36 @@ layout: center
 
 # Docker life cycle
 
-<div class="flex items-center justify-center gap-6 mt-12">
-  <div v-click class="card text-center w-56">
+<div class="flex items-center justify-center gap-2 mt-8">
+  <div v-click class="card text-center w-48">
     <div class="h-20 flex items-center justify-center"><DockerfileIcon /></div>
     <div class="text-xl font-700 mt-2">Dockerfile</div>
-    <div class="opacity-60 text-sm">the recipe</div>
+    <div class="opacity-60 text-sm">a <b>file</b> with the recipe</div>
   </div>
-  <div v-click class="arrow">→</div>
-  <div v-click class="card text-center w-56">
+  <div v-click class="text-center w-44">
+    <div class="small mb-1">we <b>build</b> it</div>
+    <div class="chip" style="font-size: 1.05rem">docker build</div>
+    <div class="arrow mt-1">→</div>
+  </div>
+  <div v-click class="card text-center w-48">
     <div class="h-20 flex items-center justify-center text-5xl">💿</div>
     <div class="text-xl font-700 mt-2">Image</div>
-    <div class="opacity-60 text-sm">the template</div>
+    <div class="opacity-60 text-sm">the <b>template</b> to run</div>
   </div>
-  <div v-click class="arrow">→</div>
-  <div v-click class="card glow text-center w-56">
-    <div class="h-20 flex items-center justify-center"><ContainerBig :open="true" :width="120" /></div>
+  <div v-click class="text-center w-44">
+    <div class="small mb-1">we <b>run</b> it</div>
+    <div class="chip" style="font-size: 1.05rem">docker run</div>
+    <div class="arrow mt-1">→</div>
+  </div>
+  <div v-click class="card glow text-center w-48">
+    <div class="h-20 flex items-center justify-center"><ContainerBig :open="true" :width="110" /></div>
     <div class="text-xl font-700 mt-2">Container</div>
-    <div class="opacity-60 text-sm">the running thing</div>
+    <div class="opacity-60 text-sm">the <b>running</b> copy</div>
   </div>
+</div>
+
+<div v-click class="mt-10 text-center text-xl">
+  Write a <b>file</b>. <span class="gradient-text font-700">Build</span> it into an <b>image</b>. <span class="gradient-text font-700">Run</span> the image as a <b>container</b>.
 </div>
 
 ---
