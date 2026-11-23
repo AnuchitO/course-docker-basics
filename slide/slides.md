@@ -127,8 +127,8 @@ class: text-center
 <div class="flex items-center justify-center gap-6 mt-8">
 
 <div class="card good text-center w-52">
-  <div class="text-5xl">💻</div>
-  <div class="font-700 mt-1">My laptop</div>
+  <img src="/img/photo-laptop.jpg" style="border-radius:8px; height: 6.5rem; width: 100%; object-fit: cover" />
+  <div class="font-700 mt-2">My laptop</div>
   <div class="label-good mt-1">✅ works</div>
 </div>
 
@@ -136,17 +136,17 @@ class: text-center
 
 <div class="flex flex-col gap-3">
   <div v-click class="card bad flex items-center gap-4 w-96">
-    <div class="text-3xl">🧑‍💻</div>
+    <img src="/img/photo-desk.jpg" style="border-radius:8px; height: 3.2rem; width: 4.6rem; object-fit: cover; flex: none" />
     <div><b>Friend's laptop</b><div class="small">has an older version</div></div>
     <div class="label-bad ml-auto">❌ breaks</div>
   </div>
   <div v-click class="card bad flex items-center gap-4 w-96">
-    <div class="text-3xl">🏢</div>
+    <img src="/img/photo-rack.jpg" style="border-radius:8px; height: 3.2rem; width: 4.6rem; object-fit: cover; flex: none" />
     <div><b>The server</b><div class="small">is missing a piece</div></div>
     <div class="label-bad ml-auto">❌ breaks</div>
   </div>
   <div v-click class="card bad flex items-center gap-4 w-96">
-    <div class="text-3xl">🧪</div>
+    <img src="/img/photo-code.jpg" style="border-radius:8px; height: 3.2rem; width: 4.6rem; object-fit: cover; flex: none" />
     <div><b>The tester's PC</b><div class="small">has different settings</div></div>
     <div class="label-bad ml-auto">❌ breaks</div>
   </div>
@@ -166,7 +166,7 @@ class: text-center
 
 <div v-click class="flex items-center gap-4">
   <div class="w-24 text-right font-700 opacity-70">On the sea</div>
-  <div class="card w-64 text-center"><div class="text-3xl">☕ 🚗 👕</div><div class="small">coffee, cars, clothes: anything</div></div>
+  <div class="card text-center w-64" style="padding: .6rem"><div class="grid grid-cols-3 gap-2"><img src="/img/photo-coffee.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-car.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-clothes.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div><div class="small mt-1">coffee, cars, clothes: anything</div></div>
   <div class="arrow">→</div>
   <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Container</div><div class="small">same size, sealed</div></div>
   <div class="arrow">→</div>
@@ -197,7 +197,7 @@ class: text-center
 
 <div v-click class="mt-3 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
 
-<div class="abs-bl m-4 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Markus Spiske, Norbert Levajsics, D. Coetzee)</div>
+<div class="abs-bl m-4 text-xs opacity-50">Photos via Wikimedia Commons: Petar Milošević (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), PiDatacenters (CC BY-SA 4.0); the rest CC0 (Wikideas1, Unsplash photographers)</div>
 
 ---
 layout: center
