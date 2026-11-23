@@ -556,6 +556,64 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 ---
 
+# Tour · The tree is the code
+
+<div class="grid grid-cols-[1fr_1.1fr] gap-8 mt-2 items-center">
+
+<div>
+  <div class="text-2xl font-700 leading-snug">Type a link.<br>Watch it <span class="gradient-text">grow into a tree</span>.</div>
+  <div class="mt-5 flex flex-col gap-3">
+    <div v-click class="flex items-center gap-3"><span class="text-3xl">🌳</span><div><b>The crown is the code</b><div class="small">scan the canopy with your phone</div></div></div>
+    <div v-click class="flex items-center gap-3"><span class="text-3xl">🦋</span><div><b>Butterflies fly around it</b><div class="small">just for fun</div></div></div>
+    <div v-click class="flex items-center gap-3"><span class="text-3xl">👆</span><div><b>Drag to spin and tilt</b><div class="small">tap to change the view</div></div></div>
+  </div>
+</div>
+
+<div class="flex justify-center"><img src="/img/site-butterflies.gif" style="border-radius:12px; border:1px solid var(--card-line); width: 100%; max-width: 440px" /></div>
+
+</div>
+
+---
+
+# Tour · Tap to see the code
+
+<div class="grid grid-cols-3 gap-5 mt-2 items-start">
+  <div><img src="/img/site-tree.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><span class="chip">1</span> <b>Tree</b></div><div class="small text-center">where it starts</div></div>
+  <div v-click><img src="/img/site-canopy.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><span class="chip">2</span> <b>Tap</b></div><div class="small text-center">the crown shows the code</div></div>
+  <div v-click><img src="/img/site-qr.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><span class="chip">3</span> <b>Tap again</b></div><div class="small text-center">flat and ready to scan</div></div>
+</div>
+
+<div v-click class="mt-5 text-center text-xl">Same code in all three. <span class="gradient-text font-700">Only the look changes.</span></div>
+
+---
+
+# Tour · Seasons and colours
+
+<div class="grid grid-cols-[1.3fr_1fr] gap-8 mt-2 items-center">
+
+<img src="/img/site-autumn.jpg" style="border-radius:12px; border:1px solid var(--card-line)" />
+
+<div class="flex flex-col gap-4">
+  <div v-click class="card"><div class="font-700">🍂 Pick a season</div><div class="small">Spring, Summer or Autumn changes the whole garden.</div></div>
+  <div v-click class="card"><div class="font-700">🎨 Pick a flower colour</div><div class="small">Six colours. The code stays readable.</div></div>
+  <div v-click class="card"><div class="font-700">✅ No server needed</div><div class="small">The web container does all of this by itself.</div></div>
+</div>
+
+</div>
+
+---
+
+# Tour · Save and gallery
+
+<div class="grid grid-cols-2 gap-6 mt-2 items-start">
+  <div><img src="/img/site-saved.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><b>Save</b> 🔖 keeps your garden</div></div>
+  <div v-click><img src="/img/site-gallery.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><b>Gallery</b> shows everyone's gardens, with scan counts</div></div>
+</div>
+
+<div v-click class="mt-4 text-center text-lg">These two need to <b>remember things</b>, so they need the <span class="gradient-text font-700">database</span>. That is Step 4.</div>
+
+---
+
 # Step 4 · Add the database
 
 <Stepper :n="4" class="absolute top-6 right-10" />
