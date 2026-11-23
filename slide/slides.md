@@ -324,7 +324,7 @@ class: text-center
   <div class="flex items-center gap-6">
     <div class="flex flex-col gap-2">
       <div v-click class="chip">📄 Dockerfile</div>
-      <div v-click class="chip"><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /> image</div>
+      <div v-click class="chip"><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /> image</div>
     </div>
     <div v-click class="arrow">→</div>
     <div class="grid grid-cols-3 gap-3">
@@ -351,7 +351,7 @@ class: text-center
           v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
           :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
     <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
-    <div class="chip"><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /> image</div><Ctr />
+    <div class="chip"><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /> image</div><Ctr />
   </Laptop>
 </div>
 
@@ -384,8 +384,8 @@ layout: center
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
     <div class="text-3xl font-800 mt-1">Image</div>
-    <div class="h-24 flex items-center justify-center"><img src="/img/photo-seal.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
-    <div class="text-sm">Everything is saved as a <b>metal stamp</b>.</div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/stamp.svg" style="height: 5.5rem; width: auto" /></div>
+    <div class="text-sm">Everything is saved as a <b>steel stamp</b>.</div>
     <div class="mt-auto pt-3"><span class="chip">Save</span></div>
   </div>
 
@@ -409,7 +409,6 @@ layout: center
   <b>Dockerfile</b> = the instructions &nbsp;·&nbsp; <b>Image</b> = the stamp &nbsp;·&nbsp; <b>Container</b> = made from it, running
 </div>
 
-<div class="abs-bl m-2 text-xs opacity-50">Wax seal photo: Simon A. Eugster via Wikimedia Commons (CC BY-SA 3.0)</div>
 
 ---
 
@@ -468,7 +467,7 @@ CMD ["./api"]
 
 <div class="text-2xl font-700 leading-snug">A <span class="gradient-text">stamp</span> of your app,<br>built from <b>layers</b>.</div>
 
-<div class="mt-3 flex items-center gap-3"><img src="/img/photo-seal.jpg" style="width: 15rem; height: 6rem; object-fit: cover; border-radius: 10px" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often as you like</div></div>
+<div class="mt-3 flex items-center gap-3"><img src="/img/stamp.svg" style="height: 7rem; width: auto" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often as you like</div></div>
 
 <div class="mt-5 flex flex-col gap-3">
   <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
@@ -479,7 +478,7 @@ CMD ["./api"]
 </div>
 
 <div class="relative">
-  <div v-click="5" class="image-tag"><span><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /></span> magic-api:1.0</div>
+  <div v-click="5" class="image-tag"><span><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /></span> magic-api:1.0</div>
   <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
     <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
     <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
@@ -490,14 +489,13 @@ CMD ["./api"]
 
 </div>
 
-<div class="abs-bl m-2 text-xs opacity-50">Wax seal photo: Simon A. Eugster via Wikimedia Commons (CC BY-SA 3.0)</div>
 
 ---
 
 # Container <span class="opacity-50">?</span>
 
 <div class="flex items-center justify-center gap-8 mt-2">
-  <div class="card glow text-center"><div class="text-5xl"><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /></div><div class="font-700">image</div></div>
+  <div class="card glow text-center"><div class="text-5xl"><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /></div><div class="font-700">image</div></div>
   <div class="arrow">→</div>
   <ContainerBig name="magic-api" :open="$clicks >= 1" :width="400" />
 </div>
@@ -585,7 +583,7 @@ docker exec byd cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /></span> <b>image: alpine</b></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /></span> <b>image: alpine</b></div>
   <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
 
   <div class="grid grid-cols-2 gap-3 w-full">
@@ -651,7 +649,7 @@ docker exec tesla cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-seal.png" style="height:1.3em;width:1.3em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.3em" /></span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/stamp.svg" style="height:1.6em;width:auto;display:inline-block;vertical-align:-0.4em" /></span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
