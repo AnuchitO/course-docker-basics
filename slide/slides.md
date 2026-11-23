@@ -446,22 +446,17 @@ CMD ["./api"]
 ```
 ````
 
-<div v-click class="mt-4 text-center opacity-70">each instruction → one layer of the <b>image</b></div>
+<div v-click class="mt-3 text-center opacity-70">each instruction → one layer of the <b>image</b></div>
 
----
-layout: center
-class: text-center
----
-
-# Choose the right tool
-
-<div class="grid grid-cols-3 gap-6 mt-10">
-  <div v-click class="card"><div class="text-4xl">🟩</div><div class="font-700 mt-1">FROM node</div><div class="opacity-60 text-sm">JavaScript</div></div>
-  <div v-click class="card"><div class="text-4xl">🐍</div><div class="font-700 mt-1">FROM python</div><div class="opacity-60 text-sm">Data / scripts</div></div>
-  <div v-click class="card"><div class="text-4xl">🐹</div><div class="font-700 mt-1">FROM golang</div><div class="opacity-60 text-sm">Services</div></div>
+<div v-click class="mt-4 pt-3" style="border-top: 1px solid var(--card-line)">
+  <div class="text-center font-700 mb-2">Choose the right tool: pick the base image that fits your job</div>
+  <div class="grid grid-cols-3 gap-4">
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🟩</span><div><div class="font-700">FROM node</div><div class="small">JavaScript</div></div></div>
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🐍</span><div><div class="font-700">FROM python</div><div class="small">Data / scripts</div></div></div>
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🐹</span><div><div class="font-700">FROM golang</div><div class="small">Services</div></div></div>
+  </div>
+  <div class="mt-2 text-center small">then add what you need on top</div>
 </div>
-
-<div v-click class="mt-8 opacity-70">Pick the base image that fits your job — then add what you need on top.</div>
 
 ---
 
