@@ -280,10 +280,10 @@ layout: center
 
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 1</div>
-    <div class="text-3xl font-800 mt-1">Write</div>
+    <div class="text-3xl font-800 mt-1">Dockerfile</div>
     <div class="h-24 flex items-center justify-center"><DockerfileIcon /></div>
     <div class="text-sm">List what your app needs, in a <b>text file</b>.</div>
-    <div class="mt-auto pt-3"><span class="chip">a Dockerfile</span></div>
+    <div class="mt-auto pt-3"><span class="chip">Write</span></div>
   </div>
 
   <div v-click class="text-center self-center" style="width: 8.5rem">
@@ -294,10 +294,10 @@ layout: center
 
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
-    <div class="text-3xl font-800 mt-1">Pack</div>
+    <div class="text-3xl font-800 mt-1">Image</div>
     <div class="h-24 flex items-center justify-center"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
     <div class="text-sm">Everything goes into <b>one sealed box</b>.</div>
-    <div class="mt-auto pt-3"><span class="chip">an Image</span></div>
+    <div class="mt-auto pt-3"><span class="chip">Pack</span></div>
   </div>
 
   <div v-click class="text-center self-center" style="width: 8.5rem">
@@ -308,10 +308,10 @@ layout: center
 
   <div v-click class="card glow text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 3</div>
-    <div class="text-3xl font-800 mt-1">Start</div>
+    <div class="text-3xl font-800 mt-1">Container</div>
     <div class="h-24 flex items-center justify-center gap-1" style="zoom: .7"><Ctr v-for="n in 3" :key="n" /></div>
     <div class="text-sm">Open the box and your app <b>runs</b>. Open as many as you like.</div>
-    <div class="mt-auto pt-3"><span class="chip">a Container</span></div>
+    <div class="mt-auto pt-3"><span class="chip">Start</span></div>
   </div>
 
 </div>
