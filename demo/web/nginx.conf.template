@@ -1,0 +1,12 @@
+server {
+  listen 80;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # forward /api to the API. ${API_URL} is filled in from the environment when the container starts
+  location /api/ {
+    proxy_pass ${API_URL};
+    proxy_set_header Host $http_host;               # keeps the port, so the API can build links like http://host:3000/api/r/abc
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
