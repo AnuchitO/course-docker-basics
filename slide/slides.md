@@ -162,34 +162,39 @@ class: text-center
 
 <div class="text-xl opacity-80">To ship anything overseas, <b>make it fit inside a standard container</b>.</div>
 
-<div class="mt-5 flex flex-col gap-4">
+<div class="mt-4 flex flex-col gap-3">
 
 <div v-click class="flex items-center gap-4">
   <div class="w-24 text-right font-700 opacity-70">On the sea</div>
   <div class="card w-64 text-center"><div class="text-3xl">☕ 🚗 👕</div><div class="small">coffee, cars, clothes: anything</div></div>
   <div class="arrow">→</div>
-  <div class="card glow w-48 text-center"><div class="text-4xl">📦</div><div class="font-700">Container</div><div class="small">same size, sealed</div></div>
+  <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Container</div><div class="small">same size, sealed</div></div>
   <div class="arrow">→</div>
-  <div class="card w-64 text-center"><div class="text-3xl">🚢 🚚 🚂</div><div class="small">any ship, truck or train</div></div>
+  <div class="card text-center" style="width: 21rem; padding: .6rem">
+    <div class="grid grid-cols-3 gap-2"><img src="/img/photo-ship.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-truck.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /><img src="/img/photo-train.jpg" style="border-radius:8px; height: 5rem; width: 100%; object-fit: cover" /></div>
+    <div class="small mt-1">any ship, truck or train</div>
+  </div>
 </div>
 
 <div v-click class="flex items-center gap-4">
-  <div class="w-24 text-right font-700" style="color: var(--blue)">In software</div>
+  <div class="w-24 text-right font-700" style="color: var(--blue)">Software</div>
   <div class="card w-64 text-center"><div class="text-3xl">🧩 🔧 ⚙️</div><div class="small">your app, its tools, its settings</div></div>
   <div class="arrow">→</div>
-  <div class="card glow w-48 text-center"><div class="text-4xl">📦</div><div class="font-700">Docker container</div><div class="small">same shape, sealed</div></div>
+  <div class="card glow w-56 text-center"><div class="text-4xl">📦</div><div class="font-700">Docker container</div><div class="small">same shape, sealed</div></div>
   <div class="arrow">→</div>
-  <div class="card w-64 text-center"><div class="text-3xl">💻 🏢 ☁️</div><div class="small">any laptop, server or cloud</div></div>
+  <div class="card text-center" style="width: 21rem"><div class="text-3xl">💻 🏢 ☁️</div><div class="small">any laptop, server or cloud</div></div>
 </div>
 
 </div>
 
-<div v-click class="mt-6 grid grid-cols-2 gap-5">
+<div v-click class="mt-4 grid grid-cols-2 gap-5">
   <div class="card"><b>The crane doesn't care what's inside.</b><div class="small">It only needs the box to be the standard size.</div></div>
   <div class="card"><b>🐳 Docker is the ship.</b><div class="small">Any computer with Docker can carry and run any container.</div></div>
 </div>
 
-<div v-click class="mt-5 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
+<div v-click class="mt-3 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
+
+<div class="abs-bl m-4 text-xs opacity-50">Photos: Petar Milošević (CC BY-SA 4.0), Tumwinekenneth (CC BY-SA 4.0), Virtual-Pano (CC BY 4.0), via Wikimedia Commons</div>
 
 ---
 layout: center
