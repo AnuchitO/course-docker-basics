@@ -158,32 +158,38 @@ class: text-center
 
 ---
 
-# The idea: ship it in a sealed box
+# The idea: a shipping container
 
-<div class="text-xl opacity-80">Don't send just the program. Send the program <b>with everything it needs</b>.</div>
+<div class="text-xl opacity-80">To ship anything overseas, <b>make it fit inside a standard container</b>.</div>
 
-<div class="flex items-center justify-center gap-8 mt-6">
-  <div v-click class="card glow text-center w-60">
-    <div class="text-6xl">📦</div>
-    <div class="font-700 text-lg mt-1">One sealed box</div>
-    <div class="small">your app + its tools + its settings</div>
-  </div>
-  <div v-click class="arrow">→</div>
-  <div v-click>
-    <div class="grid grid-cols-5 gap-3">
-      <Ctr v-for="n in 15" :key="n" />
-    </div>
-    <div class="mt-3 text-center"><span class="label-good">✅ all 100 behave the same</span></div>
-  </div>
+<div class="mt-5 flex flex-col gap-4">
+
+<div v-click class="flex items-center gap-4">
+  <div class="w-24 text-right font-700 opacity-70">On the sea</div>
+  <div class="card w-64 text-center"><div class="text-3xl">☕ 🚗 👕</div><div class="small">coffee, cars, clothes: anything</div></div>
+  <div class="arrow">→</div>
+  <div class="card glow w-48 text-center"><div class="text-4xl">📦</div><div class="font-700">Container</div><div class="small">same size, sealed</div></div>
+  <div class="arrow">→</div>
+  <div class="card w-64 text-center"><div class="text-3xl">🚢 🚚 🚂</div><div class="small">any ship, truck or train</div></div>
 </div>
 
-<div v-click class="grid grid-cols-3 gap-5 mt-8">
-  <div class="card"><div class="font-700">📄 Dockerfile</div><div class="small">the <b>recipe</b> for the box</div></div>
-  <div class="card"><div class="font-700">📦 Image</div><div class="small">the <b>sealed box</b>, packed once</div></div>
-  <div class="card"><div class="font-700">▶️ Container</div><div class="small">a box that is <b>opened and running</b></div></div>
+<div v-click class="flex items-center gap-4">
+  <div class="w-24 text-right font-700" style="color: var(--blue)">In software</div>
+  <div class="card w-64 text-center"><div class="text-3xl">🧩 🔧 ⚙️</div><div class="small">your app, its tools, its settings</div></div>
+  <div class="arrow">→</div>
+  <div class="card glow w-48 text-center"><div class="text-4xl">📦</div><div class="font-700">Docker container</div><div class="small">same shape, sealed</div></div>
+  <div class="arrow">→</div>
+  <div class="card w-64 text-center"><div class="text-3xl">💻 🏢 ☁️</div><div class="small">any laptop, server or cloud</div></div>
 </div>
 
-<div v-click class="mt-6 text-center big-line">The setup travels <span class="gradient-text">with</span> the program.</div>
+</div>
+
+<div v-click class="mt-6 grid grid-cols-2 gap-5">
+  <div class="card"><b>The crane doesn't care what's inside.</b><div class="small">It only needs the box to be the standard size.</div></div>
+  <div class="card"><b>🐳 Docker is the ship.</b><div class="small">Any computer with Docker can carry and run any container.</div></div>
+</div>
+
+<div v-click class="mt-5 text-center big-line">Fit it in the box once. <span class="gradient-text">Ship it anywhere.</span></div>
 
 ---
 layout: center
