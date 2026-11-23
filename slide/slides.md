@@ -463,17 +463,20 @@ docker run hello-world
     <div class="small mb-1"><b>1</b> · Start two containers from the same image</div>
 
 ```bash
-docker run -d --name a alpine sleep 3600
-docker run -d --name b alpine sleep 3600
+docker run -d --name alice \
+  alpine sleep 3600
+docker run -d --name bob \
+  alpine sleep 3600
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>2</b> · Write a file inside <code>a</code> only</div>
+    <div class="small mb-1"><b>2</b> · Write a file inside <code>alice</code> only</div>
 
 ```bash
-docker exec a sh -c "echo hi > /note.txt"
+docker exec alice sh -c \
+  "echo hi > /note.txt"
 ```
 
   </div>
@@ -482,8 +485,8 @@ docker exec a sh -c "echo hi > /note.txt"
     <div class="small mb-1"><b>3</b> · Look for the file in each one</div>
 
 ```bash
-docker exec a cat /note.txt
-docker exec b cat /note.txt
+docker exec alice cat /note.txt
+docker exec bob cat /note.txt
 ```
 
   </div>
@@ -497,13 +500,13 @@ docker exec b cat /note.txt
 
   <div class="grid grid-cols-2 gap-3 w-full">
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>a</code></div>
+      <div class="font-700">container <code>alice</code></div>
       <div v-click="2" class="mt-2 text-3xl">📄</div>
       <div v-click="2" class="small"><code>note.txt</code></div>
       <div v-click="3" class="label-good mt-1">✅ finds it</div>
     </div>
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>b</code></div>
+      <div class="font-700">container <code>bob</code></div>
       <div v-click="2" class="mt-2 text-3xl opacity-30">🫙</div>
       <div v-click="2" class="small">untouched</div>
       <div v-click="3" class="label-bad mt-1">❌ not found</div>
@@ -527,19 +530,20 @@ docker exec b cat /note.txt
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>4</b> · Throw <code>a</code> away</div>
+    <div class="small mb-1"><b>4</b> · Throw <code>alice</code> away</div>
 
 ```bash
-docker rm -f a
+docker rm -f alice
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>5</b> · Start a new <code>a</code> from the same image</div>
+    <div class="small mb-1"><b>5</b> · Start a new <code>alice</code> from the same image</div>
 
 ```bash
-docker run -d --name a alpine sleep 3600
+docker run -d --name alice \
+  alpine sleep 3600
 ```
 
   </div>
@@ -548,7 +552,7 @@ docker run -d --name a alpine sleep 3600
     <div class="small mb-1"><b>6</b> · Look for the file again</div>
 
 ```bash
-docker exec a cat /note.txt
+docker exec alice cat /note.txt
 ```
 
   </div>
@@ -561,13 +565,13 @@ docker exec a cat /note.txt
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
-      <div class="font-700">old <code>a</code></div>
+      <div class="font-700">old <code>alice</code></div>
       <div class="text-3xl mt-1">📄</div>
       <div class="small"><code>note.txt</code></div>
     </div>
     <div v-click="1" class="text-3xl">🗑️</div>
     <div v-click="2" class="card text-center">
-      <div class="font-700">new <code>a</code></div>
+      <div class="font-700">new <code>alice</code></div>
       <div class="text-3xl mt-1 opacity-30">🫙</div>
       <div v-click="3" class="label-bad mt-1">❌ file gone</div>
     </div>
@@ -579,7 +583,7 @@ docker exec a cat /note.txt
 
 <div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f a b</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f alice bob</code></div>
 
 ---
 
