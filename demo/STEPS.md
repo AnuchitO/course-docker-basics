@@ -43,3 +43,18 @@ docker images magic-web
 **See:** after `docker restart web`, http://localhost:3000 still has **3** colours (the file was copied into the image at build time). After the rebuild and `magic-web:v2`, it has **4**. `docker images magic-web` lists two images, `latest` (old) and `v2` (new). Save still says "API not reachable": that is why Step 2 adds the API.
 
 ---
+
+---
+
+## Step 2: a second container, the API
+
+**Intent:** a Go service builds and verifies the QR code. Run it as another container and publish port 8080 to your laptop.
+
+```bash
+docker build -t magic-api ./api
+docker run -d --name api -p 8080:8080 magic-api
+curl localhost:8080/api/health
+```
+
+**See:** `{"db":"not connected","host":"<container id>","status":"ok"}`. The API runs without a database for now.
+The web page does not use it: `curl -i localhost:3000/api/health` is still `404`. The two containers don't know each other.
