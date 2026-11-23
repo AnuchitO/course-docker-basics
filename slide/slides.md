@@ -148,38 +148,6 @@ class: text-center
 
 ---
 
-# What Docker gives you
-
-<div class="grid grid-cols-2 gap-6 mt-8">
-
-<div v-click class="card">
-  <div class="text-3xl">🤷</div>
-  <div class="font-700 text-lg mt-1">"It works on my machine"</div>
-  <div class="opacity-60 text-sm">Different OS, versions and settings between Dev, QA and Prod.</div>
-</div>
-
-<div v-click class="card">
-  <div class="text-3xl">📦</div>
-  <div class="font-700 text-lg mt-1">Same environment everywhere</div>
-  <div class="opacity-60 text-sm">Package the app and everything it needs, run it anywhere.</div>
-</div>
-
-<div v-click class="card">
-  <div class="text-3xl">🧹</div>
-  <div class="font-700 text-lg mt-1">Clean &amp; disposable</div>
-  <div class="opacity-60 text-sm">Break it? Remove it and start again in seconds.</div>
-</div>
-
-<div v-click class="card">
-  <div class="text-3xl">🚀</div>
-  <div class="font-700 text-lg mt-1">Fast onboarding</div>
-  <div class="opacity-60 text-sm">New teammate or tester runs the whole stack with one command.</div>
-</div>
-
-</div>
-
----
-
 # The problem, in plain words
 
 <div class="text-xl opacity-80">Same program. Different computers. <b>Different results.</b></div>
