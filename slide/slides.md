@@ -123,23 +123,6 @@ ln -sfn $(which docker-compose) .
 <div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">appears on every hands-on step. Pause the video, run it, then press play.</span></div>
 
 ---
-layout: center
-class: text-center
----
-
-<h1 style="border-left: none; padding-left: 0">Meet <span class="gradient-text">Magic Tree</span> 🌳</h1>
-
-<div class="opacity-70 mt-2">Paste a link, get a QR code that grows from a tree. We will build it <b>one container at a time</b>.</div>
-
-<div class="flex items-center justify-center gap-5 mt-10">
-  <div v-click class="card text-center w-44"><div class="text-4xl">🌐</div><div class="font-700">web</div><div class="opacity-60 text-xs">the page (nginx)</div></div>
-  <div v-click class="arrow">→</div>
-  <div v-click class="card text-center w-44"><div class="text-4xl">⚙️</div><div class="font-700">api</div><div class="opacity-60 text-xs">makes the QR (Go)</div></div>
-  <div v-click class="arrow">→</div>
-  <div v-click class="card glow text-center w-44"><div class="text-4xl">🐘</div><div class="font-700">db</div><div class="opacity-60 text-xs">colours &amp; shares (Postgres)</div></div>
-</div>
-
----
 
 # Tour · The tree is the code
 
@@ -196,6 +179,54 @@ class: text-center
 </div>
 
 <div v-click class="mt-4 text-center text-lg">These two need to <b>remember things</b>, so they need the <span class="gradient-text font-700">database</span>. That is Step 4.</div>
+
+---
+
+# Meet the app: three containers
+
+<div class="text-xl opacity-80">Paste a link, get a QR code that grows from a tree. <b>Each job runs in its own container.</b></div>
+
+<div class="grid grid-cols-[auto_auto_1fr_auto_1fr_auto_1fr] items-center gap-2 mt-8">
+
+  <div class="text-center" style="width: 6rem">
+    <div class="text-5xl">🧑</div>
+    <div class="font-700 mt-1">You</div>
+    <div class="small">in a browser</div>
+  </div>
+
+  <div v-click class="arrow">→</div>
+
+  <div v-click class="card text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">CONTAINER 1</div>
+    <div class="text-4xl mt-1">🌐</div>
+    <div class="text-2xl font-800">web</div>
+    <div class="text-sm mt-1"><b>Shows the page</b> and the growing tree.</div>
+    <div class="mt-auto pt-3"><span class="chip">nginx</span></div>
+  </div>
+
+  <div v-click class="arrow">→</div>
+
+  <div v-click class="card text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">CONTAINER 2</div>
+    <div class="text-4xl mt-1">⚙️</div>
+    <div class="text-2xl font-800">api</div>
+    <div class="text-sm mt-1"><b>Works out the QR code</b> from your link.</div>
+    <div class="mt-auto pt-3"><span class="chip">Go</span></div>
+  </div>
+
+  <div v-click class="arrow">→</div>
+
+  <div v-click class="card glow text-center min-w-0 flex flex-col">
+    <div class="text-sm font-700" style="color: var(--m)">CONTAINER 3</div>
+    <div class="text-4xl mt-1">🐘</div>
+    <div class="text-2xl font-800">db</div>
+    <div class="text-sm mt-1"><b>Remembers</b> saved trees and the gallery.</div>
+    <div class="mt-auto pt-3"><span class="chip">Postgres</span></div>
+  </div>
+
+</div>
+
+<div v-click class="mt-8 text-center big-line">We will build it <span class="gradient-text">one container at a time</span>.</div>
 
 ---
 layout: center
