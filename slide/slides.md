@@ -235,34 +235,42 @@ layout: center
 
 <div class="text-xl opacity-80">Three steps. <b>Write it, pack it, start it.</b></div>
 
-<div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-3 mt-6">
+<div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-2 mt-6">
 
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 1</div>
     <div class="text-3xl font-800 mt-1">Write</div>
     <div class="h-24 flex items-center justify-center"><DockerfileIcon /></div>
     <div class="text-sm">List what your app needs, in a <b>text file</b>.</div>
-    <div class="mt-auto pt-3"><span class="chip">Docker calls it a Dockerfile</span></div>
+    <div class="mt-auto pt-3"><span class="chip">a Dockerfile</span></div>
   </div>
 
-  <div v-click class="arrow self-center">→</div>
+  <div v-click class="text-center self-center" style="width: 8.5rem">
+    <div class="small">then</div>
+    <div class="chip mt-1" style="font-size: 1rem; border-color: var(--m)">docker build</div>
+    <div class="arrow">→</div>
+  </div>
 
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
     <div class="text-3xl font-800 mt-1">Pack</div>
     <div class="h-24 flex items-center justify-center"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
-    <div class="text-sm">Docker packs it all into <b>one sealed box</b>.</div>
-    <div class="mt-auto pt-3"><span class="chip">That box is an Image</span><div class="small mt-1">type: <code>docker build</code></div></div>
+    <div class="text-sm">Everything goes into <b>one sealed box</b>.</div>
+    <div class="mt-auto pt-3"><span class="chip">an Image</span></div>
   </div>
 
-  <div v-click class="arrow self-center">→</div>
+  <div v-click class="text-center self-center" style="width: 8.5rem">
+    <div class="small">then</div>
+    <div class="chip mt-1" style="font-size: 1rem; border-color: var(--m)">docker run</div>
+    <div class="arrow">→</div>
+  </div>
 
   <div v-click class="card glow text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 3</div>
     <div class="text-3xl font-800 mt-1">Start</div>
-    <div class="h-24 flex items-center justify-center gap-1" style="zoom: .8"><Ctr v-for="n in 3" :key="n" /></div>
+    <div class="h-24 flex items-center justify-center gap-1" style="zoom: .7"><Ctr v-for="n in 3" :key="n" /></div>
     <div class="text-sm">Open the box and your app <b>runs</b>. Open as many as you like.</div>
-    <div class="mt-auto pt-3"><span class="chip">A running box is a Container</span><div class="small mt-1">type: <code>docker run</code></div></div>
+    <div class="mt-auto pt-3"><span class="chip">a Container</span></div>
   </div>
 
 </div>
