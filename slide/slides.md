@@ -384,7 +384,7 @@ layout: center
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
     <div class="text-3xl font-800 mt-1">Image</div>
-    <div class="h-24 flex items-center justify-center"><img src="/img/photo-containers.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/photo-box.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
     <div class="text-sm">Everything goes into <b>one sealed box</b>.</div>
     <div class="mt-auto pt-3"><span class="chip">Pack</span></div>
   </div>
@@ -408,6 +408,8 @@ layout: center
 <div v-click class="mt-8 text-center text-xl">
   <b>Dockerfile</b> = the instructions &nbsp;·&nbsp; <b>Image</b> = the packed box &nbsp;·&nbsp; <b>Container</b> = the box, running
 </div>
+
+<div class="abs-bl m-2 text-xs opacity-50">Box photo: HireAHelper via Wikimedia Commons (CC BY 2.0)</div>
 
 ---
 
