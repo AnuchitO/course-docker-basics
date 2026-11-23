@@ -324,7 +324,7 @@ class: text-center
   <div class="flex items-center gap-6">
     <div class="flex flex-col gap-2">
       <div v-click class="chip">📄 Dockerfile</div>
-      <div v-click class="chip"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /> image</div>
+      <div v-click class="chip flex-col" style="padding: .4rem .6rem; border-radius: 12px"><img src="/img/photo-stamp.jpg" style="height: 5.5rem; width: 5.5rem; object-fit: cover; border-radius: 8px" /><span class="mt-1">image</span></div>
     </div>
     <div v-click class="arrow">→</div>
     <div class="grid grid-cols-3 gap-3">
@@ -351,7 +351,7 @@ class: text-center
           v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
           :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
     <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
-    <div class="chip"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /> image</div><Ctr />
+    <div class="chip" style="padding: .2rem .6rem .2rem .25rem"><img src="/img/photo-stamp.jpg" style="height: 2.2rem; width: 2.2rem; object-fit: cover; border-radius: 6px; display: inline-block; vertical-align: middle; margin-right: .4rem" />image</div><Ctr />
   </Laptop>
 </div>
 
