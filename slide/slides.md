@@ -411,36 +411,6 @@ layout: center
 
 ---
 
-# Image <span class="opacity-50">?</span>
-
-<div class="grid grid-cols-2 gap-12 mt-4 items-center">
-
-<div>
-
-<div class="text-2xl font-700 leading-snug">A <span class="gradient-text">recipe</span> your app needs,<br>baked into <b>layers</b>.</div>
-
-<div class="mt-6 flex flex-col gap-4">
-  <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
-  <div v-click="6" class="flex items-center gap-3"><span class="text-3xl">📤</span><div><b>Shareable</b><div class="small">push it once, pull it anywhere</div></div></div>
-  <div v-click="7" class="flex items-center gap-3"><span class="text-3xl">♻️</span><div><b>Reusable</b><div class="small">one image → as many containers as you like</div></div></div>
-</div>
-
-</div>
-
-<div class="relative">
-  <div v-click="5" class="image-tag"><span>💿</span> magic-api:1.0</div>
-  <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
-    <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
-    <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
-    <div v-click="3" class="layer l3"><span class="who">your code</span><code>COPY . .</code></div>
-    <div v-click="4" class="layer l4"><span class="who">build</span><code>RUN go build -o api .</code></div>
-  </div>
-</div>
-
-</div>
-
----
-
 # Dockerfile <span class="opacity-50">?</span>
 
 A text file of instructions that **builds an image**.
@@ -490,6 +460,36 @@ class: text-center
 </div>
 
 <div v-click class="mt-8 opacity-70">Pick the base image that fits your job — then add what you need on top.</div>
+
+---
+
+# Image <span class="opacity-50">?</span>
+
+<div class="grid grid-cols-2 gap-12 mt-4 items-center">
+
+<div>
+
+<div class="text-2xl font-700 leading-snug">A <span class="gradient-text">recipe</span> your app needs,<br>baked into <b>layers</b>.</div>
+
+<div class="mt-6 flex flex-col gap-4">
+  <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
+  <div v-click="6" class="flex items-center gap-3"><span class="text-3xl">📤</span><div><b>Shareable</b><div class="small">push it once, pull it anywhere</div></div></div>
+  <div v-click="7" class="flex items-center gap-3"><span class="text-3xl">♻️</span><div><b>Reusable</b><div class="small">one image → as many containers as you like</div></div></div>
+</div>
+
+</div>
+
+<div class="relative">
+  <div v-click="5" class="image-tag"><span>💿</span> magic-api:1.0</div>
+  <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
+    <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
+    <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
+    <div v-click="3" class="layer l3"><span class="who">your code</span><code>COPY . .</code></div>
+    <div v-click="4" class="layer l4"><span class="who">build</span><code>RUN go build -o api .</code></div>
+  </div>
+</div>
+
+</div>
 
 ---
 
