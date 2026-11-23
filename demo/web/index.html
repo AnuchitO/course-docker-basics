@@ -178,6 +178,7 @@
 <div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -839,8 +840,15 @@ async function regenerate(){
     currentQR = fromMatrix(d.matrix); build(currentQR);
   }catch(e){
     if(id !== reqId) return;
-    err.textContent = e.message;
-    if(!currentQR){ currentQR = emptyQR; build(currentQR); }
+    // API down: the page still works. Build the code in the browser (same level Q, but not decoded back to verify it).
+    try{
+      const q = qrcode(0, 'Q'); q.addData(text); q.make();
+      err.textContent = '';
+      currentQR = q; build(currentQR);
+    }catch(_){
+      err.textContent = e.message;
+      if(!currentQR){ currentQR = emptyQR; build(currentQR); }
+    }
   }
 }
 function rebuildLook(){ if(currentQR) build(currentQR); }
