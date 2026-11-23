@@ -827,6 +827,38 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 ---
 
+# The same thing, written down
+
+<div class="text-lg opacity-80">Every flag you typed has a line in the <b>compose file</b>. <span class="opacity-70">(you will use it in Step 6)</span></div>
+
+<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-2 mt-3">
+
+  <div class="text-center font-700 opacity-70">On the command line</div><div></div><div class="text-center font-700 opacity-70">In <code>docker-compose.yml</code></div>
+
+  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t magic-web ./web</code><span class="small">make the image</span></div></div>
+  <div v-click="1" class="arrow">→</div>
+  <div v-click="1"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>build: ./web</code><span class="small">same folder, same Dockerfile</span></div></div>
+
+  <div v-click="2"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--name web</code><span class="small">name the container</span></div></div>
+  <div v-click="2" class="arrow">→</div>
+  <div v-click="2"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>web:</code><span class="small">the service name</span></div></div>
+
+  <div v-click="3"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>-p 3000:80</code><span class="small">open a door to your browser</span></div></div>
+  <div v-click="3" class="arrow">→</div>
+  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>ports: ["3000:80"]</code><span class="small">same two numbers</span></div></div>
+
+  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--network magic</code><span class="small">connect the containers</span></div></div>
+  <div v-click="4" class="arrow">→</div>
+  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>nothing to write</b><span class="small">Compose makes the network</span></div></div>
+
+  <div v-click="5"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker run -d …</code><span class="small">once per container</span></div></div>
+  <div v-click="5" class="arrow">→</div>
+  <div v-click="5"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker compose up</code><span class="small">starts all of them together</span></div></div>
+
+</div>
+
+---
+
 # Step 4 · Add the database
 
 <Stepper :n="4" class="absolute top-6 right-10" />
