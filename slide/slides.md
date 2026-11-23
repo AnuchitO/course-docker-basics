@@ -453,7 +453,7 @@ docker run hello-world
 
 # Containers are isolated
 
-<div class="text-lg opacity-80">Same image (a web server), two copies running. <b>Changing one does not touch the other.</b></div>
+<div class="text-lg opacity-80">Same image, two containers. <b>Changing one does not touch the other.</b></div>
 
 <div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
@@ -463,17 +463,20 @@ docker run hello-world
     <div class="small mb-1"><b>1</b> · Start two containers from the same image</div>
 
 ```bash
-docker run -d --name web1 nginx
-docker run -d --name web2 nginx
+docker run -d --name tesla \
+  alpine sleep 3600
+docker run -d --name toyota \
+  alpine sleep 3600
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>2</b> · Write a file inside <code>web1</code> only</div>
+    <div class="small mb-1"><b>2</b> · Write a file inside <code>tesla</code> only</div>
 
 ```bash
-docker exec web1 sh -c "echo hi > /note.txt"
+docker exec tesla sh -c \
+  "echo hi > /note.txt"
 ```
 
   </div>
@@ -482,8 +485,8 @@ docker exec web1 sh -c "echo hi > /note.txt"
     <div class="small mb-1"><b>3</b> · Look for the file in each one</div>
 
 ```bash
-docker exec web1 cat /note.txt
-docker exec web2 cat /note.txt
+docker exec tesla cat /note.txt
+docker exec toyota cat /note.txt
 ```
 
   </div>
@@ -492,18 +495,18 @@ docker exec web2 cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: nginx</b></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b></div>
   <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
 
   <div class="grid grid-cols-2 gap-3 w-full">
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>web1</code></div>
+      <div class="font-700">container <code>tesla</code></div>
       <div v-click="2" class="mt-2 text-3xl">📄</div>
       <div v-click="2" class="small"><code>note.txt</code></div>
       <div v-click="3" class="label-good mt-1">✅ finds it</div>
     </div>
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>web2</code></div>
+      <div class="font-700">container <code>toyota</code></div>
       <div v-click="2" class="mt-2 text-3xl opacity-30">🫙</div>
       <div v-click="2" class="small">untouched</div>
       <div v-click="3" class="label-bad mt-1">❌ not found</div>
@@ -527,19 +530,20 @@ docker exec web2 cat /note.txt
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>4</b> · Throw <code>web1</code> away</div>
+    <div class="small mb-1"><b>4</b> · Throw <code>tesla</code> away</div>
 
 ```bash
-docker rm -f web1
+docker rm -f tesla
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>5</b> · Start a new <code>web1</code> from the same image</div>
+    <div class="small mb-1"><b>5</b> · Start a new <code>tesla</code> from the same image</div>
 
 ```bash
-docker run -d --name web1 nginx
+docker run -d --name tesla \
+  alpine sleep 3600
 ```
 
   </div>
@@ -548,7 +552,7 @@ docker run -d --name web1 nginx
     <div class="small mb-1"><b>6</b> · Look for the file again</div>
 
 ```bash
-docker exec web1 cat /note.txt
+docker exec tesla cat /note.txt
 ```
 
   </div>
@@ -557,17 +561,17 @@ docker exec web1 cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: nginx</b> <span class="small">(never changed)</span></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
-      <div class="font-700">old <code>web1</code></div>
+      <div class="font-700">old <code>tesla</code></div>
       <div class="text-3xl mt-1">📄</div>
       <div class="small"><code>note.txt</code></div>
     </div>
     <div v-click="1" class="text-3xl">🗑️</div>
     <div v-click="2" class="card text-center">
-      <div class="font-700">new <code>web1</code></div>
+      <div class="font-700">new <code>tesla</code></div>
       <div class="text-3xl mt-1 opacity-30">🫙</div>
       <div v-click="3" class="label-bad mt-1">❌ file gone</div>
     </div>
@@ -579,7 +583,7 @@ docker exec web1 cat /note.txt
 
 <div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f web1 web2</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f tesla toyota</code></div>
 
 ---
 
