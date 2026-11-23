@@ -98,3 +98,25 @@ curl localhost:3000/api/health
 
 **See:** both services `running`, and `{"db":"not connected","host":"<api container id>","status":"ok"}` through port 3000.
 `curl localhost:8080/api/health` now fails: the API is private. Open http://localhost:3000: the QR code is built and verified by the API.
+
+---
+
+## Step 5: add the database, then lose the data **(fails on purpose)**
+
+**Intent:** add Postgres as a third service. The API gets `DATABASE_URL` (host `db` = the service name) and waits for the database healthcheck. `db/init.sql` is mounted so the first start creates the tables and ten example gardens.
+The gallery and the save button start working. But the data lives inside the db container.
+
+```bash
+docker compose up -d
+curl localhost:3000/api/health
+# open http://localhost:3000, press the bookmark button to save a garden, open the gallery and find it
+curl localhost:3000/api/health          # one more tree
+docker compose down
+docker compose up -d
+curl localhost:3000/api/health
+```
+
+**See:** first `"db":"connected","shared_trees":10`, then `11` after saving.
+After `down` + `up` the saved garden is **gone**: `shared_trees` is back to `10`.
+
+**Why:** `docker compose down` removes the db container, and the data lived inside it. We need a place for the data that is not the container: a volume.

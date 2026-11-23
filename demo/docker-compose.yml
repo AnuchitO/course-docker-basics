@@ -1,4 +1,4 @@
-# The same two containers, written down once: docker compose up --build
+# web + api + db on one network: docker compose up --build
 services:
   web:
     build: ./web
@@ -11,11 +11,32 @@ services:
 
   api:
     build: ./api
+    environment:
+      DATABASE_URL: postgres://magic:magic@db:5432/magictree?sslmode=disable   # "db" = the service name
+    depends_on:
+      db:
+        condition: service_healthy     # wait until Postgres accepts connections
     networks:
       magic:
         aliases:
           - api            # other containers on "magic" can reach this one as http://api:8080
     # no "ports:" any more: only the web container needs to be reachable from the laptop
+
+  db:
+    image: postgres:18-alpine3.24
+    environment:
+      POSTGRES_USER: magic
+      POSTGRES_PASSWORD: magic
+      POSTGRES_DB: magictree
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro   # creates the tables and seeds ten gardens on first start
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U magic -d magictree"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    networks:
+      - magic
 
 networks:
   magic:
