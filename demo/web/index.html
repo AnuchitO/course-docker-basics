@@ -61,6 +61,13 @@
   #url:focus{border-color:var(--accent)}
   .primary{flex:0 0 46px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer}
   .primary:hover{filter:brightness(1.08)}
+  .primary:disabled{cursor:progress;filter:none;opacity:.85}
+  .primary.ok{background:#3f7d4e}
+  .primary.fail{background:#b4442f}
+  .spin{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #toast.ok{background:#3f7d4e}
+  #toast.fail{background:#b4442f}
   .seg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0;border-radius:12px;
     border:1px solid transparent;background:rgba(255,253,248,.55);font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;transition:all .2s}
   .seg:hover{background:rgba(255,253,248,.9)}
@@ -1158,16 +1165,39 @@ document.querySelectorAll('#wall [data-fs]').forEach(b => b.addEventListener('cl
 }));
 $('#galBtn').addEventListener('click', () => { $('#wall').classList.add('open'); loadGallery(); });
 $('#wallClose').addEventListener('click', () => $('#wall').classList.remove('open'));
+const SAVE_ICONS = {
+  idle: $('#saveBtn').innerHTML,
+  loading: '<svg class="spin" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9" /></svg>',
+  ok: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  fail: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+let saveReset;
+function setSaveState(st){
+  const b = $('#saveBtn');
+  clearTimeout(saveReset);
+  b.innerHTML = SAVE_ICONS[st];
+  b.disabled = st === 'loading';
+  b.setAttribute('aria-busy', st === 'loading');
+  b.classList.toggle('ok', st === 'ok');
+  b.classList.toggle('fail', st === 'fail');
+  if(st === 'ok' || st === 'fail') saveReset = setTimeout(() => setSaveState('idle'), 2500);
+}
 $('#saveBtn').addEventListener('click', async () => {
+  if(!state.text.trim()){ setSaveState('fail'); toast('Enter a link or some text first', 3000, 'fail'); return; }
+  setSaveState('loading');
   try{
     const saved = await api('/trees', post({ url:state.text.trim(), season:state.season, swatch:state.swatch }));
     state.link = saved.link; regenerate();   // from now on the code points at our server, so its scans can be counted
-    toast('Saved. Scans of this code are now counted');
-  }catch(e){ toast(e.message, 3000); }
+    setSaveState('ok');
+    toast('Saved. Scans of this code are now counted', 2400, 'ok');
+  }catch(e){
+    setSaveState('fail');
+    toast('Could not save: ' + e.message, 4000, 'fail');
+  }
 });
 $('#infoBtn').addEventListener('click', () => openModal('#infoModal'));
 
-function toast(msg, ms=1800){ const t=$('#toast'); t.textContent=msg; t.style.opacity=1; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.opacity=0, ms); }
+function toast(msg, ms=1800, kind=''){ const t=$('#toast'); t.className=kind; t.textContent=msg; t.style.opacity=1; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.opacity=0, ms); }
 
 /* top-down snapshot of the garden, without the tree */
 let shotCanvas = null;
