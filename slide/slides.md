@@ -119,6 +119,73 @@ class: text-center
 </div>
 
 ---
+
+# The problem, in plain words
+
+<div class="text-xl opacity-80">Same program. Different computers. <b>Different results.</b></div>
+
+<div class="flex items-center justify-center gap-6 mt-8">
+
+<div class="card good text-center w-52">
+  <div class="text-5xl">💻</div>
+  <div class="font-700 mt-1">My laptop</div>
+  <div class="label-good mt-1">✅ works</div>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flex flex-col gap-3">
+  <div v-click class="card bad flex items-center gap-4 w-96">
+    <div class="text-3xl">🧑‍💻</div>
+    <div><b>Friend's laptop</b><div class="small">has an older version</div></div>
+    <div class="label-bad ml-auto">❌ breaks</div>
+  </div>
+  <div v-click class="card bad flex items-center gap-4 w-96">
+    <div class="text-3xl">🏢</div>
+    <div><b>The server</b><div class="small">is missing a piece</div></div>
+    <div class="label-bad ml-auto">❌ breaks</div>
+  </div>
+  <div v-click class="card bad flex items-center gap-4 w-96">
+    <div class="text-3xl">🧪</div>
+    <div><b>The tester's PC</b><div class="small">has different settings</div></div>
+    <div class="label-bad ml-auto">❌ breaks</div>
+  </div>
+</div>
+
+</div>
+
+<div v-click class="mt-8 text-center text-xl">Now imagine <b>100</b> computers. Nobody can keep them all the same by hand.</div>
+
+---
+
+# The idea: ship it in a sealed box
+
+<div class="text-xl opacity-80">Don't send just the program. Send the program <b>with everything it needs</b>.</div>
+
+<div class="flex items-center justify-center gap-8 mt-6">
+  <div v-click class="card glow text-center w-60">
+    <div class="text-6xl">📦</div>
+    <div class="font-700 text-lg mt-1">One sealed box</div>
+    <div class="small">your app + its tools + its settings</div>
+  </div>
+  <div v-click class="arrow">→</div>
+  <div v-click>
+    <div class="grid grid-cols-5 gap-3">
+      <Ctr v-for="n in 15" :key="n" />
+    </div>
+    <div class="mt-3 text-center"><span class="label-good">✅ all 100 behave the same</span></div>
+  </div>
+</div>
+
+<div v-click class="grid grid-cols-3 gap-5 mt-8">
+  <div class="card"><div class="font-700">📄 Dockerfile</div><div class="small">the <b>recipe</b> for the box</div></div>
+  <div class="card"><div class="font-700">📦 Image</div><div class="small">the <b>sealed box</b>, packed once</div></div>
+  <div class="card"><div class="font-700">▶️ Container</div><div class="small">a box that is <b>opened and running</b></div></div>
+</div>
+
+<div v-click class="mt-6 text-center big-line">The setup travels <span class="gradient-text">with</span> the program.</div>
+
+---
 layout: center
 ---
 
@@ -285,6 +352,105 @@ class: text-center
 </div>
 
 <div v-click class="mt-4 text-center text-xl">Six laptops · one image · <span class="gradient-text font-700">identical behaviour</span></div>
+
+---
+
+# Hello Docker <span class="opacity-50">· containers are stateless</span>
+
+<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-2">
+
+<div>
+
+<div class="font-700 mb-1">1 · Say hello</div>
+
+```bash
+docker run hello-world
+```
+
+<div class="font-700 mt-4 mb-1">2 · Make a file inside a container</div>
+
+```bash
+docker run --name first alpine sh -c "echo hi > /note.txt && cat /note.txt"
+```
+
+<div class="font-700 mt-4 mb-1">3 · Look for it in a new container</div>
+
+```bash
+docker run --name second alpine cat /note.txt
+```
+
+<div class="mt-3"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div>
+
+<div v-click class="see">
+  <div class="h">YOU SHOULD SEE</div>
+  <div>Step 1: a "Hello from Docker!" message, then the container <b>stops</b>.</div>
+  <div class="mt-2">Step 2 prints <code>hi</code>.</div>
+  <div class="mt-2">Step 3 fails:</div>
+  <div class="out mt-1">cat: can't open '/note.txt': No such file or directory</div>
+</div>
+
+<div v-click class="card mt-4">
+  <div class="font-700">🧽 Stateless</div>
+  <div class="small">Every container starts fresh from its image. What one container writes is not there in the next.</div>
+</div>
+
+<div v-click class="mt-4 small">Clean up: <code>docker rm first second</code></div>
+
+</div>
+
+</div>
+
+---
+
+# Keep it running
+
+<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-2">
+
+<div>
+
+<div class="small mb-2"><code>hello-world</code> stopped by itself: it had nothing left to do. A server keeps working, so run it <b>in the background</b>.</div>
+
+```bash {1|2|3|4|5}
+docker run -d --name web -p 8080:80 nginx
+docker ps
+docker logs web
+docker stop web
+docker start web
+```
+
+<div class="mt-3"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div>
+
+<div class="card">
+  <div><code>-d</code> <b>detached</b>: runs in the background, you get your terminal back</div>
+  <div class="mt-2"><code>docker ps</code> lists what is running</div>
+  <div class="mt-2"><code>docker stop</code> / <code>start</code> pause and resume the same container</div>
+</div>
+
+<div v-click class="see mt-4">
+  <div class="h">YOU SHOULD SEE</div>
+  Open <b>http://localhost:8080</b>: "Welcome to nginx!"
+</div>
+
+<div v-click class="mt-4">
+  <div class="small mb-1">Come back after a reboot or crash:</div>
+
+```bash
+docker run -d --restart unless-stopped --name web2 -p 8081:80 nginx
+```
+
+</div>
+
+</div>
+
+</div>
 
 ---
 
