@@ -451,49 +451,135 @@ docker run hello-world
 
 ---
 
+# Containers are isolated
+
+<div class="text-lg opacity-80">Same image, two containers. <b>Changing one does not touch the other.</b></div>
+
+<div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
+
+<div class="min-w-0 flex flex-col gap-2">
+
+  <div v-click="1">
+    <div class="small mb-1"><b>1</b> · Start two containers from the same image</div>
+
+```bash
+docker run -d --name a alpine sleep 3600
+docker run -d --name b alpine sleep 3600
+```
+
+  </div>
+
+  <div v-click="2">
+    <div class="small mb-1"><b>2</b> · Write a file inside <code>a</code> only</div>
+
+```bash
+docker exec a sh -c "echo hi > /note.txt"
+```
+
+  </div>
+
+  <div v-click="3">
+    <div class="small mb-1"><b>3</b> · Look for the file in each one</div>
+
+```bash
+docker exec a cat /note.txt
+docker exec b cat /note.txt
+```
+
+  </div>
+
+</div>
+
+<div class="min-w-0 flex flex-col items-center gap-2">
+
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b></div>
+  <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
+
+  <div class="grid grid-cols-2 gap-3 w-full">
+    <div v-click="1" class="card text-center">
+      <div class="font-700">container <code>a</code></div>
+      <div v-click="2" class="mt-2 text-3xl">📄</div>
+      <div v-click="2" class="small"><code>note.txt</code></div>
+      <div v-click="3" class="label-good mt-1">✅ finds it</div>
+    </div>
+    <div v-click="1" class="card text-center">
+      <div class="font-700">container <code>b</code></div>
+      <div v-click="2" class="mt-2 text-3xl opacity-30">🫙</div>
+      <div v-click="2" class="small">untouched</div>
+      <div v-click="3" class="label-bad mt-1">❌ not found</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<div v-click="3" class="mt-3 text-center text-lg">Each container has its <b>own private space</b>. Nothing leaks between them.</div>
+
+---
+
 # Containers are stateless
 
-<div class="text-lg opacity-80">Write a file in one container. Start another one. <b>The file is gone.</b></div>
+<div class="text-lg opacity-80">Remove a container and start a new one. <b>It starts clean, every time.</b></div>
 
-<div class="grid grid-cols-2 gap-6 mt-4 items-start">
+<div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
-<div>
-  <div class="card text-center">
-    <div class="font-700">① Container <code>first</code></div>
-    <div class="text-4xl mt-1">📄</div>
-    <div class="small"><code>note.txt</code> says <b>hi</b></div>
-    <div class="label-good mt-1">✅ file exists</div>
-  </div>
+<div class="min-w-0 flex flex-col gap-2">
 
-  <div class="small mt-3 mb-1">Write <code>hi</code> into a file, then read it back:</div>
+  <div v-click="1">
+    <div class="small mb-1"><b>4</b> · Throw <code>a</code> away</div>
 
 ```bash
-docker run --name first alpine \
-  sh -c "echo hi > /note.txt && cat /note.txt"
+docker rm -f a
 ```
-</div>
 
-<div v-click>
-  <div class="card text-center bad">
-    <div class="font-700">② Container <code>second</code> <span class="small">(brand new)</span></div>
-    <div class="text-4xl mt-1">🫙</div>
-    <div class="small">empty: no <code>note.txt</code></div>
-    <div class="label-bad mt-1">❌ file not found</div>
   </div>
 
-  <div class="small mt-3 mb-1">Ask a new container for the same file:</div>
+  <div v-click="2">
+    <div class="small mb-1"><b>5</b> · Start a new <code>a</code> from the same image</div>
 
 ```bash
-docker run --name second alpine \
-  cat /note.txt
+docker run -d --name a alpine sleep 3600
 ```
+
+  </div>
+
+  <div v-click="3">
+    <div class="small mb-1"><b>6</b> · Look for the file again</div>
+
+```bash
+docker exec a cat /note.txt
+```
+
+  </div>
+
+</div>
+
+<div class="min-w-0 flex flex-col items-center gap-2">
+
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
+
+  <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
+    <div class="card text-center">
+      <div class="font-700">old <code>a</code></div>
+      <div class="text-3xl mt-1">📄</div>
+      <div class="small"><code>note.txt</code></div>
+    </div>
+    <div v-click="1" class="text-3xl">🗑️</div>
+    <div v-click="2" class="card text-center">
+      <div class="font-700">new <code>a</code></div>
+      <div class="text-3xl mt-1 opacity-30">🫙</div>
+      <div v-click="3" class="label-bad mt-1">❌ file gone</div>
+    </div>
+  </div>
+
 </div>
 
 </div>
 
-<div v-click class="mt-5 text-center text-lg">Every container starts fresh from its image, so <b>what one writes, the next never sees</b>.</div>
+<div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
 
-<div v-click class="mt-2 text-center small">Clean up: <code>docker rm first second</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f a b</code></div>
 
 ---
 
