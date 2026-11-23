@@ -324,7 +324,7 @@ class: text-center
   <div class="flex items-center gap-6">
     <div class="flex flex-col gap-2">
       <div v-click class="chip">📄 Dockerfile</div>
-      <div v-click class="chip">💿 image</div>
+      <div v-click class="chip"><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /> image</div>
     </div>
     <div v-click class="arrow">→</div>
     <div class="grid grid-cols-3 gap-3">
@@ -351,7 +351,7 @@ class: text-center
           v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
           :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
     <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
-    <div class="chip">💿 image</div><Ctr />
+    <div class="chip"><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /> image</div><Ctr />
   </Laptop>
 </div>
 
@@ -363,7 +363,7 @@ layout: center
 
 # Docker life cycle
 
-<div class="text-xl opacity-80">Three steps. <b>Write it, pack it, start it.</b></div>
+<div class="text-xl opacity-80">Three steps. <b>Write it, save it, start it.</b></div>
 
 <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-2 mt-6">
 
@@ -386,7 +386,7 @@ layout: center
     <div class="text-3xl font-800 mt-1">Image</div>
     <div class="h-24 flex items-center justify-center"><img src="/img/photo-cutter.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
     <div class="text-sm">Everything is saved as a <b>ready-made template</b>.</div>
-    <div class="mt-auto pt-3"><span class="chip">Pack</span></div>
+    <div class="mt-auto pt-3"><span class="chip">Save</span></div>
   </div>
 
   <div v-click class="text-center self-center" style="width: 8.5rem">
@@ -466,9 +466,11 @@ CMD ["./api"]
 
 <div>
 
-<div class="text-2xl font-700 leading-snug">A <span class="gradient-text">recipe</span> your app needs,<br>baked into <b>layers</b>.</div>
+<div class="text-2xl font-700 leading-snug">A <span class="gradient-text">ready-made template</span> of your app,<br>built from <b>layers</b>.</div>
 
-<div class="mt-6 flex flex-col gap-4">
+<div class="mt-3 flex items-center gap-3"><img src="/img/photo-cutter.jpg" style="width: 15rem; height: 6rem; object-fit: cover; border-radius: 10px" /><div class="small" style="max-width: 9rem">one cutter,<br>many identical cookies</div></div>
+
+<div class="mt-5 flex flex-col gap-3">
   <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
   <div v-click="6" class="flex items-center gap-3"><span class="text-3xl">📤</span><div><b>Shareable</b><div class="small">push it once, pull it anywhere</div></div></div>
   <div v-click="7" class="flex items-center gap-3"><span class="text-3xl">♻️</span><div><b>Reusable</b><div class="small">one image → as many containers as you like</div></div></div>
@@ -477,7 +479,7 @@ CMD ["./api"]
 </div>
 
 <div class="relative">
-  <div v-click="5" class="image-tag"><span>💿</span> magic-api:1.0</div>
+  <div v-click="5" class="image-tag"><span><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /></span> magic-api:1.0</div>
   <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
     <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
     <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
@@ -488,12 +490,14 @@ CMD ["./api"]
 
 </div>
 
+<div class="abs-bl m-2 text-xs opacity-50">Cookie cutter photo: Personal Creations via Wikimedia Commons (CC BY 2.0)</div>
+
 ---
 
 # Container <span class="opacity-50">?</span>
 
 <div class="flex items-center justify-center gap-8 mt-2">
-  <div class="card glow text-center"><div class="text-5xl">💿</div><div class="font-700">image</div></div>
+  <div class="card glow text-center"><div class="text-5xl"><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /></div><div class="font-700">image</div></div>
   <div class="arrow">→</div>
   <ContainerBig name="magic-api" :open="$clicks >= 1" :width="400" />
 </div>
@@ -581,7 +585,7 @@ docker exec byd cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /></span> <b>image: alpine</b></div>
   <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
 
   <div class="grid grid-cols-2 gap-3 w-full">
@@ -647,7 +651,7 @@ docker exec tesla cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl">💿</span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-cutter.jpg" style="height:1.15em;width:1.15em;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:-0.2em" /></span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
