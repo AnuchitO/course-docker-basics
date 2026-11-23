@@ -369,62 +369,86 @@ class: text-center
 
 ---
 
-# Hello Docker <span class="opacity-50">· containers are stateless</span>
+# Hello Docker
 
-<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-2">
+<div class="grid grid-cols-[1fr_1fr] gap-8 mt-4 items-start">
 
 <div>
 
-<div class="font-700 mb-1">1 · Say hello</div>
+<div class="text-lg mb-2">Run your very first container:</div>
 
 ```bash
 docker run hello-world
 ```
 
-<div class="font-700 mt-4 mb-1">2 · Make a file inside a container</div>
+<div class="mt-4 small">Docker finds the image, starts a container, prints a message, and the container <b>stops</b>: it had nothing else to do.</div>
 
-```bash
-docker run --name first alpine sh -c "echo hi > /note.txt && cat /note.txt"
-```
-
-<div class="font-700 mt-4 mb-1">3 · Look for it in a new container</div>
-
-```bash
-docker run --name second alpine cat /note.txt
-```
-
-<div class="mt-3"><span class="try">⏸ Pause &amp; try</span></div>
+<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
 
 </div>
-
-<div>
 
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
-  <div>Step 1: a "Hello from Docker!" message, then the container <b>stops</b>.</div>
-  <div class="mt-2">Step 2 prints <code>hi</code>.</div>
-  <div class="mt-2">Step 3 fails:</div>
-  <div class="out mt-1">cat: can't open '/note.txt': No such file or directory</div>
-</div>
-
-<div v-click class="card mt-4">
-  <div class="font-700">🧽 Stateless</div>
-  <div class="small">Every container starts fresh from its image. What one container writes is not there in the next.</div>
-</div>
-
-<div v-click class="mt-4 small">Clean up: <code>docker rm first second</code></div>
-
+  <div class="out" style="font-size: 1rem; word-break: normal">Hello from Docker!<br>This message shows that your installation appears to be working correctly.</div>
+  <div class="mt-3 text-sm opacity-70">Your container ran and finished in under a second.</div>
 </div>
 
 </div>
 
 ---
 
-# Keep it running
+# Containers are stateless
 
-<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-2">
+<div class="text-lg opacity-80">Write a file in one container. Start another one. <b>The file is gone.</b></div>
+
+<div class="grid grid-cols-2 gap-6 mt-4 items-start">
 
 <div>
+  <div class="card text-center">
+    <div class="font-700">① Container <code>first</code></div>
+    <div class="text-4xl mt-1">📄</div>
+    <div class="small"><code>note.txt</code> says <b>hi</b></div>
+    <div class="label-good mt-1">✅ file exists</div>
+  </div>
+
+  <div class="small mt-3 mb-1">Write <code>hi</code> into a file, then read it back:</div>
+
+```bash
+docker run --name first alpine \
+  sh -c "echo hi > /note.txt && cat /note.txt"
+```
+</div>
+
+<div v-click>
+  <div class="card text-center bad">
+    <div class="font-700">② Container <code>second</code> <span class="small">(brand new)</span></div>
+    <div class="text-4xl mt-1">🫙</div>
+    <div class="small">empty: no <code>note.txt</code></div>
+    <div class="label-bad mt-1">❌ file not found</div>
+  </div>
+
+  <div class="small mt-3 mb-1">Ask a new container for the same file:</div>
+
+```bash
+docker run --name second alpine \
+  cat /note.txt
+```
+</div>
+
+</div>
+
+<div v-click class="mt-5 text-center text-lg">Every container starts fresh from its image, so <b>what one writes, the next never sees</b>.</div>
+
+<div v-click class="mt-2 text-center small">Clean up: <code>docker rm first second</code></div>
+
+---
+
+
+# Keep it running
+
+<div class="grid grid-cols-2 gap-8 mt-2">
+
+<div class="min-w-0">
 
 <div class="small mb-2"><code>hello-world</code> stopped by itself: it had nothing left to do. A server keeps working, so run it <b>in the background</b>.</div>
 
@@ -440,7 +464,7 @@ docker start web
 
 </div>
 
-<div>
+<div class="min-w-0">
 
 <div class="card">
   <div><code>-d</code> <b>detached</b>: runs in the background, you get your terminal back</div>
@@ -457,7 +481,8 @@ docker start web
   <div class="small mb-1">Come back after a reboot or crash:</div>
 
 ```bash
-docker run -d --restart unless-stopped --name web2 -p 8081:80 nginx
+docker run -d --restart unless-stopped \
+  --name web2 -p 8081:80 nginx
 ```
 
 </div>
