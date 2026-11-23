@@ -105,7 +105,7 @@ docker ps
 </div>
 
 <div v-click class="card">
-  <div class="font-700">🧩 For <code>docker compose</code> (Step 6)</div>
+  <div class="font-700">🧩 For <code>docker compose</code> (Step 4)</div>
   <div class="opacity-60 text-sm mt-1">Link the plugin once:</div>
 
 ```bash
@@ -178,7 +178,7 @@ ln -sfn $(which docker-compose) .
   <div v-click><img src="/img/site-gallery.jpg" style="border-radius:12px; border:1px solid var(--card-line)" /><div class="text-center mt-2"><b>Gallery</b> shows everyone's gardens, with scan counts</div></div>
 </div>
 
-<div v-click class="mt-4 text-center text-lg">These two need to <b>remember things</b>, so they need the <span class="gradient-text font-700">database</span>. That is Step 4.</div>
+<div v-click class="mt-4 text-center text-lg">These two need to <b>remember things</b>, so they need the <span class="gradient-text font-700">database</span>. That is Step 5.</div>
 
 ---
 
@@ -671,7 +671,7 @@ docker exec tesla cat /note.txt
 
 <div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 5). Clean up: <code>docker rm -f tesla byd</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 6). Clean up: <code>docker rm -f tesla byd</code></div>
 
 ---
 
@@ -792,35 +792,122 @@ The Go API starts on its own, with built-in themes and <b>no database</b>.
 
 ---
 
-# Step 3 · Connect them with a network
+# Step 3 · Point the web at the API
 
 <Stepper :n="3" class="absolute top-6 right-10" />
 
-<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-4">
+<div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
 
 <div>
 
-```bash {1|2|3|4}
-docker rm -f web api
-docker network create magic
-docker run -d --name api --network magic magic-api
-docker run -d --name web --network magic -p 3000:80 magic-web
+<div class="small mb-1">The API answers on <code>localhost:8080</code>, so tell the web <code>web/Dockerfile</code>:</div>
+
+```dockerfile {2}
+FROM nginx:1.31.9-alpine3.24
+ENV API_URL=http://localhost:8080
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY index.html og.svg /usr/share/nginx/html/
 ```
 
-<div class="mt-4 text-sm opacity-80 leading-relaxed">
-On the same network, <b>web</b> reaches the API by its name: <code>http://api:8080</code>.<br>
-The API has no <code>-p</code>: only <b>web</b> is open to the outside.
-</div>
+```bash {1|2|3|4}
+docker rm -f web
+docker build -t magic-web ./web
+docker run -d --name web -p 3000:80 magic-web
+curl -i localhost:3000/api/health
+```
 
-<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
+<div class="mt-3"><span class="try">⏸ Pause &amp; try</span></div>
 
 </div>
 
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
-  Refresh <b>http://localhost:3000</b>
-  <div class="mt-2">🌳 The garden now carries a <b>QR code</b> under the tree. <b>Tap the garden</b>: the blossoms fly into flower beds and the code appears, flat and scannable.</div>
-  <div class="mt-3 text-sm opacity-70">The header shows <b>API &lt;container id&gt;</b>. Seasons work; the 🔗 link button says it needs a database.</div>
+  <div class="out" style="color: #dc2626">HTTP/1.1 502 Bad Gateway</div>
+  <div class="mt-3">The API is running and port 8080 is open, yet the web cannot reach it.</div>
+  <div class="mt-3 text-sm opacity-70"><code>docker logs web</code> says <code>connect() failed (111: Connection refused)</code>. Why?</div>
+</div>
+
+</div>
+
+---
+
+# Why? Every container has its own <code>localhost</code>
+
+<div class="text-lg opacity-80"><code>localhost</code> means <b>"this machine"</b>. Inside a container, "this machine" is the container itself.</div>
+
+<div class="grid grid-cols-3 gap-4 mt-6">
+
+  <div v-click="1" class="card text-center">
+    <div class="text-4xl">💻</div>
+    <div class="font-800 mt-1">Your laptop</div>
+    <div class="small mt-1"><code>localhost:8080</code></div>
+    <div class="mt-2 label-good">✅ API answers</div>
+    <div class="small">because of <code>-p 8080:8080</code></div>
+  </div>
+
+  <div v-click="2" class="card bad text-center">
+    <div class="text-4xl">🌐</div>
+    <div class="font-800 mt-1">web container</div>
+    <div class="small mt-1"><code>localhost:8080</code></div>
+    <div class="mt-2 label-bad">❌ nothing here</div>
+    <div class="small">this is <b>web</b> itself, not the API</div>
+  </div>
+
+  <div v-click="3" class="card text-center">
+    <div class="text-4xl">⚙️</div>
+    <div class="font-800 mt-1">api container</div>
+    <div class="small mt-1">listens on <code>:8080</code></div>
+    <div class="mt-2 label-good">✅ it is here</div>
+    <div class="small">but web has no way to find it</div>
+  </div>
+
+</div>
+
+<div v-click="4" class="mt-8 text-center big-line">Web must call the API <span class="gradient-text">by name</span>, not by <code>localhost</code>.</div>
+
+---
+
+# Step 4 · Write it down: Docker Compose
+
+<Stepper :n="4" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
+
+<div class="compact">
+
+```yaml {1-6|7-11|12-13}
+services:
+  web:
+    build: ./web
+    ports: ["3000:80"]
+    networks: [magic]
+    depends_on: [api]
+  api:
+    build: ./api
+    networks:
+      magic:
+        aliases: [api]
+networks:
+  magic:
+```
+
+</div>
+
+<div>
+
+<div v-click="1" class="card">
+  <b>web</b>: same image, same port <code>3000:80</code>, and it joins the private network <code>magic</code>.
+</div>
+
+<div v-click="2" class="card glow mt-3">
+  <b>api</b> joins the same network and answers to the <b>alias</b> <code>api</code>. Any container on <code>magic</code> can call <code>http://api:8080</code>.
+  <div class="small mt-1">No <code>ports:</code>: only <b>web</b> is open to your laptop.</div>
+</div>
+
+<div v-click="3" class="card mt-3">
+  The network is declared once at the bottom.
+</div>
+
 </div>
 
 </div>
@@ -829,7 +916,7 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 # The same thing, written down
 
-<div class="text-lg opacity-80">Every flag you typed has a line in the <b>compose file</b>. <span class="opacity-70">(you will use it in Step 6)</span></div>
+<div class="text-lg opacity-80">Every flag you typed has a line in the <b>compose file</b>. <span class="opacity-70">(Step 4)</span></div>
 
 <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-2 mt-3">
 
@@ -847,13 +934,9 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
   <div v-click="3" class="arrow">→</div>
   <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>ports: ["3000:80"]</code><span class="small">same two numbers</span></div></div>
 
-  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--network magic</code><span class="small">connect the containers</span></div></div>
+  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker run -d …</code><span class="small">once per container</span></div></div>
   <div v-click="4" class="arrow">→</div>
-  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>nothing to write</b><span class="small">Compose makes the network</span></div></div>
-
-  <div v-click="5"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker run -d …</code><span class="small">once per container</span></div></div>
-  <div v-click="5" class="arrow">→</div>
-  <div v-click="5"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker compose up</code><span class="small">starts all of them together</span></div></div>
+  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker compose up</code><span class="small">starts all of them together</span></div></div>
 
 </div>
 
@@ -861,7 +944,7 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 # Now the API, written down
 
-<div class="text-lg opacity-80">The API gets its own service, <b>next to web</b>. <span class="opacity-70">(Step 2 and Step 3)</span></div>
+<div class="text-lg opacity-80">The API gets its own service, <b>next to web</b>, on the <b>same network</b>. <span class="opacity-70">(Step 2 and Step 4)</span></div>
 
 <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-2 mt-3">
 
@@ -877,11 +960,11 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
   <div v-click="3"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>-p 8080:8080</code><span class="small">open a door to your browser</span></div></div>
   <div v-click="3" class="arrow">→</div>
-  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>ports: ["8080:8080"]</code><span class="small">same two numbers</span></div></div>
+  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>nothing to write</b><span class="small">no <code>ports:</code>, the API stays private</span></div></div>
 
-  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--network magic</code><span class="small">connect the containers</span></div></div>
+  <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>http://localhost:8080</code><span class="small">only works on your laptop</span></div></div>
   <div v-click="4" class="arrow">→</div>
-  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>nothing to write</b><span class="small">same network, automatically</span></div></div>
+  <div v-click="4"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>aliases: [api]</code><span class="small">web calls <code>http://api:8080</code></span></div></div>
 
   <div v-click="5"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>start api before web</code><span class="small">order matters</span></div></div>
   <div v-click="5" class="arrow">→</div>
@@ -891,37 +974,74 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 
 ---
 
+# Step 4 · Fix the one wrong line
+
+<Stepper :n="4" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
+
+<div>
+
+<div class="small mb-1"><code>web/Dockerfile</code></div>
+
+```diff
+- ENV API_URL=http://localhost:8080
++ ENV API_URL=http://api:8080
+```
+
+<div class="mt-4 text-sm opacity-80 leading-relaxed">
+<code>api</code> is the <b>alias</b> from the compose file. <code>8080</code> is the port <b>inside</b> the API container, so nothing has to be published.
+</div>
+
+<div class="mt-3 text-sm opacity-80 leading-relaxed">
+nginx also asks Docker's DNS for <code>api</code> <b>on every request</b>, so the API can be recreated without restarting the web.
+</div>
+
+</div>
+
+<div v-click class="card glow">
+  <div class="font-800">Review it</div>
+  <div class="mt-2 text-sm">The web is the <b>only</b> file that changes. The API image is untouched: it does not know who calls it.</div>
+</div>
+
+</div>
+
+---
+
 # Run it, for real
+
+<Stepper :n="4" class="absolute top-6 right-10" />
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
 
 <div>
 
-```bash {1|2|3}
+```bash {1|2|3|4}
+docker rm -f web api
 docker compose up -d --build
 docker compose ps
-curl localhost:8080/api/health
+curl localhost:3000/api/health
 ```
 
-<div v-click="1" class="out mt-3" style="font-size: .8rem; line-height: 1.35">
-Network demo_default  Created<br>
-Container demo-api-1  Started<br>
-Container demo-web-1  Started
+<div v-click="2" class="out mt-3" style="font-size: .8rem; line-height: 1.35">
+Network demo_magic&nbsp;&nbsp;Created<br>
+Container demo-api-1&nbsp;&nbsp;Started<br>
+Container demo-web-1&nbsp;&nbsp;Started
 </div>
 
-<div v-click="2" class="out mt-2" style="font-size: .8rem; line-height: 1.35">
+<div v-click="3" class="out mt-2" style="font-size: .8rem; line-height: 1.35">
 NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SERVICE&nbsp;&nbsp;STATUS<br>
 demo-api-1&nbsp;&nbsp;api&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds<br>
 demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
 </div>
 
-<div v-click="3" class="out mt-2" style="font-size: .8rem">{"db":"not connected","host":"ec7dffe4c6bd","status":"ok"}</div>
+<div v-click="4" class="out mt-2" style="font-size: .8rem">{"db":"not connected","host":"ec7dffe4c6bd","status":"ok"}</div>
 
-<div v-click="3" class="mt-3 text-sm opacity-80">One command, two containers, one network. No <code>docker run</code>, no <code>network create</code>.</div>
+<div v-click="4" class="mt-3 text-sm opacity-80">The call goes laptop → <b>web</b> → <code>api</code>. <code>curl localhost:8080</code> no longer works: the API is private now.</div>
 
 </div>
 
-<div v-click="3" class="text-center">
+<div v-click="4" class="text-center">
   <img src="/img/compose-result.jpg" style="height: 21rem; width: auto; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18)" />
   <div class="small mt-1">the garden, started by Compose</div>
 </div>
@@ -930,133 +1050,132 @@ demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
 
 ---
 
-# Step 4 · Add the database
-
-<Stepper :n="4" class="absolute top-6 right-10" />
-
-<div class="grid grid-cols-1 gap-3 mt-2">
-
-<div>
-
-```bash {1-4|5-8}
-docker run -d --name db --network magic \
-  -e POSTGRES_USER=magic -e POSTGRES_PASSWORD=magic -e POSTGRES_DB=magictree \
-  -v "$PWD/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro" \
-  postgres:16-alpine
-docker rm -f api
-docker run -d --name api --network magic \
-  -e DATABASE_URL="postgres://magic:magic@db:5432/magictree?sslmode=disable" \
-  magic-api
-```
-
-<div class="mt-3 text-sm opacity-80 leading-relaxed">
-<code>-e</code> sets an <b>environment variable</b>: that is how the API learns where the database is.
-</div>
-
-<div class="mt-3"><span class="try">⏸ Pause &amp; try</span> <span class="small ml-2">wait ~5 seconds, then</span> <code>curl localhost:3000/api/health</code></div>
-
-</div>
-
-<div v-click class="see">
-  <div class="h">YOU SHOULD SEE</div>
-  <div class="out">{"db":"connected",<br>"shared_trees":0, ...}</div>
-  <div class="mt-3">The colour dots now come from <b>Postgres</b>: <b>6 flower colours</b> instead of 3. Press the 🔗 button: a share link works.</div>
-</div>
-
-</div>
-
----
-
-# Step 5 · Keep the data: a volume
+# Step 5 · Add the database
 
 <Stepper :n="5" class="absolute top-6 right-10" />
 
-<div class="grid grid-cols-2 gap-8 mt-4">
-
-<div class="card bad">
-  <div class="label-bad">❌ Without a volume</div>
-
-```bash
-docker rm -f db
-# start db again (same command as step 4)
-```
-
-<div class="text-sm opacity-80">Delete the container, and the shared trees are <b>gone</b>: <code>shared_trees: 0</code>.</div>
-</div>
-
-<div v-click class="card good">
-  <div class="label-good">✅ With a volume</div>
-
-```bash {1|3}
-docker rm -f db
-docker run -d --name db --network magic \
-  -v tree-data:/var/lib/postgresql/data \
-  ...same as step 4
-docker restart api
-```
-
-<div class="text-sm opacity-80">Delete and recreate: the trees are <b>still there</b>.</div>
-</div>
-
-</div>
-
-<div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">share a garden, remove <code>db</code>, start it again, then check <code>/api/health</code>.</span></div>
-
----
-
-# Step 6 · One command: Docker Compose
-
-<Stepper :n="6" class="absolute top-6 right-10" />
-
-<div class="grid grid-cols-[1.3fr_1fr] gap-6 mt-2">
+<div class="grid grid-cols-[1.35fr_1fr] gap-6 mt-2">
 
 <div class="compact">
 
-```yaml {1-5|6-11|12-22}
-services:
-  web:
-    build: ./web
-    ports: ["3000:80"]
-    depends_on: [api]
+```yaml {1-7|8-17}
   api:
     build: ./api
     environment:
       DATABASE_URL: postgres://magic:magic@db:5432/magictree?sslmode=disable
     depends_on: { db: { condition: service_healthy } }
+    networks: ...
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine3.24
     environment:
       POSTGRES_USER: magic
       POSTGRES_PASSWORD: magic
       POSTGRES_DB: magictree
     volumes:
-      - tree-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-volumes:
-  tree-data:
+    healthcheck: ...
+    networks: [magic]
 ```
+
+<div class="mt-3"><span class="try">⏸ Pause &amp; try</span> <code class="ml-2">docker compose up -d</code></div>
 
 </div>
 
 <div>
 
 <div class="card">
-  <div class="text-sm opacity-70">First, clean up the manual containers:</div>
+  <div class="text-sm"><code>DATABASE_URL</code> tells the API where the database is. <code>db</code> is the <b>service name</b>: same idea as the alias.</div>
+  <div class="text-sm mt-2"><code>init.sql</code> creates the tables and ten example gardens.</div>
+</div>
 
-```bash
-docker rm -f web api db
-docker network rm magic
-```
-
-  <div class="text-sm opacity-70 mt-2">Then everything, with one command:</div>
-
-```bash
-docker compose up --build
-```
+<div v-click class="see mt-3">
+  <div class="h">YOU SHOULD SEE</div>
+  <div class="out">{"db":"connected",<br>"shared_trees":10, ...}</div>
+  <div class="mt-2 text-sm">The gallery has 10 gardens and <b>6 flower colours</b>. Press 🔖 to save yours: <code>shared_trees</code> becomes <b>11</b>.</div>
+</div>
 
 </div>
 
-<div v-click class="mt-3 text-center"><span class="try">⏸ Pause &amp; try</span></div>
+</div>
+
+---
+
+# Step 5 · …and then we lose it
+
+<Stepper :n="5" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.1fr_1fr] gap-8 mt-6">
+
+<div>
+
+```bash {1|2|3}
+docker compose down
+docker compose up -d
+curl localhost:3000/api/health
+```
+
+<div class="mt-4"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div v-click class="card bad">
+  <div class="label-bad">❌ Without a volume</div>
+  <div class="out mt-2">{"db":"connected",<br>"shared_trees":<b>10</b>, ...}</div>
+  <div class="text-sm mt-2">Your garden is <b>gone</b>. <code>down</code> removed the db container, and the data lived <b>inside</b> it.</div>
+</div>
+
+</div>
+
+<div v-click class="mt-8 text-center big-line">The data needs a home that is <span class="gradient-text">not the container</span>.</div>
+
+---
+
+# Step 6 · Keep the data: a volume
+
+<Stepper :n="6" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
+
+<div class="compact">
+
+```yaml {5|8-9}
+  db:
+    image: postgres:18-alpine3.24
+    ...
+    volumes:
+      - tree-data:/var/lib/postgresql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ...
+volumes:
+  tree-data:
+```
+
+```bash
+docker compose down -v      # start clean
+docker compose up -d
+# save a garden → 11
+docker compose down         # no -v!
+docker compose up -d
+curl localhost:3000/api/health
+```
+
+<div class="mt-2"><span class="try">⏸ Pause &amp; try</span></div>
+
+</div>
+
+<div>
+
+<div class="card">
+  <div class="text-sm"><code>tree-data</code> is a <b>named volume</b>: storage managed by Docker, outside any container. Postgres 18 keeps its files in <code>/var/lib/postgresql</code>.</div>
+</div>
+
+<div v-click class="card good mt-3">
+  <div class="label-good">✅ With a volume</div>
+  <div class="out mt-2">{"db":"connected",<br>"shared_trees":<b>11</b>, ...}</div>
+  <div class="text-sm mt-2">Delete and recreate the container: your garden is <b>still there</b>.</div>
+</div>
+
+<div v-click class="small mt-3">⚠️ <code>docker compose down <b>-v</b></code> also deletes the volume, and the data.</div>
 
 </div>
 
@@ -1072,14 +1191,16 @@ docker compose up --build
 
 <div>
 
-```bash {1|2-3}
+```bash {1|2|3-4}
 docker compose up -d --scale api=3
+sleep 6
 for i in 1 2 3 4 5 6; do
   curl -s localhost:3000/api/health; echo; done
 ```
 
 <div class="mt-4 text-sm opacity-80 leading-relaxed">
-Three copies of the <b>same image</b>. Compose gives them one name, <code>api</code>, and requests are spread between them.
+Three copies of the <b>same image</b>, all answering to the alias <code>api</code>. Docker's DNS hands them out in turn.<br>
+<span class="opacity-70">(<code>sleep 6</code>: nginx re-reads the DNS every 5 seconds.)</span>
 </div>
 
 <div class="mt-5"><span class="try">⏸ Pause &amp; try</span> <span class="small ml-2">finish with</span> <code>docker compose down</code></div>
@@ -1090,7 +1211,7 @@ Three copies of the <b>same image</b>. Compose gives them one name, <code>api</c
   <div class="h">YOU SHOULD SEE</div>
   <div class="out">"host":"4d633404bd51"<br>"host":"a7a19b993e2b"<br>"host":"dc88b4d8a103"<br>...</div>
   <div class="flex gap-2 mt-3"><Ctr v-for="n in 3" :key="n" /></div>
-  <div class="mt-2 text-sm opacity-70">Three different container IDs: one image, three containers.</div>
+  <div class="mt-2 text-sm opacity-70">Three different container IDs: one image, three containers. And the data is still there.</div>
 </div>
 
 </div>
@@ -1104,10 +1225,11 @@ layout: center
 <div class="grid grid-cols-2 gap-4 mt-6 text-left">
   <div v-click class="card"><b>1 · docker run</b><div class="small">starts a container from an image</div></div>
   <div v-click class="card"><b>2 · -p host:container</b><div class="small">opens a door to the outside</div></div>
-  <div v-click class="card"><b>3 · network</b><div class="small">containers find each other by name</div></div>
-  <div v-click class="card"><b>4 · -e variable</b><div class="small">config without changing the image</div></div>
-  <div v-click class="card"><b>5 · volume</b><div class="small">data outlives the container</div></div>
-  <div v-click class="card"><b>6 · compose</b><div class="small">the whole stack in one file</div></div>
+  <div v-click class="card"><b>3 · localhost</b><div class="small">every container has its own</div></div>
+  <div v-click class="card"><b>4 · compose + alias</b><div class="small">the stack in one file, found by name</div></div>
+  <div v-click class="card"><b>5 · DATABASE_URL</b><div class="small">config without changing the image</div></div>
+  <div v-click class="card"><b>6 · volume</b><div class="small">data outlives the container</div></div>
+  <div v-click class="card col-span-2"><b>7 · --scale</b><div class="small">one image, many containers</div></div>
 </div>
 
 ---
