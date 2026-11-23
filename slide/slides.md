@@ -140,8 +140,15 @@ class: text-center
 </div>
 
 ---
+layout: center
+class: text-center
+---
 
-# Why do we need Docker?
+<h1 style="border-left: none; padding-left: 0; font-size: 4.2rem; line-height: 1.1; margin: 0">Why we need Docker?</h1>
+
+---
+
+# What Docker gives you
 
 <div class="grid grid-cols-2 gap-6 mt-8">
 
