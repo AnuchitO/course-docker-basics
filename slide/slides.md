@@ -875,9 +875,9 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
   <div v-click="2" class="arrow">→</div>
   <div v-click="2"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>api:</code><span class="small">the service name</span></div></div>
 
-  <div v-click="3"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem">no <b>-p</b> on the API<span class="small">closed to the outside</span></div></div>
+  <div v-click="3"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>-p 8080:8080</code><span class="small">open a door to your browser</span></div></div>
   <div v-click="3" class="arrow">→</div>
-  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><b>no <b>ports:</b></b><span class="small">only web is open</span></div></div>
+  <div v-click="3"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>ports: ["8080:8080"]</code><span class="small">same two numbers</span></div></div>
 
   <div v-click="4"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>--network magic</code><span class="small">connect the containers</span></div></div>
   <div v-click="4" class="arrow">→</div>
@@ -900,7 +900,7 @@ The API has no <code>-p</code>: only <b>web</b> is open to the outside.
 ```bash {1|2|3}
 docker compose up -d --build
 docker compose ps
-curl localhost:3000/api/health
+curl localhost:8080/api/health
 ```
 
 <div v-click="1" class="out mt-3" style="font-size: .8rem; line-height: 1.35">
@@ -915,7 +915,7 @@ demo-api-1&nbsp;&nbsp;api&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds<
 demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
 </div>
 
-<div v-click="3" class="out mt-2" style="font-size: .8rem">{"db":"not connected","host":"04db7b1d9b41","status":"ok"}</div>
+<div v-click="3" class="out mt-2" style="font-size: .8rem">{"db":"not connected","host":"ec7dffe4c6bd","status":"ok"}</div>
 
 <div v-click="3" class="mt-3 text-sm opacity-80">One command, two containers, one network. No <code>docker run</code>, no <code>network create</code>.</div>
 
