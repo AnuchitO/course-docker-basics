@@ -233,36 +233,47 @@ layout: center
 
 # Docker life cycle
 
-<div class="flex items-center justify-center gap-2 mt-8">
-  <div v-click class="card text-center w-48">
-    <div class="h-20 flex items-center justify-center"><DockerfileIcon /></div>
-    <div class="text-xl font-700 mt-2">Dockerfile</div>
-    <div class="opacity-60 text-sm">a <b>file</b> with the recipe</div>
+<div class="grid grid-cols-[1fr_1.15fr_1fr_1.15fr_1.1fr] items-center gap-2 mt-8">
+
+  <div v-click class="card text-center min-w-0">
+    <div class="h-16 flex items-center justify-center"><DockerfileIcon /></div>
+    <div class="text-xl font-700 mt-1">Dockerfile</div>
+    <div class="text-sm">a <b>file</b></div>
+    <div class="small mt-1">like a recipe card</div>
   </div>
-  <div v-click class="text-center w-44">
-    <div class="small mb-1">we <b>build</b> it</div>
-    <div class="chip" style="font-size: 1.05rem">docker build</div>
-    <div class="arrow mt-1">→</div>
+
+  <div v-click class="text-center min-w-0">
+    <div class="small">turn the file into an image</div>
+    <div class="chip mt-1" style="font-size: 1.05rem">docker build</div>
+    <div class="small mt-1"><code>-t magic-web ./web</code></div>
+    <div class="arrow">→</div>
   </div>
-  <div v-click class="card text-center w-48">
-    <div class="h-20 flex items-center justify-center text-5xl">💿</div>
-    <div class="text-xl font-700 mt-2">Image</div>
-    <div class="opacity-60 text-sm">the <b>template</b> to run</div>
+
+  <div v-click class="card text-center min-w-0">
+    <div class="h-16 flex items-center justify-center text-5xl">💿</div>
+    <div class="text-xl font-700 mt-1">Image</div>
+    <div class="text-sm">a <b>sealed package</b></div>
+    <div class="small mt-1">like a meal kit</div>
   </div>
-  <div v-click class="text-center w-44">
-    <div class="small mb-1">we <b>run</b> it</div>
-    <div class="chip" style="font-size: 1.05rem">docker run</div>
-    <div class="arrow mt-1">→</div>
+
+  <div v-click class="text-center min-w-0">
+    <div class="small">start the image</div>
+    <div class="chip mt-1" style="font-size: 1.05rem">docker run</div>
+    <div class="small mt-1"><code>-d magic-web</code></div>
+    <div class="arrow">→</div>
   </div>
-  <div v-click class="card glow text-center w-48">
-    <div class="h-20 flex items-center justify-center"><ContainerBig :open="true" :width="110" /></div>
-    <div class="text-xl font-700 mt-2">Container</div>
-    <div class="opacity-60 text-sm">the <b>running</b> copy</div>
+
+  <div v-click class="card glow text-center min-w-0">
+    <div class="h-16 flex items-center justify-center gap-1" style="zoom: .62"><Ctr v-for="n in 3" :key="n" /></div>
+    <div class="text-xl font-700 mt-1">Containers</div>
+    <div class="text-sm"><b>running</b> copies</div>
+    <div class="small mt-1">like meals served</div>
   </div>
+
 </div>
 
-<div v-click class="mt-10 text-center text-xl">
-  Write a <b>file</b>. <span class="gradient-text font-700">Build</span> it into an <b>image</b>. <span class="gradient-text font-700">Run</span> the image as a <b>container</b>.
+<div v-click class="mt-9 text-center text-xl">
+  Build <b>once</b>. Run <b>as many times</b> as you like.
 </div>
 
 ---
