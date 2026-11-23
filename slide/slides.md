@@ -40,34 +40,87 @@ duration: 90min
 
 # Before you start
 
-<div class="grid grid-cols-3 gap-5 mt-8">
+<div class="grid grid-cols-[1.35fr_1fr] gap-8 mt-3">
 
-<div v-click class="card">
-  <div class="text-3xl">🐳</div>
-  <div class="font-700 text-lg mt-1">Install Docker Desktop</div>
-  <div class="opacity-60 text-sm mt-1">Then check it works:</div>
+<div class="min-w-0 flex flex-col gap-3">
+
+<div v-click class="flex items-start gap-3">
+  <span class="chip">1</span>
+  <div class="min-w-0 flex-1"><b>Install Colima</b> <span class="small">(runs Docker for you, no Docker Desktop)</span>
+
+```bash
+brew install colima docker docker-compose
+```
+
+  </div>
+</div>
+
+<div v-click class="flex items-start gap-3">
+  <span class="chip">2</span>
+  <div class="min-w-0 flex-1"><b>Start it</b> <span class="small">(stop later with <code>colima stop</code>)</span>
+
+```bash
+colima start
+```
+
+  </div>
+</div>
+
+<div v-click class="flex items-start gap-3">
+  <span class="chip">3</span>
+  <div class="min-w-0 flex-1"><b>Point Docker at it</b> <span class="small">(the star <b>*</b> marks the one in use)</span>
+
+```bash
+docker context use colima
+docker context ls
+```
+
+  </div>
+</div>
+
+<div v-click class="flex items-start gap-3">
+  <span class="chip">4</span>
+  <div class="min-w-0 flex-1"><b>Check it works</b>
 
 ```bash
 docker --version
+docker ps
 ```
+
+  </div>
+</div>
 
 </div>
 
+<div class="min-w-0 flex flex-col gap-4">
+
 <div v-click class="card">
-  <div class="text-3xl">📁</div>
-  <div class="font-700 text-lg mt-1">Get the course code</div>
+  <div class="font-700 text-lg">📁 Get the course code</div>
   <div class="opacity-60 text-sm mt-1">Download it (link under the video) and open a terminal in the <code>demo/</code> folder.</div>
 </div>
 
 <div v-click class="card">
-  <div class="text-3xl">⌨️</div>
-  <div class="font-700 text-lg mt-1">No Go needed</div>
+  <div class="font-700 text-lg">⌨️ No Go needed</div>
   <div class="opacity-60 text-sm mt-1">Docker builds and runs everything. You only type commands.</div>
 </div>
 
+<div v-click class="card">
+  <div class="font-700">🧩 For <code>docker compose</code> (Step 6)</div>
+  <div class="opacity-60 text-sm mt-1">Link the plugin once:</div>
+
+```bash
+mkdir -p ~/.docker/cli-plugins
+cd ~/.docker/cli-plugins
+ln -sfn $(which docker-compose) .
+```
+
 </div>
 
-<div v-click class="mt-8 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">appears on every hands-on step. Pause the video, run it, then press play.</span></div>
+</div>
+
+</div>
+
+<div v-click class="mt-5 text-center"><span class="try">⏸ Pause &amp; try</span> <span class="opacity-70 ml-2">appears on every hands-on step. Pause the video, run it, then press play.</span></div>
 
 ---
 layout: center
