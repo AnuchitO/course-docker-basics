@@ -479,9 +479,9 @@ docker run -d --name web -p 3000:80 magic-web
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   Open <b>http://localhost:3000</b>
-  <div class="mt-2">A cherry-blossom tree on a bare garden appears, but under the colour dots it says:</div>
+  <div class="mt-2">A cherry-blossom tree appears. Type a link and the QR code and the tree work, with 3 flower colours. Now press <b>Save</b> or open the <b>Gallery</b>:</div>
   <div class="out mt-1">API not reachable</div>
-  <div class="mt-3 text-sm opacity-70">One container works alone. There is no QR code yet: the page has nobody to ask. Only 3 flower colours.</div>
+  <div class="mt-3 text-sm opacity-70">One container works alone. Anything that needs to <b>remember</b> or <b>count</b> has nobody to ask yet.</div>
 </div>
 
 </div>
@@ -514,7 +514,7 @@ The Go API starts on its own, with built-in themes and <b>no database</b>.
   <div class="h">YOU SHOULD SEE</div>
   <div class="out">{"db":"not connected",<br>"host":"bd9a1a742cb4",<br>"status":"ok"}</div>
   <div class="mt-3 text-sm opacity-70"><code>host</code> is the container ID. Remember it: we use it in step 7.</div>
-  <div class="mt-2 text-sm opacity-70">The page at :3000 still says “API not reachable”: containers are <b>isolated</b>.</div>
+  <div class="mt-2 text-sm opacity-70">Save at :3000 still says “API not reachable”: containers are <b>isolated</b>.</div>
 </div>
 
 </div>
