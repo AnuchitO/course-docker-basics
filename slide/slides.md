@@ -384,8 +384,8 @@ layout: center
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
     <div class="text-3xl font-800 mt-1">Image</div>
-    <div class="h-24 flex items-center justify-center"><img src="/img/photo-box.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
-    <div class="text-sm">Everything goes into <b>one sealed box</b>.</div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/photo-cutter.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
+    <div class="text-sm">Everything is saved as a <b>ready-made template</b>.</div>
     <div class="mt-auto pt-3"><span class="chip">Pack</span></div>
   </div>
 
@@ -398,18 +398,18 @@ layout: center
   <div v-click class="card glow text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 3</div>
     <div class="text-3xl font-800 mt-1">Container</div>
-    <div class="h-24 flex items-center justify-center gap-1" style="zoom: .7"><Ctr v-for="n in 3" :key="n" /></div>
-    <div class="text-sm">Open the box and your app <b>runs</b>. Open as many as you like.</div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/photo-box.jpg" style="border-radius:8px; height: 5.5rem; width: 100%; object-fit: cover" /></div>
+    <div class="text-sm">Stamp out a box from it and your app <b>runs</b>. Make as many as you like.</div>
     <div class="mt-auto pt-3"><span class="chip">Start</span></div>
   </div>
 
 </div>
 
 <div v-click class="mt-8 text-center text-xl">
-  <b>Dockerfile</b> = the instructions &nbsp;·&nbsp; <b>Image</b> = the packed box &nbsp;·&nbsp; <b>Container</b> = the box, running
+  <b>Dockerfile</b> = the instructions &nbsp;·&nbsp; <b>Image</b> = the template &nbsp;·&nbsp; <b>Container</b> = a box made from it, running
 </div>
 
-<div class="abs-bl m-2 text-xs opacity-50">Box photo: HireAHelper via Wikimedia Commons (CC BY 2.0)</div>
+<div class="abs-bl m-2 text-xs opacity-50">Photos via Wikimedia Commons: box by HireAHelper (CC BY 2.0), cookie cutter by Personal Creations (CC BY 2.0)</div>
 
 ---
 
