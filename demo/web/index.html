@@ -365,9 +365,15 @@ function wearQR(mat){
           vec2 g = vec2(vWP.x + uInfo.x*.5, vWP.z - vWP.y*uInfo.w + uInfo.x*.5) - uInfo.y;   // grid cell under this pixel, as the camera sees it
           float dark = 0.0;
           if(g.x >= 0.0 && g.y >= 0.0 && g.x < uInfo.z && g.y < uInfo.z) dark = texture2D(uQR, (floor(g) + .5)/uInfo.z).r;
-          float lum = dot(diffuseColor.rgb, vec3(.333));
-          vec3 want = dark > .5 ? uDark*(.72 + .45*lum) : uLight*(.9 + .1*lum);
-          diffuseColor.rgb = mix(diffuseColor.rgb, want, uQ*.94);
+          // keep each blossom/leaf/branch's own hue; scanners only read brightness, so dark modules are a deep shade of it
+          // and light modules a pale tint of it (contrast stays high, colour survives)
+          vec3 c0 = diffuseColor.rgb;
+          float lum = dot(c0, vec3(.333));
+          vec3 sat = clamp(mix(vec3(lum), c0, 1.6), 0.0, 1.0);   // push the hue so the darkened colour still reads as pink / green
+          vec3 deep = sat * (.36 / max(.5, lum*1.6));       // brighter colours are pulled down harder so every dark module stays dark
+          vec3 pale = mix(c0, uLight, .68);              // light module: mostly cream, tinted by the colour underneath
+          vec3 want = dark > .5 ? deep : pale;
+          diffuseColor.rgb = mix(c0, want, uQ*.96);
         }`);
   };
   mat.needsUpdate = true;
