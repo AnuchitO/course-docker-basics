@@ -541,40 +541,40 @@ docker run hello-world
 
 # Containers are isolated
 
-<div class="text-lg opacity-80">Same image, two containers. <b>Changing one does not touch the other.</b></div>
+<div class="text-lg opacity-80">Same <b>stamp</b> (image), two <b>cards</b> (containers). <b>Writing on one card does not touch the other.</b></div>
 
 <div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>1</b> · Start two containers from the same image</div>
+    <div class="small mb-1"><b>1</b> · Press the same stamp on two cards</div>
 
 ```bash
-docker run -d --name tesla \
+docker run -d --name card1 \
   alpine sleep 3600
-docker run -d --name byd \
+docker run -d --name card2 \
   alpine sleep 3600
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>2</b> · Write a file inside <code>tesla</code> only</div>
+    <div class="small mb-1"><b>2</b> · Write a note on <code>card1</code> only</div>
 
 ```bash
-docker exec tesla sh -c \
+docker exec card1 sh -c \
   "echo hi > /note.txt"
 ```
 
   </div>
 
   <div v-click="3">
-    <div class="small mb-1"><b>3</b> · Look for the file in each one</div>
+    <div class="small mb-1"><b>3</b> · Look for the note on each card</div>
 
 ```bash
-docker exec tesla cat /note.txt
-docker exec byd cat /note.txt
+docker exec card1 cat /note.txt
+docker exec card2 cat /note.txt
 ```
 
   </div>
@@ -583,20 +583,20 @@ docker exec byd cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>image: alpine</b></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>stamp = image: alpine</b></div>
   <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
 
   <div class="grid grid-cols-2 gap-3 w-full">
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>tesla</code></div>
-      <div v-click="2" class="mt-2 text-3xl">📄</div>
+      <div class="font-700">card <code>card1</code></div>
+      <div v-click="2" class="mt-2 text-3xl">📝</div>
       <div v-click="2" class="small"><code>note.txt</code></div>
       <div v-click="3" class="label-good mt-1">✅ finds it</div>
     </div>
     <div v-click="1" class="card text-center">
-      <div class="font-700">container <code>byd</code></div>
-      <div v-click="2" class="mt-2 text-3xl opacity-30">🫙</div>
-      <div v-click="2" class="small">untouched</div>
+      <div class="font-700">card <code>card2</code></div>
+      <div v-click="2" class="mt-2 text-3xl opacity-30">⬜</div>
+      <div v-click="2" class="small">still blank</div>
       <div v-click="3" class="label-bad mt-1">❌ not found</div>
     </div>
   </div>
@@ -605,42 +605,42 @@ docker exec byd cat /note.txt
 
 </div>
 
-<div v-click="3" class="mt-3 text-center text-lg">Each container has its <b>own private space</b>. Nothing leaks between them.</div>
+<div v-click="3" class="mt-3 text-center text-lg">Each container has its <b>own private space</b>, like each card has its own surface. Nothing leaks between them.</div>
 
 ---
 
 # Containers are stateless
 
-<div class="text-lg opacity-80">Remove a container and start a new one. <b>It starts clean, every time.</b></div>
+<div class="text-lg opacity-80">Throw a card away and press a new one. <b>It starts blank, every time.</b></div>
 
 <div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>4</b> · Throw <code>tesla</code> away</div>
+    <div class="small mb-1"><b>4</b> · Throw <code>card1</code> away</div>
 
 ```bash
-docker rm -f tesla
+docker rm -f card1
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>5</b> · Start a new <code>tesla</code> from the same image</div>
+    <div class="small mb-1"><b>5</b> · Press a new <code>card1</code> with the same stamp</div>
 
 ```bash
-docker run -d --name tesla \
+docker run -d --name card1 \
   alpine sleep 3600
 ```
 
   </div>
 
   <div v-click="3">
-    <div class="small mb-1"><b>6</b> · Look for the file again</div>
+    <div class="small mb-1"><b>6</b> · Look for the note again</div>
 
 ```bash
-docker exec tesla cat /note.txt
+docker exec card1 cat /note.txt
 ```
 
   </div>
@@ -649,18 +649,18 @@ docker exec tesla cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>image: alpine</b> <span class="small">(never changed)</span></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>stamp = image: alpine</b> <span class="small">(never changed)</span></div>
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
-      <div class="font-700">old <code>tesla</code></div>
-      <div class="text-3xl mt-1">📄</div>
+      <div class="font-700">old <code>card1</code></div>
+      <div class="text-3xl mt-1">📝</div>
       <div class="small"><code>note.txt</code></div>
     </div>
     <div v-click="1" class="text-3xl">🗑️</div>
     <div v-click="2" class="card text-center">
-      <div class="font-700">new <code>tesla</code></div>
-      <div class="text-3xl mt-1 opacity-30">🫙</div>
+      <div class="font-700">new <code>card1</code></div>
+      <div class="text-3xl mt-1 opacity-30">⬜</div>
       <div v-click="3" class="label-bad mt-1">❌ file gone</div>
     </div>
   </div>
@@ -669,9 +669,9 @@ docker exec tesla cat /note.txt
 
 </div>
 
-<div v-click="3" class="mt-3 text-center text-lg">The image is the <b>same every time</b>, so the container starts the <b>same every time</b>. Nothing is saved.</div>
+<div v-click="3" class="mt-3 text-center text-lg">The stamp is the <b>same every time</b>, so every new card starts the <b>same</b>: blank. Nothing you wrote is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 6). Clean up: <code>docker rm -f tesla byd</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 6). Clean up: <code>docker rm -f card1 card2</code></div>
 
 ---
 
