@@ -1,4 +1,4 @@
-module magictree/api
+module tree/api
 
 go 1.25.0
 

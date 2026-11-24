@@ -12,8 +12,8 @@ Only Step 3 fails on purpose, so that Step 4 has a reason to exist.
 **Intent:** the smallest possible container. nginx serves one static page. No API yet.
 
 ```bash
-docker build -t magic-web ./web
-docker run -d --name web -p 3000:80 magic-web
+docker build -t tree-web ./web
+docker run -d --name web -p 3000:80 tree-web
 ```
 
 **See:** http://localhost:3000 shows the garden and the QR code works (the page builds it in the browser, because there is no API to ask).
@@ -34,13 +34,13 @@ The `Step 1b` commit adds a 4th flower colour in `web/index.html`. Check it out,
 
 ```bash
 docker restart web                         # run the old image again
-docker build -t magic-web:v2 ./web          # build a NEW image
+docker build -t tree-web:v2 ./web          # build a NEW image
 docker rm -f web
-docker run -d --name web -p 3000:80 magic-web:v2
-docker images magic-web
+docker run -d --name web -p 3000:80 tree-web:v2
+docker images tree-web
 ```
 
-**See:** after `docker restart web`, http://localhost:3000 still has **3** colours (the file was copied into the image at build time). After the rebuild and `magic-web:v2`, it has **4**. `docker images magic-web` lists two images, `latest` (old) and `v2` (new). Save still says "API not reachable": that is why Step 2 adds the API.
+**See:** after `docker restart web`, http://localhost:3000 still has **3** colours (the file was copied into the image at build time). After the rebuild and `tree-web:v2`, it has **4**. `docker images tree-web` lists two images, `latest` (old) and `v2` (new). Save still says "API not reachable": that is why Step 2 adds the API.
 
 ---
 
@@ -51,8 +51,8 @@ docker images magic-web
 **Intent:** a Go service builds and verifies the QR code. Run it as another container and publish port 8080 to your laptop.
 
 ```bash
-docker build -t magic-api ./api
-docker run -d --name api -p 8080:8080 magic-api
+docker build -t tree-api ./api
+docker run -d --name api -p 8080:8080 tree-api
 curl localhost:8080/api/health
 ```
 
@@ -67,8 +67,8 @@ The web page does not use it: `curl -i localhost:3000/api/health` is still `404`
 
 ```bash
 docker rm -f web
-docker build -t magic-web ./web
-docker run -d --name web -p 3000:80 magic-web
+docker build -t tree-web ./web
+docker run -d --name web -p 3000:80 tree-web
 curl -i localhost:3000/api/health
 docker logs web | tail -3
 ```
@@ -84,7 +84,7 @@ It works on a laptop, but every service has to publish a port (even the database
 
 ## Step 4: Docker Compose, a private network and an alias
 
-**Intent:** stop chaining `docker run` flags. One file describes both containers and puts them on a private network `magic`. The API gets the **alias** `api`, so the web can reach it as `http://api:8080`.
+**Intent:** stop chaining `docker run` flags. One file describes both containers and puts them on a private network `tree`. The API gets the **alias** `api`, so the web can reach it as `http://api:8080`.
 Two matching edits in `web/`: `API_URL` changes from `http://localhost:8080` to `http://api:8080`, and nginx asks Docker's DNS for `api` on every request (so the API container can be recreated without restarting the web).
 The API has no `ports:` any more: only the web is open to your laptop.
 

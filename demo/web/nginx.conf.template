@@ -3,7 +3,7 @@ server {
   root /usr/share/nginx/html;
   index index.html;
 
-  # Docker's built-in DNS (only exists on a user-defined network, like "magic").
+  # Docker's built-in DNS (only exists on a user-defined network, like "tree").
   # Resolving at request time means the API container can be recreated without restarting this one.
   resolver 127.0.0.11 valid=5s;
   resolver_timeout 2s;

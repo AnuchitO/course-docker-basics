@@ -384,7 +384,7 @@ layout: center
   <div v-click class="card text-center min-w-0 flex flex-col">
     <div class="text-sm font-700" style="color: var(--m)">STEP 2</div>
     <div class="text-3xl font-800 mt-1">Image</div>
-    <div class="h-24 flex items-center justify-center"><img src="/img/photo-stamp.jpg" style="border-radius:8px; height: 6rem; width: auto" /></div>
+    <div class="h-24 flex items-center justify-center"><img src="/img/stamp-only.png" style="height: 6rem; width: auto" /></div>
     <div class="text-sm">Everything is saved as a <b>stamp</b>.</div>
     <div class="mt-auto pt-3"><span class="chip">Save</span></div>
   </div>
@@ -467,7 +467,7 @@ CMD ["./api"]
 
 <div class="text-2xl font-700 leading-snug">A <span class="gradient-text">stamp</span> of your app,<br>built from <b>layers</b>.</div>
 
-<div class="mt-3 flex items-center gap-3"><img src="/img/photo-stamp.jpg" style="height: 10rem; width: auto; border-radius: 10px" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often<br>as you like</div></div>
+<div class="mt-3 flex items-center gap-3"><img src="/img/stamp-only.png" style="height: 10rem; width: auto" /><div class="small" style="max-width: 9rem">one stamp,<br>press it as often<br>as you like</div></div>
 
 <div class="mt-5 flex flex-col gap-3">
   <div v-click="5" class="flex items-center gap-3"><span class="text-3xl">🔒</span><div><b>Read-only</b><div class="small">a finished image never changes</div></div></div>
@@ -478,7 +478,7 @@ CMD ["./api"]
 </div>
 
 <div class="relative">
-  <div v-click="5" class="image-tag"><span><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> magic-api:1.0</div>
+  <div v-click="5" class="image-tag"><span><img src="/img/stamp-only.png" style="height:1.7em;width:auto;display:inline-block;vertical-align:-0.45em" /></span> tree-api:1.0</div>
   <div class="image-stack" :class="{ sealed: $clicks >= 5 }">
     <div v-click="1" class="layer l1"><span class="who">base OS + Go</span><code>FROM golang:1.25-alpine</code></div>
     <div v-click="2" class="layer l2"><span class="who">dependencies</span><code>RUN go mod download</code></div>
@@ -495,9 +495,9 @@ CMD ["./api"]
 # Container <span class="opacity-50">?</span>
 
 <div class="flex items-center justify-center gap-8 mt-2">
-  <div class="card glow text-center"><div class="text-5xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></div><div class="font-700">image</div></div>
+  <div class="card glow text-center"><div class="text-5xl"><img src="/img/stamp-only.png" style="height:1.7em;width:auto;display:inline-block;vertical-align:-0.45em" /></div><div class="font-700">image</div></div>
   <div class="arrow">→</div>
-  <ContainerBig name="magic-api" :open="$clicks >= 1" :width="400" />
+  <ContainerBig name="tree-api" :open="$clicks >= 1" :width="400" />
 </div>
 
 <div v-click="1" class="mt-4 text-center"><span class="chip">docker run</span> — the doors open and the app starts</div>
@@ -583,7 +583,7 @@ docker exec ticket cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>stamp = image: alpine</b></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/stamp-only.png" style="height:1.7em;width:auto;display:inline-block;vertical-align:-0.45em" /></span> <b>stamp = image: alpine</b></div>
   <div class="arrow" style="transform: rotate(90deg); animation: none">→</div>
 
   <div class="grid grid-cols-2 gap-3 w-full">
@@ -649,7 +649,7 @@ docker exec postcard cat /note.txt
 
 <div class="min-w-0 flex flex-col items-center gap-2">
 
-  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/icon-stamp.jpg" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:50%;display:inline-block;vertical-align:-0.35em" /></span> <b>stamp = image: alpine</b> <span class="small">(never changed)</span></div>
+  <div class="card glow text-center" style="padding: .5rem 1.4rem"><span class="text-3xl"><img src="/img/stamp-only.png" style="height:1.7em;width:auto;display:inline-block;vertical-align:-0.45em" /></span> <b>stamp = image: alpine</b> <span class="small">(never changed)</span></div>
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
@@ -734,8 +734,8 @@ docker run -d --restart unless-stopped \
 <div>
 
 ```bash {1|2}
-docker build -t magic-web ./web
-docker run -d --name web -p 3000:80 magic-web
+docker build -t tree-web ./web
+docker run -d --name web -p 3000:80 tree-web
 ```
 
 <div class="mt-4 text-sm opacity-80 leading-relaxed">
@@ -768,8 +768,8 @@ docker run -d --name web -p 3000:80 magic-web
 <div>
 
 ```bash {1|2|3}
-docker build -t magic-api ./api
-docker run -d --name api -p 8080:8080 magic-api
+docker build -t tree-api ./api
+docker run -d --name api -p 8080:8080 tree-api
 curl localhost:8080/api/health
 ```
 
@@ -811,8 +811,8 @@ COPY index.html og.svg /usr/share/nginx/html/
 
 ```bash {1|2|3|4}
 docker rm -f web
-docker build -t magic-web ./web
-docker run -d --name web -p 3000:80 magic-web
+docker build -t tree-web ./web
+docker run -d --name web -p 3000:80 tree-web
 curl -i localhost:3000/api/health
 ```
 
@@ -922,15 +922,15 @@ services:
   web:
     build: ./web
     ports: ["3000:80"]
-    networks: [magic]
+    networks: [tree]
     depends_on: [api]
   api:
     build: ./api
     networks:
-      magic:
+      tree:
         aliases: [api]
 networks:
-  magic:
+  tree:
 ```
 
 </div>
@@ -938,11 +938,11 @@ networks:
 <div>
 
 <div v-click="1" class="card">
-  <b>web</b>: same image, same port <code>3000:80</code>, and it joins the private network <code>magic</code>.
+  <b>web</b>: same image, same port <code>3000:80</code>, and it joins the private network <code>tree</code>.
 </div>
 
 <div v-click="2" class="card glow mt-3">
-  <b>api</b> joins the same network and answers to the <b>alias</b> <code>api</code>. Any container on <code>magic</code> can call <code>http://api:8080</code>.
+  <b>api</b> joins the same network and answers to the <b>alias</b> <code>api</code>. Any container on <code>tree</code> can call <code>http://api:8080</code>.
   <div class="small mt-1">No <code>ports:</code>: only <b>web</b> is open to your laptop.</div>
 </div>
 
@@ -964,7 +964,7 @@ networks:
 
   <div class="text-center font-700 opacity-70">On the command line</div><div></div><div class="text-center font-700 opacity-70">In <code>docker-compose.yml</code></div>
 
-  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t magic-web ./web</code><span class="small">make the image</span></div></div>
+  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t tree-web ./web</code><span class="small">make the image</span></div></div>
   <div v-click="1" class="arrow">→</div>
   <div v-click="1"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>build: ./web</code><span class="small">same folder, same Dockerfile</span></div></div>
 
@@ -992,7 +992,7 @@ networks:
 
   <div class="text-center font-700 opacity-70">On the command line</div><div></div><div class="text-center font-700 opacity-70">In <code>docker-compose.yml</code></div>
 
-  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t magic-api ./api</code><span class="small">make the image</span></div></div>
+  <div v-click="1"><div class="card min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>docker build -t tree-api ./api</code><span class="small">make the image</span></div></div>
   <div v-click="1" class="arrow">→</div>
   <div v-click="1"><div class="card glow min-w-0 flex items-baseline gap-3" style="padding: .4rem .9rem"><code>build: ./api</code><span class="small">same folder, same Dockerfile</span></div></div>
 
@@ -1066,7 +1066,7 @@ curl localhost:3000/api/health
 ```
 
 <div v-click="2" class="out mt-3" style="font-size: .8rem; line-height: 1.35">
-Network demo_magic&nbsp;&nbsp;Created<br>
+Network demo_tree&nbsp;&nbsp;Created<br>
 Container demo-api-1&nbsp;&nbsp;Started<br>
 Container demo-web-1&nbsp;&nbsp;Started
 </div>
@@ -1104,19 +1104,19 @@ demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
   api:
     build: ./api
     environment:
-      DATABASE_URL: postgres://magic:magic@db:5432/magictree?sslmode=disable
+      DATABASE_URL: postgres://magic:magictree@db:5432/treedb?sslmode=disable
     depends_on: { db: { condition: service_healthy } }
     networks: ...
   db:
     image: postgres:18-alpine3.24
     environment:
       POSTGRES_USER: magic
-      POSTGRES_PASSWORD: magic
-      POSTGRES_DB: magictree
+      POSTGRES_PASSWORD: magictree
+      POSTGRES_DB: treedb
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck: ...
-    networks: [magic]
+    networks: [tree]
 ```
 
 <div class="mt-3"><span class="try">⏸ Pause &amp; try</span> <code class="ml-2">docker compose up -d</code></div>

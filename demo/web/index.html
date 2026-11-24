@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TreeQR — grow a QR code</title>
-<meta name="description" content="TreeQR turns any link into a little 3D tree that rearranges itself into a scannable QR code. Pick a season, pick a bloom colour, share the picture.">
+<title>MagicTree — grow a QR code</title>
+<meta name="description" content="MagicTree turns any link into a little 3D tree that rearranges itself into a scannable QR code. Pick a season, pick a bloom colour, share the picture.">
 <meta name="keywords" content="QR code generator, 3D QR code, interactive QR, seasonal QR, custom QR">
 <meta name="theme-color" content="#f6f3ea">
-<meta property="og:title" content="TreeQR — grow a QR code">
+<meta property="og:title" content="MagicTree — grow a QR code">
 <meta property="og:description" content="A link goes in, a tree grows, and the blossoms land as a QR code.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="/og.svg">
@@ -169,7 +169,7 @@
     <g style="fill:var(--color-accent)"><rect x="10.5" y="10.5" width="4" height="4" rx="1"/><rect x="10.5" y="27.5" width="4" height="4" rx="1"/><rect x="27.5" y="10.5" width="4" height="4" rx="1"/></g>
     <circle cx="29.5" cy="29.5" r="6" style="fill:var(--color-accent-soft)"/><circle cx="29.5" cy="29.5" r="2" style="fill:var(--color-accent-deep)"/>
   </svg>
-  <div><b>TreeQR</b><small>Grow a QR code</small></div>
+  <div><b>MagicTree</b><small>Grow a QR code</small></div>
 </div>
 
 <button id="railToggle" aria-label="Hide menu" aria-expanded="true">
@@ -211,7 +211,7 @@
 <div class="modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
   <div class="card">
     <button class="close" data-close aria-label="Close">×</button>
-    <h2 id="shareTitle">Your TreeQR code</h2>
+    <h2 id="shareTitle">Your MagicTree code</h2>
     <img id="shot" alt="Top-down view of the tree's blossoms, readable as a QR code">
     <p class="muted" id="shotNote">Right-click or long-press the image to save it.</p>
     <div class="actions">
@@ -264,11 +264,11 @@ let SWATCHES = ['#e98aab','#a57ad6','#e0473c','#f5b301'];   // built-in; the dat
 const SEASON_BG = { spring:'#f5efe6', summer:'#eef2e4', autumn:'#f6ece0' };
 const state = { text:'https://example.com', season:'spring', swatch:0, muted:true };
 try{
-  const s = JSON.parse(localStorage.getItem('treeqr') || 'null');
+  const s = JSON.parse(localStorage.getItem('magictree') || 'null');
   if(s){ if(typeof s.text==='string' && s.text) state.text=s.text; if(SEASON_BG[s.season]) state.season=s.season;
          if(s.swatch>=0 && s.swatch<10) state.swatch=s.swatch; }
 }catch(e){}
-function persist(){ try{ localStorage.setItem('treeqr', JSON.stringify({text:state.text,season:state.season,swatch:state.swatch})); }catch(e){} }
+function persist(){ try{ localStorage.setItem('magictree', JSON.stringify({text:state.text,season:state.season,swatch:state.swatch})); }catch(e){} }
 
 /* ---------------- helpers ---------------- */
 function mulberry(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed);
@@ -1085,8 +1085,8 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') document.queryS
 /* gallery: saved trees live in the database, the API lists them */
 const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const wall = { sort:'new', season:'' };
-const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('treeqr-likes')||'[]')); }catch(e){ return new Set(); } })();
-const saveLiked = () => { try{ localStorage.setItem('treeqr-likes', JSON.stringify([...LIKED])); }catch(e){} };
+const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('magictree-likes')||'[]')); }catch(e){ return new Set(); } })();
+const saveLiked = () => { try{ localStorage.setItem('magictree-likes', JSON.stringify([...LIKED])); }catch(e){} };
 // a tiny top-down garden: dark modules are flower beds, light ones are stone. Heights differ per card, like a pin board.
 function thumb(t, W = 360, square = false){
   const m = t.matrix, n = m ? m.length : 25, c = document.createElement('canvas');
@@ -1388,10 +1388,10 @@ const railToggle = $('#railToggle');
 function setCollapsed(c){
   document.body.classList.toggle('collapsed', c);
   railToggle.setAttribute('aria-expanded', String(!c)); railToggle.setAttribute('aria-label', c ? 'Show menu' : 'Hide menu');
-  try{ localStorage.setItem('treeqr-menu', c ? 'hidden' : 'shown'); }catch(e){}
+  try{ localStorage.setItem('magictree-menu', c ? 'hidden' : 'shown'); }catch(e){}
 }
 railToggle.addEventListener('click', () => setCollapsed(!document.body.classList.contains('collapsed')));
-try{ if(localStorage.getItem('treeqr-menu') === 'hidden') setCollapsed(true); }catch(e){}
+try{ if(localStorage.getItem('magictree-menu') === 'hidden') setCollapsed(true); }catch(e){}
 
 /* ---------------- go ---------------- */
 syncUI(); syncMute(); resize(); currentQR = emptyQR; build(emptyQR);

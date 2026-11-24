@@ -5,42 +5,42 @@ services:
     ports:
       - "3000:80"          # http://localhost:3000
     networks:
-      - magic
+      - tree
     depends_on:
       - api
 
   api:
     build: ./api
     environment:
-      DATABASE_URL: postgres://magic:magic@db:5432/magictree?sslmode=disable   # "db" = the service name
+      DATABASE_URL: postgres://magic:magictree@db:5432/treedb?sslmode=disable   # "db" = the service name
     depends_on:
       db:
         condition: service_healthy     # wait until Postgres accepts connections
     networks:
-      magic:
+      tree:
         aliases:
-          - api            # other containers on "magic" can reach this one as http://api:8080
+          - api            # other containers on "tree" can reach this one as http://api:8080
     # no "ports:" any more: only the web container needs to be reachable from the laptop
 
   db:
     image: postgres:18-alpine3.24
     environment:
       POSTGRES_USER: magic
-      POSTGRES_PASSWORD: magic
-      POSTGRES_DB: magictree
+      POSTGRES_PASSWORD: magictree
+      POSTGRES_DB: treedb
     volumes:
       - tree-data:/var/lib/postgresql          # named volume: the data outlives the container
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro   # creates the tables and seeds ten gardens on first start
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U magic -d magictree"]
+      test: ["CMD-SHELL", "pg_isready -U magic -d treedb"]
       interval: 3s
       timeout: 3s
       retries: 10
     networks:
-      - magic
+      - tree
 
 networks:
-  magic:
+  tree:
 
 volumes:
   tree-data:
