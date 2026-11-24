@@ -823,7 +823,7 @@ curl -i localhost:3000/api/health
 <div v-click class="see">
   <div class="h">YOU SHOULD SEE</div>
   <div class="out" style="color: #dc2626">HTTP/1.1 502 Bad Gateway</div>
-  <div class="mt-3">The API is running and port 8080 is open, yet the web cannot reach it.</div>
+  <div class="mt-3">The API is running and port 8080 is open on your laptop, yet the web cannot reach it through <code>localhost</code>.</div>
   <div class="mt-3 text-sm opacity-70"><code>docker logs web</code> says <code>connect() failed (111: Connection refused)</code>. Why?</div>
 </div>
 
@@ -858,12 +858,54 @@ curl -i localhost:3000/api/health
     <div class="font-800 mt-1">api container</div>
     <div class="small mt-1">listens on <code>:8080</code></div>
     <div class="mt-2 label-good">✅ it is here</div>
-    <div class="small">but web has no way to find it</div>
+    <div class="small">but <code>localhost</code> never points here</div>
   </div>
 
 </div>
 
-<div v-click="4" class="mt-8 text-center big-line">Web must call the API <span class="gradient-text">by name</span>, not by <code>localhost</code>.</div>
+<div v-click="4" class="mt-8 text-center big-line"><code>localhost</code> is the wrong address. <span class="gradient-text">So what is the right one?</span></div>
+
+---
+
+# Could web use the published port instead?
+
+<div class="text-lg opacity-80">Yes, but not with <code>localhost</code>. Docker gives containers a name for <b>your laptop</b>: <code>host.docker.internal</code>.</div>
+
+<div class="grid grid-cols-[1fr_1fr] gap-6 mt-3">
+
+<div class="compact">
+
+```bash {1-2|3-4}
+# web → api   (api published: -p 8080:8080)
+API_URL=http://host.docker.internal:8080
+# api → db    (db published: -p 5432:5432)
+DATABASE_URL=postgres://…@host.docker.internal:5432/…
+```
+
+<div v-click="1" class="grid grid-cols-2 gap-3 mt-4">
+  <div class="card bad text-center"><div class="label-bad">❌ localhost</div><div class="small">the container itself</div></div>
+  <div class="card good text-center"><div class="label-good">✅ host.docker.internal</div><div class="small">your laptop</div></div>
+</div>
+
+<div v-click="1" class="small mt-2">We tried both: only the second one answers.</div>
+
+</div>
+
+<div>
+
+<div v-click="2" class="card" style="padding: .6rem .9rem">
+  <div class="font-800">So why not do this?</div>
+  <div class="small mt-1" style="color: inherit">🚪 <b>Every service publishes a port</b>, even the database: anyone who reaches your laptop reaches it.</div>
+  <div class="small mt-1" style="color: inherit">🔁 The call leaves the container, goes to the host, and comes back.</div>
+  <div class="small mt-1" style="color: inherit">💻 <b>Laptop-only.</b> Linux needs an extra <code>--add-host</code> flag, a server has no such host.</div>
+  <div class="small mt-1" style="color: inherit">1️⃣ Only <b>one</b> container can publish <code>8080</code>: no <code>--scale api=3</code>.</div>
+</div>
+
+</div>
+
+</div>
+
+<div v-click="3" class="mt-3 text-center big-line">It works on your laptop. A <span class="gradient-text">network + alias</span> works everywhere.</div>
 
 ---
 
