@@ -733,17 +733,24 @@ docker run -d --restart unless-stopped \
 
 <div>
 
+<div class="small mb-1"><code>web/Dockerfile</code>: just the page, nothing else yet</div>
+
+```dockerfile
+FROM nginx:1.31.9-alpine3.24
+COPY index.html og.svg /usr/share/nginx/html/
+```
+
 ```bash {1|2}
 docker build -t tree-web ./web
 docker run -d --name web -p 3000:80 tree-web
 ```
 
-<div class="mt-4 text-sm opacity-80 leading-relaxed">
+<div class="mt-3 text-sm opacity-80 leading-relaxed">
 <code>-d</code> run in the background · <code>--name</code> give it a name<br>
 <code>-p 3000:80</code> <b>host</b> port 3000 → <b>container</b> port 80
 </div>
 
-<div class="mt-5"><span class="try">⏸ Pause &amp; try</span></div>
+<div class="mt-4"><span class="try">⏸ Pause &amp; try</span></div>
 
 </div>
 
@@ -752,10 +759,74 @@ docker run -d --name web -p 3000:80 tree-web
   Open <b>http://localhost:3000</b>
   <div class="mt-2">A cherry-blossom tree appears. Type a link and the QR code and the tree work, with 3 flower colours. Now press <b>Save</b> or open the <b>Gallery</b>:</div>
   <div class="out mt-1">API not reachable</div>
-  <div class="mt-3 text-sm opacity-70">One container works alone. Anything that needs to <b>remember</b> or <b>count</b> has nobody to ask yet.</div>
+  <div class="mt-3 text-sm opacity-70">There is no API in this image: only <code>index.html</code> and nginx. First, let's change the page.</div>
 </div>
 
 </div>
+
+---
+
+# Step 1 · Change the page, then rebuild
+
+<Stepper :n="1" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-3">
+
+<div>
+
+<div v-click="1">
+<div class="small mb-1"><b>A</b> · Add a 4th flower colour in <code>web/index.html</code> (line 263)</div>
+
+```diff
+- let SWATCHES = ['#e98aab','#a57ad6','#e0473c'];
++ let SWATCHES = ['#e98aab','#a57ad6','#e0473c','#f5b301'];
+```
+
+</div>
+
+<div v-click="2" class="mt-3">
+<div class="small mb-1"><b>B</b> · Run it again</div>
+
+```bash
+docker restart web
+```
+
+</div>
+
+<div v-click="3" class="mt-3">
+<div class="small mb-1"><b>C</b> · Build a <b>new image</b> and run that one</div>
+
+```bash
+docker build -t tree-web:v2 ./web
+docker rm -f web
+docker run -d --name web -p 3000:80 tree-web:v2
+docker images tree-web
+```
+
+</div>
+
+</div>
+
+<div>
+
+<div v-click="2" class="see">
+  <div class="h">B · YOU SHOULD SEE</div>
+  Refresh <b>http://localhost:3000</b>: still <b>3</b> colours.
+  <div class="mt-2 text-sm opacity-80">The image is a <b>snapshot</b>: <code>index.html</code> was copied in when we built it. Editing the file on your laptop, or restarting the container, changes nothing.</div>
+</div>
+
+<div v-click="3" class="see mt-3">
+  <div class="h">C · YOU SHOULD SEE</div>
+  Refresh again: <b>4</b> colours.
+  <div class="out mt-1">REPOSITORY&nbsp;&nbsp;TAG<br>tree-web&nbsp;&nbsp;&nbsp;&nbsp;v2<br>tree-web&nbsp;&nbsp;&nbsp;&nbsp;latest</div>
+  <div class="mt-2 text-sm opacity-80">New code means a <b>new image</b>, and a new container from it. The old image is untouched.</div>
+</div>
+
+</div>
+
+</div>
+
+<div v-click="4" class="mt-4 text-center text-lg">Save still says <b>API not reachable</b>. We need a second container: the API. <span class="small opacity-70">(First put the page back: <code>git restore web/index.html</code>)</span></div>
 
 ---
 
@@ -800,9 +871,9 @@ The Go API starts on its own, with built-in themes and <b>no database</b>.
 
 <div>
 
-<div class="small mb-1">The API answers on <code>localhost:8080</code>, so tell the web <code>web/Dockerfile</code>:</div>
+<div class="small mb-1">The API answers on <code>localhost:8080</code>, so give <code>web/Dockerfile</code> an nginx config that forwards <code>/api</code> there:</div>
 
-```dockerfile {2}
+```dockerfile {2-3}
 FROM nginx:1.31.9-alpine3.24
 ENV API_URL=http://localhost:8080
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template

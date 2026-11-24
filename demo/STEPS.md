@@ -1,6 +1,6 @@
 # Demo script: from one container to a full stack
 
-Walk through it commit by commit (`git log --reverse --oneline`). One commit = one step = one slide (Step 1 to Step 7; Step 1b is a short extra step right after Step 1).
+Walk through it commit by commit (`git log --reverse --oneline`). One commit = one step = one slide (Step 1 to Step 7; Step 1b is a short extra slide).
 Run every command from this `demo/` folder.
 Each step says what it is **for**, what to **run** and what you should **see**.
 Only Step 3 fails on purpose, so that Step 4 has a reason to exist.
@@ -25,7 +25,7 @@ docker run -d --name web -p 3000:80 tree-web
 
 **Intent:** show that an image is a snapshot. Editing `index.html` does not change a container that is already built and running. New code needs a **new image**.
 
-The `Step 1b` commit adds a 4th flower colour in `web/index.html`. Check it out, or make the same edit by hand:
+Add a 4th flower colour in `web/index.html` (line 263):
 
 ```diff
 - let SWATCHES = ['#e98aab','#a57ad6','#e0473c'];
@@ -38,11 +38,10 @@ docker build -t tree-web:v2 ./web          # build a NEW image
 docker rm -f web
 docker run -d --name web -p 3000:80 tree-web:v2
 docker images tree-web
+git restore web/index.html                 # put the page back before Step 2
 ```
 
 **See:** after `docker restart web`, http://localhost:3000 still has **3** colours (the file was copied into the image at build time). After the rebuild and `tree-web:v2`, it has **4**. `docker images tree-web` lists two images, `latest` (old) and `v2` (new). Save still says "API not reachable": that is why Step 2 adds the API.
-
----
 
 ---
 
