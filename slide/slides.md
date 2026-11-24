@@ -1130,6 +1130,87 @@ curl localhost:3000/api/health
 
 ---
 
+# Why did the data disappear?
+
+<Stepper :n="5" class="absolute top-6 right-10" />
+
+<div class="text-lg opacity-80">A container is the image <b>plus a thin writable layer</b> on top. Everything the database saves goes into that layer.</div>
+
+<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mt-5">
+
+  <div class="card min-w-0">
+    <div class="font-800 text-center">🐘 db container</div>
+    <div class="card glow mt-2 text-center" style="padding: .5rem">✍️ <b>writable layer</b><div class="small">your saved trees live here</div></div>
+    <div class="card mt-2 text-center" style="padding: .5rem">📦 <b>image layers</b><div class="small">postgres:18 · read-only</div></div>
+  </div>
+
+  <div v-click="1" class="text-center">
+    <div class="text-3xl">🗑️</div>
+    <div class="small"><code>docker compose down</code></div>
+  </div>
+
+  <div v-click="1" class="card min-w-0">
+    <div class="font-800 text-center">🐘 new db container</div>
+    <div class="card bad mt-2 text-center" style="padding: .5rem">🫙 <b>new, empty layer</b><div class="small label-bad">trees gone</div></div>
+    <div class="card mt-2 text-center" style="padding: .5rem">📦 <b>same image layers</b><div class="small">postgres:18 · read-only</div></div>
+  </div>
+
+</div>
+
+<div v-click="2" class="mt-6 text-center big-line">The writable layer <span class="label-bad">dies with the container</span>. Keep the data <span class="gradient-text">somewhere else</span>.</div>
+
+---
+
+# A volume lives outside the container
+
+<Stepper :n="6" class="absolute top-6 right-10" />
+
+<div class="text-lg opacity-80">A <b>volume</b> is a folder that Docker keeps on the host. A container <b>mounts</b> it at a path, like plugging in a USB drive.</div>
+
+<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mt-5">
+
+  <div class="card min-w-0 text-center">
+    <div class="font-800">🐘 db container</div>
+    <div class="small mt-1">Postgres writes to</div>
+    <div class="chip mt-1"><code>/var/lib/postgresql</code></div>
+  </div>
+
+  <div class="text-center">
+    <div class="arrow" style="font-size: 2rem">⇄</div>
+    <div class="small">mounted</div>
+  </div>
+
+  <div class="card glow min-w-0 text-center">
+    <div class="font-800">💾 volume <code>tree-data</code></div>
+    <div class="small mt-1">managed by Docker</div>
+    <div class="small">outside any container</div>
+  </div>
+
+</div>
+
+<div class="grid grid-cols-3 gap-4 mt-6">
+
+  <div v-click="1" class="card">
+    <div class="font-800">1 · Save</div>
+    <div class="text-sm mt-1">Postgres writes a tree. It lands <b>in the volume</b>, not in the container.</div>
+  </div>
+
+  <div v-click="2" class="card">
+    <div class="font-800">2 · Remove</div>
+    <div class="text-sm mt-1"><code>docker compose down</code> deletes the container. <b>The volume stays.</b> 🗑️ 💾</div>
+  </div>
+
+  <div v-click="3" class="card good">
+    <div class="font-800">3 · Start again</div>
+    <div class="text-sm mt-1">A new container mounts the <b>same volume</b>. The trees are back. ✅</div>
+  </div>
+
+</div>
+
+<div v-click="3" class="mt-5 text-center big-line">Container = <span class="label-bad">disposable</span>. Volume = <span class="gradient-text">the data</span>.</div>
+
+---
+
 # Step 6 · Keep the data: a volume
 
 <Stepper :n="6" class="absolute top-6 right-10" />
@@ -1176,6 +1257,55 @@ curl localhost:3000/api/health
 </div>
 
 <div v-click class="small mt-3">⚠️ <code>docker compose down <b>-v</b></code> also deletes the volume, and the data.</div>
+
+</div>
+
+</div>
+
+---
+
+# Look inside: volumes and mounts
+
+<Stepper :n="6" class="absolute top-6 right-10" />
+
+<div class="grid grid-cols-2 gap-6 mt-3">
+
+<div>
+
+```bash {1|2}
+docker volume ls
+docker volume inspect demo_tree-data
+```
+
+<div class="small mt-2">The name starts with the project folder (<code>demo_</code>). <code>Mountpoint</code> is where Docker keeps the files.</div>
+
+<div v-click class="card bad mt-4">
+  <div class="label-bad">⚠️ Gotcha</div>
+  <div class="text-sm mt-1"><code>init.sql</code> only runs when the volume is <b>empty</b>, on the very first start. To start from scratch:</div>
+
+```bash
+docker compose down -v
+```
+
+</div>
+
+</div>
+
+<div>
+
+<div class="card glow">
+  <div class="font-800">💾 Named volume</div>
+  <div class="mt-1"><code>tree-data:/var/lib/postgresql</code></div>
+  <div class="small mt-1">Docker owns the files. For <b>data you keep</b>: databases, uploads.</div>
+</div>
+
+<div class="card mt-3">
+  <div class="font-800">📁 Bind mount</div>
+  <div class="mt-1" style="word-break: break-all"><code>./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro</code></div>
+  <div class="small mt-1">A file or folder from <b>your laptop</b>. For <b>config and seed files</b>. <code>:ro</code> = read-only.</div>
+</div>
+
+<div class="small mt-3">Both are in our <code>db</code> service. The only difference is the left side of the colon: a <b>name</b> or a <b>path</b>.</div>
 
 </div>
 
