@@ -450,11 +450,11 @@ CMD ["./api"]
 <div v-click class="mt-4 pt-3" style="border-top: 1px solid var(--card-line)">
   <div class="text-center font-700 mb-2">Choose the right tool: pick the base image that fits your job</div>
   <div class="grid grid-cols-3 gap-4">
-    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🟩</span><div><div class="font-700">FROM node</div><div class="small">JavaScript</div></div></div>
-    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🐍</span><div><div class="font-700">FROM python</div><div class="small">Data / scripts</div></div></div>
-    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><span class="text-3xl">🐹</span><div><div class="font-700">FROM golang</div><div class="small">Services</div></div></div>
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><img src="/img/logo-node.svg" style="height: 2.4rem; width: 2.4rem; object-fit: contain" /><div><div class="font-700">FROM node</div><div class="small">JavaScript</div></div></div>
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><img src="/img/logo-python.svg" style="height: 2.4rem; width: 2.4rem; object-fit: contain" /><div><div class="font-700">FROM python</div><div class="small">Data / scripts</div></div></div>
+    <div class="card flex items-center gap-3" style="padding: .5rem .9rem"><img src="/img/logo-go.svg" style="height: 2.4rem; width: 2.4rem; object-fit: contain" /><div><div class="font-700">FROM golang</div><div class="small">Services</div></div></div>
   </div>
-  <div class="mt-2 text-center small">then add what you need on top</div>
+  <div class="mt-2 text-center small">then add what you need on top <span class="opacity-60">· Go gopher by Renée French (CC BY 3.0)</span></div>
 </div>
 
 ---
