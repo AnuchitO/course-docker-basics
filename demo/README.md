@@ -1,6 +1,6 @@
-# ICQR Magic Tree (demo for the Docker Basics course)
+# TreeQR (demo for the Docker Basics course)
 
-Paste a link, get a 3D garden with a cherry-blossom tree. Tap the garden: the blossoms fly into flower beds and form a flat, scannable QR code. (Visual design ported from the "QR Garden" prototype.) Three containers:
+Paste a link, get a 3D cherry-blossom tree. Tap the scene: the blossoms fly into flower beds and form a flat, scannable QR code. Three containers:
 
 | service | what | image |
 |---|---|---|

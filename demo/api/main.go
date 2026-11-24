@@ -167,7 +167,7 @@ func trackingLink(r *http.Request, id string) string {
 var landing = template.Must(template.New("l").Parse(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{.Name}}</title><body style="font-family:system-ui;max-width:32rem;margin:15vh auto;padding:0 1.2rem;line-height:1.5">
 <h1 style="font-size:1.3rem">{{.Name}}</h1><p style="white-space:pre-wrap;word-break:break-word;background:#f5efe6;padding:1rem;border-radius:12px">{{.URL}}</p>
-<p style="color:#8c8274;font-size:.85rem">Scanned {{.Scans}} times · QR Garden</p>`))
+<p style="color:#8c8274;font-size:.85rem">Scanned {{.Scans}} times · TreeQR</p>`))
 
 // GET /api/r/{id}  <- what a phone opens after scanning. Counts the scan, then sends the visitor on:
 // a web link gets a 302 redirect, anything else (text, Wi-Fi, mailto) gets a small page that shows it.

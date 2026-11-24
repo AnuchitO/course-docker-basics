@@ -3,149 +3,216 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QR Garden — 3D QR Code Generator</title>
-<meta name="description" content="Turn any link into a 3D QR garden that still scans. QR code generator with seasonal themes and custom colors.">
-<meta name="keywords" content="QR code generator, 3D QR code, QR tree, interactive QR, seasonal themes, custom QR">
-<meta name="theme-color" content="#f5efe6">
-<meta property="og:title" content="QR Garden — 3D QR Code Generator">
-<meta property="og:description" content="Turn any link into a QR code garden with a magic tree.">
+<title>TreeQR — grow a QR code</title>
+<meta name="description" content="TreeQR turns any link into a little 3D tree that rearranges itself into a scannable QR code. Pick a season, pick a bloom colour, share the picture.">
+<meta name="keywords" content="QR code generator, 3D QR code, interactive QR, seasonal QR, custom QR">
+<meta name="theme-color" content="#f6f3ea">
+<meta property="og:title" content="TreeQR — grow a QR code">
+<meta property="og:description" content="A link goes in, a tree grows, and the blossoms land as a QR code.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="/og.svg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231b7a58'/><rect x='5' y='5' width='7' height='7' rx='1.5' fill='%23f8f3e9'/><rect x='5' y='20' width='7' height='7' rx='1.5' fill='%23f8f3e9'/><rect x='20' y='5' width='7' height='7' rx='1.5' fill='%23f8f3e9'/><circle cx='23.5' cy='23.5' r='4.5' fill='%23bfe8cf'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@700&family=Instrument+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f5efe6;--ink:#3b3428;--muted:#8c8274;--card:#fffdf8;--line:#e4dbcf;--accent:#2f6b4f;--accent-ink:#fff}
+  :root{
+    --color-paper:#faf8f3;--color-paper-2:#f3f0e8;--color-paper-3:#e9e5da;
+    --color-ink:#18241e;--color-ink-2:#3c4a42;--color-muted:#66736b;
+    --color-rule:#dcd8cb;
+    --color-accent:#1f7a55;--color-accent-deep:#155c40;--color-accent-soft:#d6ecde;--color-accent-ink:#fff;
+    --color-focus:#155c40;
+    --font-display:"Schibsted Grotesk",ui-sans-serif,sans-serif;--font-body:"Instrument Sans",ui-sans-serif,sans-serif;--font-outlier:"DM Mono",ui-monospace,monospace;
+    --radius-card:14px;--radius-input:10px;
+    --shadow-pop:0 1px 2px rgba(24,36,30,.08),0 24px 48px -24px rgba(24,36,30,.35);
+    --bg:var(--color-paper);--ink:var(--color-ink);--muted:var(--color-muted);--accent:var(--color-accent);--line:var(--color-rule);--card:#fff;
+    --rail-w:372px}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);transition:background-color .8s ease;
-    font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+    font-family:var(--font-body);font-size:15px;line-height:1.5;color:var(--color-ink);-webkit-font-smoothing:antialiased}
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--color-focus);outline-offset:2px}
   canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;outline:none}
   canvas#c.dragging{cursor:grabbing}
-  .brand{position:fixed;top:16px;left:18px;display:flex;align-items:center;gap:10px;user-select:none;pointer-events:none}
-  .brand b{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:21px;letter-spacing:-.01em;display:block;line-height:1}
-  .brand small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
-  .iconbtn{position:fixed;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
-    background:rgba(255,253,248,.7);color:var(--ink);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
-  .iconbtn:hover{background:#fff}
-  #galBtn{right:58px}
-  #wall{position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;display:none;padding:0 16px 40px}
-  #wall.open{display:block}
-  .wallbar{position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 0 12px;background:var(--bg)}
-  .wallbar h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:22px;margin:0 auto 0 0}
-  .chip{border:1px solid var(--line);background:rgba(255,253,248,.7);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;cursor:pointer}
-  .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
-  .masonry{columns:4 200px;column-gap:14px;max-width:1100px;margin:0 auto}
-  .pin{break-inside:avoid;margin:0 0 14px;border-radius:18px;overflow:hidden;background:#fffdf8;border:1px solid var(--line);position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s}
-  .pin:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(60,45,30,.16)}
-  .pin canvas{display:block;width:100%}
-  .pin .cap{padding:9px 12px 11px}
-  .pin .cap b{display:block;font-size:13.5px;line-height:1.25}
-  .pin .cap .scans{color:var(--accent);font-weight:600;margin-top:5px}
-  .pin .cap small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pin .over{position:absolute;inset:0 0 auto 0;height:62%;display:flex;justify-content:space-between;align-items:flex-start;padding:10px;opacity:0;transition:opacity .15s;
-    background:linear-gradient(rgba(30,24,16,.35),transparent)}
-  .pin:hover .over,.pin:focus-within .over{opacity:1}
-  @media (hover:none){.pin .over{opacity:1;background:none}}
-  .pill2{border:0;border-radius:999px;padding:7px 13px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff}
-  .heart{border:0;border-radius:999px;padding:7px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:rgba(255,253,248,.92);color:var(--ink)}
-  .heart.on{color:#d8344f}
-  #wallNote{text-align:center;color:var(--muted);font-size:13px;margin:30px 0}
-  #panel{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(520px,calc(100% - 24px));
-    display:flex;flex-direction:column;align-items:center;gap:9px;z-index:2}
-  .pill{font-size:12px;color:var(--muted);background:rgba(255,253,248,.65);border:1px solid var(--line);
-    padding:5px 12px;border-radius:999px;backdrop-filter:blur(6px);transition:opacity .3s}
-  .row{display:flex;gap:8px;width:100%}
-  #url{flex:1;min-width:0;font:inherit;font-size:15px;padding:11px 14px;border-radius:12px;border:1.5px solid var(--line);
-    background:var(--card);color:var(--ink);outline:none;transition:border-color .2s}
-  #url:focus{border-color:var(--accent)}
-  .primary{flex:0 0 46px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer}
-  .primary:hover{filter:brightness(1.08)}
-  .primary:disabled{cursor:progress;filter:none;opacity:.85}
-  .primary.ok{background:#3f7d4e}
-  .primary.fail{background:#b4442f}
+
+  /* ---- one flat sheet: the menu ---- */
+  #panel{position:fixed;z-index:2;right:0;top:0;bottom:0;width:var(--rail-w);display:flex;flex-direction:column;padding:92px 24px 16px;overflow:auto;
+    background:var(--color-paper);border-left:1px solid var(--color-rule);transition:transform .3s ease-out}
+  .brand{position:fixed;z-index:3;top:24px;right:24px;width:calc(var(--rail-w) - 48px);display:flex;align-items:center;gap:12px;user-select:none;pointer-events:none;transition:transform .3s ease-out}
+  .brand svg{flex:none;border-radius:11px}
+  .brand b{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.03em;line-height:1;display:block}
+  .brand small{display:block;font-size:13px;font-weight:500;color:var(--color-muted);margin-top:3px}
+  .blk{padding:18px 0;border-top:1px solid var(--color-rule)}
+  .blk:first-of-type{border-top:0;padding-top:0}
+  .fl{display:block;font-size:13px;font-weight:500;color:var(--color-ink-2);margin:0 0 8px}
+  .fl.gap{margin-top:16px}
+  #url{width:100%;height:48px;font:inherit;font-size:15px;padding:0 14px;border-radius:var(--radius-input);border:1px solid #9aa59d;background:#fff;color:var(--color-ink);outline:none}
+  #url::placeholder{color:var(--color-muted)}
+  #url:focus{border-color:var(--color-focus);box-shadow:0 0 0 3px rgba(31,122,85,.2)}
+  .qr{display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:stretch}
+  #pv{width:132px;height:132px;display:block;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(24,36,30,.12)}
+  .qrside{display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-width:0}
+  #pvText{margin:0;font:400 12px/1.45 var(--font-outlier);color:var(--color-muted);word-break:break-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  /* buttons: flat, one solid action */
+  .primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;padding:0 14px;border:0;border-radius:var(--radius-input);cursor:pointer;
+    background:var(--color-accent);color:var(--color-accent-ink);font-size:15px;font-weight:600;transition:background .15s}
+  .primary:hover{background:var(--color-accent-deep)}
+  .tbtn{display:flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--color-ink-2);
+    font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+  .tbtn:hover{background:rgba(24,36,30,.07);color:var(--color-ink)}
+  .tbtn:disabled{cursor:progress;opacity:.7}
+  .tbtn.ok{color:var(--color-accent-deep)}
+  .tbtn.fail{color:var(--color-muted)}
   .spin{animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  #toast.ok{background:#3f7d4e}
-  #toast.fail{background:#b4442f}
-  .seg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0;border-radius:12px;
-    border:1px solid transparent;background:rgba(255,253,248,.55);font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;transition:all .2s}
-  .seg:hover{background:rgba(255,253,248,.9)}
-  .seg.on{background:#fff;border-color:var(--line);box-shadow:0 1px 3px rgba(60,40,10,.07);font-weight:600}
-  .seg.square{flex:0 0 46px}
-  .swatches{display:flex;gap:10px;padding:2px}
-  .sw{width:24px;height:24px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0;transition:transform .15s}
-  .sw:hover{transform:scale(1.1)}
-  .sw.on{box-shadow:0 0 0 2px var(--ink)}
-  #err{font-size:12px;color:#b4442f;min-height:0}
-  .modal{position:fixed;inset:0;background:rgba(40,34,26,.38);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+  #toast.ok{background:var(--color-accent-deep)}
+  #toast.fail{background:var(--color-ink-2)}
+  /* season: a real segmented control */
+  .seasons{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #9aa59d;border-radius:var(--radius-input);overflow:hidden;background:#fff}
+  .seg{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:0;border-left:1px solid var(--color-rule);background:transparent;color:var(--color-ink);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+  .seg:first-child{border-left:0}
+  .seg:hover{background:var(--color-paper-2)}
+  .seg.on{background:var(--color-ink);color:#fff}
+  .swatches{display:flex;flex-wrap:wrap;gap:12px;padding:2px}
+  .sw{position:relative;width:32px;height:32px;border-radius:50%;border:0;padding:0;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(24,36,30,.18);transition:transform .12s}
+  .sw:hover{transform:scale(1.08)}
+  .sw.on{box-shadow:0 0 0 2px var(--color-paper),0 0 0 4px var(--color-ink)}
+  .sw.on::after{content:"";position:absolute;left:11px;top:7px;width:7px;height:12px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  #hint{font-size:13px;line-height:1.5;color:var(--color-muted);margin:18px 0 0;transition:opacity .3s}
+  #err{font-size:13px;color:var(--color-ink-2)}
+  #err:empty{display:none}
+  .foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--color-rule);display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  #railToggle{position:fixed;z-index:3;top:50%;right:var(--rail-w);transform:translateY(-50%);width:22px;height:56px;padding:0;border:1px solid var(--color-rule);border-right:0;border-radius:10px 0 0 10px;
+    cursor:pointer;color:var(--color-ink-2);background:var(--color-paper);display:grid;place-items:center;transition:right .3s ease-out}
+  #railToggle:hover{background:var(--color-paper-2)}
+  #railToggle svg{transition:transform .3s}
+  body.collapsed #railToggle{right:0}
+  body.collapsed #railToggle svg{transform:rotate(180deg)}
+  body.collapsed #panel{transform:translateX(100%)}
+  body.collapsed .brand{transform:translateX(130%)}
+  body.collapsed{--rail-vis:0px}
+  @media (prefers-reduced-motion:reduce){#panel,.brand,#railToggle,#railToggle svg{transition:none}}
+
+  /* ---- gallery ---- */
+  #wall{position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;display:none;padding:0 28px 48px}
+  #wall.open{display:block}
+  .wallbar{position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:20px 0 16px;background:var(--bg);border-bottom:1px solid var(--color-rule);margin-bottom:20px}
+  .wallbar h2{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:-.03em;line-height:1.05;margin:0 auto 0 0}
+  .chip{height:36px;padding:0 14px;border:1px solid #9aa59d;border-radius:var(--radius-input);background:#fff;color:var(--color-ink);font-size:13.5px;font-weight:500;cursor:pointer}
+  .chip:hover{background:var(--color-paper-2)}
+  .chip.on{background:var(--color-ink);border-color:var(--color-ink);color:#fff}
+  .xbtn{width:36px;height:36px;margin-left:6px;border:1px solid #9aa59d;border-radius:var(--radius-input);background:#fff;color:var(--color-ink);font-size:20px;line-height:1;cursor:pointer}
+  .xbtn:hover{background:var(--color-paper-2)}
+  .masonry{columns:5 210px;column-gap:18px;max-width:1280px;margin:0 auto}
+  .pin{break-inside:avoid;margin:0 0 18px;border-radius:var(--radius-card);overflow:hidden;background:#fff;border:1px solid var(--color-rule);position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s}
+  .pin:hover{transform:translateY(-2px);box-shadow:var(--shadow-pop)}
+  .pin canvas{display:block;width:100%}
+  .pin .cap{padding:10px 12px 12px;border-top:1px solid var(--color-rule)}
+  .pin .cap b{display:block;font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:-.01em;line-height:1.2}
+  .pin .cap .scans{color:var(--color-accent-deep);font-weight:600;margin-top:6px}
+  .pin .cap small{display:block;color:var(--color-muted);font-size:12.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pin .over{position:absolute;inset:0 0 auto 0;height:62%;display:flex;justify-content:space-between;align-items:flex-start;padding:10px;opacity:0;transition:opacity .15s;background:linear-gradient(rgba(24,36,30,.3),transparent)}
+  .pin:hover .over,.pin:focus-within .over{opacity:1}
+  @media (hover:none){.pin .over{opacity:1;background:none}}
+  .pill2{height:32px;padding:0 12px;border:0;border-radius:8px;background:var(--color-accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+  .heart{height:32px;padding:0 10px;border:0;border-radius:8px;background:#fff;color:var(--color-ink);font-size:13px;font-weight:500;cursor:pointer}
+  .heart.on{color:var(--color-accent-deep);background:var(--color-accent-soft)}
+  #wallNote{text-align:center;color:var(--color-muted);font-size:14px;margin:30px 0}
+
+  /* ---- dialogs ---- */
+  .modal{position:fixed;inset:0;background:rgba(24,36,30,.45);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
   .modal.open{display:flex}
-  .card{background:var(--card);border-radius:18px;padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(40,30,10,.25);
-    max-height:calc(100vh - 32px);overflow:auto}
-  .card h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:0 0 10px}
-  .card p{font-size:14px;line-height:1.55;margin:0 0 10px;color:#4d4538}
-  .card .muted{color:var(--muted);font-size:12.5px}
-  .card img{width:100%;border-radius:12px;display:block;margin:4px 0 12px;background:var(--bg)}
-  .card .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .btn{font:inherit;font-size:14px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
-  .btn.dark{background:var(--accent);border-color:var(--accent);color:#fff}
-  .close{float:right;border:0;background:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;margin:-6px -6px 0 0}
-  #toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:8px 14px;border-radius:999px;
-    opacity:0;transition:opacity .25s;pointer-events:none;z-index:20}
-  @media (max-height:560px){.pill{display:none}}
+  .card{background:#fff;border-radius:var(--radius-card);padding:24px;max-width:460px;width:100%;box-shadow:var(--shadow-pop);max-height:calc(100vh - 32px);overflow:auto}
+  .card h2{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.03em;line-height:1.05;margin:0 0 14px}
+  .card p{font-size:15px;line-height:1.55;margin:0 0 12px;color:var(--color-ink-2)}
+  .card .muted{color:var(--color-muted);font-size:13.5px}
+  .card img{width:100%;border-radius:10px;display:block;margin:4px 0 12px;background:var(--bg);border:1px solid var(--color-rule)}
+  .card .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .btn{height:44px;padding:0 16px;border:1px solid #9aa59d;border-radius:var(--radius-input);background:#fff;color:var(--color-ink);font-size:14px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--color-paper-2)}
+  .btn.dark{background:var(--color-accent);border-color:var(--color-accent);color:#fff}
+  .btn.dark:hover{background:var(--color-accent-deep)}
+  .close{float:right;border:0;background:none;font-size:24px;line-height:1;color:var(--color-muted);cursor:pointer;margin:-8px -6px 0 0}
+  #toast{position:fixed;left:calc(50% - var(--rail-vis,var(--rail-w))/2);top:20px;transform:translateX(-50%);background:var(--color-ink);color:#fff;font-size:14px;font-weight:500;
+    padding:10px 16px;border-radius:10px;box-shadow:var(--shadow-pop);opacity:0;transition:opacity .25s;pointer-events:none;z-index:20}
+
+  /* ---- small screens: brand bar on top, menu as a bottom sheet ---- */
+  @media (max-width:879px){
+    :root{--rail-w:0px}
+    #panel{top:auto;left:0;width:100%;padding:12px 14px 8px;border-left:0;border-top:1px solid var(--color-rule);border-radius:var(--radius-card) var(--radius-card) 0 0;max-height:62vh}
+    body.collapsed #panel,body.collapsed .brand{transform:none}
+    #railToggle{display:none}
+    .brand{top:0;left:0;right:auto;width:100%;height:56px;padding:0 14px;background:var(--color-paper);border-bottom:1px solid var(--color-rule);gap:10px}
+    .brand svg{width:30px;height:30px}
+    .brand b{font-size:21px}
+    .brand small{display:none}
+    .blk{padding:12px 0}
+    .qr{grid-template-columns:84px 1fr;gap:12px}
+    #pv{width:84px;height:84px}
+    #pvText{-webkit-line-clamp:2}
+    .primary{height:44px}
+    .fl{display:none}
+    #hint{display:none}
+    .masonry{columns:2 150px}
+    #toast{left:50%;top:66px}
+  }
+  @media (max-height:700px) and (min-width:880px){#hint{display:none}}
 </style>
 </head>
 <body>
-<canvas id="c" tabindex="0" aria-label="3D garden. Press to switch between the tree and the QR code."></canvas>
+<canvas id="c" tabindex="0" aria-label="3D tree. Press to switch between the tree and the QR code."></canvas>
 
 <div class="brand">
-  <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-    <rect x="1" y="1" width="32" height="32" rx="8" fill="#2f6b4f"/>
-    <rect x="6" y="6" width="8" height="8" rx="1.5" fill="#fffdf8"/><rect x="8.5" y="8.5" width="3" height="3" fill="#2f6b4f"/>
-    <rect x="20" y="6" width="8" height="8" rx="1.5" fill="#fffdf8"/><rect x="22.5" y="8.5" width="3" height="3" fill="#2f6b4f"/>
-    <rect x="6" y="20" width="8" height="8" rx="1.5" fill="#fffdf8"/><rect x="8.5" y="22.5" width="3" height="3" fill="#2f6b4f"/>
-    <circle cx="23.5" cy="23.5" r="4.2" fill="#f2a7bf"/><circle cx="23.5" cy="23.5" r="1.6" fill="#fffdf8"/>
+  <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+    <rect width="42" height="42" rx="11" style="fill:var(--color-accent)"/>
+    <g style="fill:#fff"><rect x="7" y="7" width="11" height="11" rx="2"/><rect x="7" y="24" width="11" height="11" rx="2"/><rect x="24" y="7" width="11" height="11" rx="2"/></g>
+    <g style="fill:var(--color-accent)"><rect x="10.5" y="10.5" width="4" height="4" rx="1"/><rect x="10.5" y="27.5" width="4" height="4" rx="1"/><rect x="27.5" y="10.5" width="4" height="4" rx="1"/></g>
+    <circle cx="29.5" cy="29.5" r="6" style="fill:var(--color-accent-soft)"/><circle cx="29.5" cy="29.5" r="2" style="fill:var(--color-accent-deep)"/>
   </svg>
-  <div><b>QR Garden</b><small>a QR code you can grow</small></div>
+  <div><b>TreeQR</b><small>Grow a QR code</small></div>
 </div>
 
-<button class="iconbtn" id="infoBtn" aria-label="About">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-</button>
-
-<button class="iconbtn" id="galBtn" aria-label="Saved gardens">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
+<button id="railToggle" aria-label="Hide menu" aria-expanded="true">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
 </button>
 
 <div id="panel">
-  <div class="pill" id="hint">Tap the garden to reveal the QR code</div>
-  <div class="row">
-    <input id="url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a link or any text" aria-label="Link or text to encode">
-    <button class="primary" id="saveBtn" aria-label="Save this garden to the gallery (needs the database)">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
-    </button>
-    <button class="primary" id="shareBtn" aria-label="Get QR image">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
-    </button>
+  <div class="blk">
+    <label class="fl" for="url">Link or text</label>
+    <input id="url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com" aria-label="Link or text to encode">
   </div>
-  <div class="row" role="group" aria-label="Season">
-    <button class="seg" data-season="spring">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2.2"/><path d="M12 9.8c-1.5-2.5-1.5-4.8 0-6.3 1.5 1.5 1.5 3.8 0 6.3zM12 14.2c1.5 2.5 1.5 4.8 0 6.3-1.5-1.5-1.5-3.8 0-6.3zM9.8 12c-2.5 1.5-4.8 1.5-6.3 0 1.5-1.5 3.8-1.5 6.3 0zM14.2 12c2.5-1.5 4.8-1.5 6.3 0-1.5 1.5-3.8 1.5-6.3 0z"/></svg>Spring</button>
-    <button class="seg" data-season="summer">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>Summer</button>
-    <button class="seg" data-season="autumn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19l8-8"/></svg>Autumn</button>
-    <button class="seg square" id="muteBtn" aria-label="Sound off"></button>
+  <div class="blk qr">
+    <canvas id="pv" width="264" height="264" aria-label="Live preview of the QR code"></canvas>
+    <div class="qrside">
+      <p id="pvText" title=""></p>
+      <button class="primary" id="shareBtn" aria-label="Get QR image"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Get QR image</span></button>
+      <button class="tbtn" id="saveBtn" aria-label="Save this tree to the gallery (needs the database)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Save to gallery</span></button>
+    </div>
   </div>
-  <div class="swatches" id="swatches" role="group" aria-label="Flower colour"></div>
-  <div id="err" role="status"></div>
+  <div class="blk">
+    <div class="fl">Season</div>
+    <div class="seasons" role="group" aria-label="Season">
+      <button class="seg" data-season="spring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2.2"/><path d="M12 9.8c-1.5-2.5-1.5-4.8 0-6.3 1.5 1.5 1.5 3.8 0 6.3zM12 14.2c1.5 2.5 1.5 4.8 0 6.3-1.5-1.5-1.5-3.8 0-6.3zM9.8 12c-2.5 1.5-4.8 1.5-6.3 0 1.5-1.5 3.8-1.5 6.3 0zM14.2 12c2.5-1.5 4.8-1.5 6.3 0-1.5 1.5-3.8 1.5-6.3 0z"/></svg>Spring</button>
+      <button class="seg" data-season="summer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>Summer</button>
+      <button class="seg" data-season="autumn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19l8-8"/></svg>Autumn</button>
+    </div>
+    <div class="fl gap">Blossom colour</div>
+    <div class="swatches" id="swatches" role="group" aria-label="Blossom colour"></div>
+    <p id="hint">Tap the tree to flip it into a QR code. Tap again to flip back.</p>
+    <div id="err" role="status"></div>
+  </div>
+  <div class="foot">
+    <button class="tbtn" id="galBtn" aria-label="Saved trees"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg><span>Gallery</span></button>
+    <button class="tbtn" id="infoBtn" aria-label="About"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>How</span></button>
+    <button class="tbtn" id="muteBtn" aria-label="Sound off"></button>
+  </div>
 </div>
 
 <div class="modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
   <div class="card">
     <button class="close" data-close aria-label="Close">×</button>
-    <h2 id="shareTitle">Your QR garden</h2>
-    <img id="shot" alt="Top-down view of the garden, readable as a QR code">
+    <h2 id="shareTitle">Your TreeQR code</h2>
+    <img id="shot" alt="Top-down view of the tree's blossoms, readable as a QR code">
     <p class="muted" id="shotNote">Right-click or long-press the image to save it.</p>
     <div class="actions">
       <button class="btn dark" id="copyImg">Copy image</button>
@@ -154,18 +221,18 @@
   </div>
 </div>
 
-<div id="wall" role="dialog" aria-modal="true" aria-label="Garden gallery">
+<div id="wall" role="dialog" aria-modal="true" aria-label="Gallery">
   <div class="wallbar">
     <h2>Gallery</h2>
     <button class="chip on" data-sort="new">New</button>
     <button class="chip" data-sort="popular">Popular</button>
     <button class="chip" data-sort="scans">Most scanned</button>
-    <span style="width:8px"></span>
+    <span style="width:10px"></span>
     <button class="chip on" data-fs="">All</button>
     <button class="chip" data-fs="spring">Spring</button>
     <button class="chip" data-fs="summer">Summer</button>
     <button class="chip" data-fs="autumn">Autumn</button>
-    <button class="iconbtn" id="wallClose" style="position:static;margin-left:6px" aria-label="Close gallery">×</button>
+    <button class="xbtn" id="wallClose" aria-label="Close gallery">×</button>
   </div>
   <div class="masonry" id="gallery"></div>
   <p id="wallNote"></p>
@@ -174,11 +241,11 @@
 <div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
   <div class="card">
     <button class="close" data-close aria-label="Close">×</button>
-    <h2 id="infoTitle">How the garden works</h2>
-    <p>Every square of a QR code is one tile of this garden. Dark squares are planted: grass around the three corner markers and flower beds in the middle. Light squares are bare stone paths.</p>
-    <p>Tap the garden and the tree bows out while the camera rises overhead. From up there the plantings line up into a real QR code your phone can scan. Tap again to bring the tree back.</p>
-    <p>Type any link or text below the garden to replant it. Seasons and flower colours change the look, not the code.</p>
-    <p class="muted">Scanning tip: hold your phone so the whole square fits on screen. Error correction is set to "Q", so the code survives a few stray petals, and the API decodes every code before you see it.</p>
+    <h2 id="infoTitle">How it works</h2>
+    <p>Every square of a QR code becomes one tile on the ground. Dark squares are planted: grass around the three corner markers and blossoms in the middle. Light squares are bare stone.</p>
+    <p>Tap the scene and the tree bows out while the camera rises overhead. From up there the plantings line up into a real QR code your phone can scan. Tap again to bring the tree back.</p>
+    <p>Type any link or text on the left to replant it. Season and bloom colour change the look, not the code.</p>
+    <p class="muted">Scanning tip: keep the whole square on screen. Error correction is set to "Q", so the code survives a few stray petals, and the API decodes every code before you see it.</p>
   </div>
 </div>
 
@@ -197,11 +264,11 @@ let SWATCHES = ['#e98aab','#a57ad6','#e0473c','#f5b301'];   // built-in; the dat
 const SEASON_BG = { spring:'#f5efe6', summer:'#eef2e4', autumn:'#f6ece0' };
 const state = { text:'https://example.com', season:'spring', swatch:0, muted:true };
 try{
-  const s = JSON.parse(localStorage.getItem('qr-garden') || 'null');
+  const s = JSON.parse(localStorage.getItem('treeqr') || 'null');
   if(s){ if(typeof s.text==='string' && s.text) state.text=s.text; if(SEASON_BG[s.season]) state.season=s.season;
          if(s.swatch>=0 && s.swatch<10) state.swatch=s.swatch; }
 }catch(e){}
-function persist(){ try{ localStorage.setItem('qr-garden', JSON.stringify({text:state.text,season:state.season,swatch:state.swatch})); }catch(e){} }
+function persist(){ try{ localStorage.setItem('treeqr', JSON.stringify({text:state.text,season:state.season,swatch:state.swatch})); }catch(e){} }
 
 /* ---------------- helpers ---------------- */
 function mulberry(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed);
@@ -812,14 +879,21 @@ function viewBounds(yaw, pitch, pts, pad){
   return { cx:(x0+x1)/2, cy:(y0+y1)/2, w:(x1-x0)*pad, h:(y1-y0)*pad };
 }
 const panel = $('#panel');
+// the part of the window the scene may use: left of the rail on desktop, above the sheet on mobile
+function stageBox(){
+  const collapsed = document.body.classList.contains('collapsed');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  if(vw >= 880){ const rw = collapsed ? 0 : panel.getBoundingClientRect().width; return { x:0, y:24, w:vw - rw, h:vh - 48 }; }
+  const top = 56 + 8, bot = panel.getBoundingClientRect().height + 16;
+  return { x:0, y:top, w:vw, h:Math.max(80, vh - top - bot) };
+}
 function frame(b){
-  const cw = window.innerWidth, ch = window.innerHeight;
-  const ph = panel.getBoundingClientRect().height;
-  const topPad = 62, botPad = ph + 26, side = 14;
-  const aw = Math.max(80, cw - side*2), ah = Math.max(80, ch - topPad - botPad);
+  const cw = window.innerWidth, ch = window.innerHeight, st = stageBox();
+  const side = 14;
+  const aw = Math.max(80, st.w - side*2), ah = Math.max(80, st.h);
   const wpp = Math.max(b.w/aw, b.h/ah);
-  const yc = topPad + ah/2;
-  camera.left = -cw/2*wpp; camera.right = cw/2*wpp; camera.top = yc*wpp; camera.bottom = -(ch-yc)*wpp;
+  const xc = st.x + st.w/2, yc = st.y + ah/2;
+  camera.left = -xc*wpp; camera.right = (cw-xc)*wpp; camera.top = yc*wpp; camera.bottom = -(ch-yc)*wpp;
   camera.position.x = b.cx; camera.position.y = b.cy;
   camera.updateProjectionMatrix();
 }
@@ -838,27 +912,38 @@ const post = body => ({ method:'POST', headers:{'Content-Type':'application/json
 const fromMatrix = rows => ({ getModuleCount:() => rows.length, isDark:(r,c) => rows[r][c] === '1' });
 const emptyQR = { getModuleCount:() => 25, isDark:() => false };   // a bare garden: shown until the API answers
 let currentQR = null, reqId = 0;
+/* live mini preview in the menu: the same modules the scene plants */
+let pvText = '';
+function drawPreview(q, text){
+  if(text !== undefined) pvText = text;
+  const cv = $('#pv'), n = q.getModuleCount(), matrix = [];
+  for(let r=0;r<n;r++){ let row = ''; for(let c=0;c<n;c++) row += q.isDark(r, c) ? '1' : '0'; matrix.push(row); }
+  // same drawing as the gallery cards: this season's stone, grass and blossom beds in the chosen colour
+  const art = thumb({ id:'preview', matrix, season:state.season, swatch:state.swatch }, cv.width, true);
+  const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height); g.drawImage(art, 0, 0, cv.width, cv.height);
+  $('#pvText').textContent = pvText; $('#pvText').title = pvText;
+}
 async function regenerate(){
   const text = state.link || state.text.trim() || 'https://example.com', err = $('#err'), id = ++reqId;
   try{
     const d = await api('/qr', post({url:text}));
     if(id !== reqId) return;
     err.textContent = '';
-    currentQR = fromMatrix(d.matrix); build(currentQR);
+    currentQR = fromMatrix(d.matrix); build(currentQR); drawPreview(currentQR, text);
   }catch(e){
     if(id !== reqId) return;
     // API down: the page still works. Build the code in the browser (same level Q, but not decoded back to verify it).
     try{
       const q = qrcode(0, 'Q'); q.addData(text); q.make();
       err.textContent = '';
-      currentQR = q; build(currentQR);
+      currentQR = q; build(currentQR); drawPreview(currentQR, text);
     }catch(_){
       err.textContent = e.message;
       if(!currentQR){ currentQR = emptyQR; build(currentQR); }
     }
   }
 }
-function rebuildLook(){ if(currentQR) build(currentQR); }
+function rebuildLook(){ if(currentQR){ build(currentQR); drawPreview(currentQR); } }
 async function loadThemes(){
   try{
     const d = await api('/themes');
@@ -933,7 +1018,7 @@ function tick(now){
 
 /* ---------------- interaction ---------------- */
 const hint = $('#hint');
-const HINTS = { tree:'Tap the garden to reveal the QR code', both:'The tree is the code: scan the canopy. Tap for the full code', qr:'Tap to bring the tree back' };
+const HINTS = { tree:'Tap the tree to flip it into a QR code. Tap again to flip back.', both:'The tree is the code: scan the canopy. Tap for the full code', qr:'Tap to bring the tree back.' };
 let view = 'qr';
 function setView(v){
   sapTarget = (v === 'both' || (v === 'qr' && view === 'both')) ? 1 : 0;   // going on to the flat code keeps the canopy colours until the morph ends
@@ -997,16 +1082,16 @@ document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e =
   if(e.target===m || e.target.hasAttribute('data-close')) m.classList.remove('open');
 }));
 document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal.open,#wall.open').forEach(m=>m.classList.remove('open')); });
-/* gallery: saved gardens live in the database, the API lists them */
+/* gallery: saved trees live in the database, the API lists them */
 const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const wall = { sort:'new', season:'' };
-const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('qr-garden-likes')||'[]')); }catch(e){ return new Set(); } })();
-const saveLiked = () => { try{ localStorage.setItem('qr-garden-likes', JSON.stringify([...LIKED])); }catch(e){} };
+const LIKED = (() => { try{ return new Set(JSON.parse(localStorage.getItem('treeqr-likes')||'[]')); }catch(e){ return new Set(); } })();
+const saveLiked = () => { try{ localStorage.setItem('treeqr-likes', JSON.stringify([...LIKED])); }catch(e){} };
 // a tiny top-down garden: dark modules are flower beds, light ones are stone. Heights differ per card, like a pin board.
-function thumb(t, W = 360){
+function thumb(t, W = 360, square = false){
   const m = t.matrix, n = m ? m.length : 25, c = document.createElement('canvas');
   const hash = [...t.id].reduce((a,ch) => a*31 + ch.charCodeAt(0) >>> 0, 7);
-  const ratio = [1, 1.18, 1.35][hash % 3], H = Math.round(W*ratio);
+  const ratio = square ? 1 : [1, 1.18, 1.35][hash % 3], H = Math.round(W*ratio);
   c.width = W; c.height = H;
   const g = c.getContext('2d'), pad = W*26/360, cell = (W - 2*pad) / (n + 2), top = (H - cell*(n+2)) / 2;
   g.fillStyle = SEASON_BG[t.season] || '#f5efe6'; g.fillRect(0,0,W,H);
@@ -1068,8 +1153,8 @@ async function plant(t, card){
     await wait(900); setMode(false); planting = false; return;
   }
   // geometry of the QR square on screen (where the live scene draws it)
-  const vw = innerWidth, vh = innerHeight, ph = panel.getBoundingClientRect().height;
-  const ah = Math.max(80, vh - 62 - (ph + 26)), cy = 62 + ah/2, qrPx = Math.min(vw - 28, ah) / 1.08;
+  const st = stageBox();
+  const ah = Math.max(80, st.h), cy = st.y + ah/2, qrPx = Math.min(st.w - 28, ah) / 1.08, cx = st.x + st.w/2;
   const k = qrPx / (r.width * (360 - 52) / 360);
   const side = r.width*(360 - 52)/360, cl = (r.width - side)/2, ct = (r.height - side)/2;
 
@@ -1077,12 +1162,12 @@ async function plant(t, card){
   grow = 1; growGo = false;
   apply(); await regenerate().catch(() => {});
   p = 1; pTarget = 1; sap = 0; sapT = 0; view = 'tree'; userYaw = 0; yawVel = 0; userPitch = 0; setMode(true); hint.style.opacity = 0;
-  const shot = await grabScene({ x: vw/2 - qrPx/2, y: cy - qrPx/2, w: qrPx });
+  const shot = await grabScene({ x: cx - qrPx/2, y: cy - qrPx/2, w: qrPx });
 
   // the flying card: a 2D thumbnail drawn at landing size, with the 3D capture laid over its QR square
   const fly = document.createElement('div');
   Object.assign(fly.style, { position:'fixed', left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px', zIndex:30,
-    borderRadius:'18px', overflow:'hidden', boxShadow:'0 18px 50px rgba(60,45,30,.28)', pointerEvents:'none', willChange:'transform,opacity,clip-path' });
+    borderRadius:'14px', overflow:'hidden', boxShadow:'0 24px 48px -24px rgba(40,90,70,.45)', pointerEvents:'none', willChange:'transform,opacity,clip-path' });
   const flat = new Image(); flat.src = thumb(t, Math.min(3000, Math.ceil(r.width * k * Math.min(devicePixelRatio || 1, 2)))).toDataURL();
   Object.assign(flat.style, { position:'absolute', inset:0, width:'100%', height:'100%' });
   const real = new Image(); real.src = shot;
@@ -1098,7 +1183,7 @@ async function plant(t, card){
     anim(x, [{opacity:1, transform:'none'},{opacity:0, transform:'scale(.92)'}], { duration:300, delay:Math.min(220, d*.35) });
   });
   await wait(160);
-  const dx = vw/2 - (r.left + r.width/2), dy = cy - (r.top + r.height/2), to = `translate(${dx}px,${dy}px) scale(${k})`;
+  const dx = cx - (r.left + r.width/2), dy = cy - (r.top + r.height/2), to = `translate(${dx}px,${dy}px) scale(${k})`;
   const crop = `inset(${ct}px ${cl}px ${ct}px ${cl}px round 5px)`, full = 'inset(0px 0px 0px 0px round 18px)';
   anim(real, [{opacity:0},{opacity:0, offset:.45},{opacity:1}], { duration:900, easing:'linear' });
   await anim(fly, [{ transform:'none', clipPath:full },
@@ -1107,8 +1192,8 @@ async function plant(t, card){
 
   // 3. the live scene is already identical underneath: drop the card and let the wave run
   const ring = document.createElement('div');
-  Object.assign(ring.style, { position:'fixed', left:(vw/2)+'px', top:cy+'px', width:qrPx+'px', height:qrPx+'px', margin:(-qrPx/2)+'px 0 0 '+(-qrPx/2)+'px',
-    borderRadius:'50%', border:'2px solid var(--accent)', zIndex:29, pointerEvents:'none' });
+  Object.assign(ring.style, { position:'fixed', left:cx+'px', top:cy+'px', width:qrPx+'px', height:qrPx+'px', margin:(-qrPx/2)+'px 0 0 '+(-qrPx/2)+'px',
+    borderRadius:'14px', border:'3px solid var(--accent)', zIndex:29, pointerEvents:'none' });
   document.body.appendChild(ring);
   anim(ring, [{ transform:'scale(.15)', opacity:.9 }, { transform:'scale(1.6)', opacity:0 }], { duration:1300, easing:'cubic-bezier(.2,.7,.3,1)' });
   grow = 0; growGo = true; audio.blip();
@@ -1138,7 +1223,7 @@ async function loadGallery(){
   box.innerHTML = ''; note.textContent = 'Loading…';
   try{
     const d = await api('/trees?sort='+wall.sort+'&season='+wall.season);
-    note.textContent = d.trees.length ? '' : 'Nothing here yet. Press the bookmark button to save your garden.';
+    note.textContent = d.trees.length ? '' : 'Nothing here yet. Press the bookmark button to save your tree.';
     d.trees.forEach(t => {
       const card = document.createElement('div'); card.className = 'pin'; card.tabIndex = 0;
       card.appendChild(thumb(t));
@@ -1166,16 +1251,17 @@ document.querySelectorAll('#wall [data-fs]').forEach(b => b.addEventListener('cl
 $('#galBtn').addEventListener('click', () => { $('#wall').classList.add('open'); loadGallery(); });
 $('#wallClose').addEventListener('click', () => $('#wall').classList.remove('open'));
 const SAVE_ICONS = {
-  idle: $('#saveBtn').innerHTML,
+  idle: $('#saveBtn').querySelector('svg').outerHTML,
   loading: '<svg class="spin" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9" /></svg>',
   ok: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   fail: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 };
+const SAVE_LABELS = { idle:'Save to gallery', loading:'Saving…', ok:'Saved', fail:'Not saved' };
 let saveReset;
 function setSaveState(st){
   const b = $('#saveBtn');
   clearTimeout(saveReset);
-  b.innerHTML = SAVE_ICONS[st];
+  b.innerHTML = SAVE_ICONS[st] + '<span>' + SAVE_LABELS[st] + '</span>';
   b.disabled = st === 'loading';
   b.setAttribute('aria-busy', st === 'loading');
   b.classList.toggle('ok', st === 'ok');
@@ -1292,12 +1378,20 @@ const audio = (function(){
 })();
 const muteBtn = $('#muteBtn');
 function syncMute(){
-  muteBtn.setAttribute('aria-label', state.muted ? 'Turn sound on' : 'Turn sound off');
+  muteBtn.setAttribute('aria-label', state.muted ? 'Turn sound on' : 'Turn sound off'); muteBtn.setAttribute('aria-pressed', String(!state.muted));
   muteBtn.innerHTML = state.muted
-    ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'
-    : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+    ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg><span>Sound: off</span>'
+    : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><span>Sound: on</span>';
 }
 muteBtn.addEventListener('click', () => audio.toggle());
+const railToggle = $('#railToggle');
+function setCollapsed(c){
+  document.body.classList.toggle('collapsed', c);
+  railToggle.setAttribute('aria-expanded', String(!c)); railToggle.setAttribute('aria-label', c ? 'Show menu' : 'Hide menu');
+  try{ localStorage.setItem('treeqr-menu', c ? 'hidden' : 'shown'); }catch(e){}
+}
+railToggle.addEventListener('click', () => setCollapsed(!document.body.classList.contains('collapsed')));
+try{ if(localStorage.getItem('treeqr-menu') === 'hidden') setCollapsed(true); }catch(e){}
 
 /* ---------------- go ---------------- */
 syncUI(); syncMute(); resize(); currentQR = emptyQR; build(emptyQR);
