@@ -728,6 +728,7 @@ docker run -d --restart unless-stopped \
 # Step 1 · Run your first container
 
 <Stepper :n="1" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-1</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
 
@@ -769,6 +770,7 @@ docker run -d --name web -p 3000:80 tree-web
 # Step 1 · Change the page, then rebuild
 
 <Stepper :n="1" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-1b</code></div>
 
 <div class="grid grid-cols-[1.25fr_1fr] gap-8 mt-3">
 
@@ -833,6 +835,7 @@ docker images tree-web
 # Step 2 · A second container: the API
 
 <Stepper :n="2" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-2</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
 
@@ -866,6 +869,7 @@ The Go API starts on its own, with built-in themes and <b>no database</b>.
 # Step 3 · Point the web at the API
 
 <Stepper :n="3" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-3</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
 
@@ -983,6 +987,7 @@ DATABASE_URL=postgres://…@host.docker.internal:5432/…
 # Step 4 · Write it down: Docker Compose
 
 <Stepper :n="4" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-4</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
 
@@ -1166,6 +1171,7 @@ demo-web-1&nbsp;&nbsp;web&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up 7 seconds
 # Step 5 · Add the database
 
 <Stepper :n="5" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-5</code></div>
 
 <div class="grid grid-cols-[1.35fr_1fr] gap-6 mt-2">
 
@@ -1327,6 +1333,7 @@ curl localhost:3000/api/health
 # Step 6 · Keep the data: a volume
 
 <Stepper :n="6" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-6</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-6 mt-2">
 
@@ -1429,6 +1436,7 @@ docker compose down -v
 # Step 7 · Scale the API
 
 <Stepper :n="7" class="absolute top-6 right-10" />
+<div class="absolute top-[4.4rem] right-10 small opacity-70">get this step: <code>git checkout step-7</code></div>
 
 <div class="grid grid-cols-[1.2fr_1fr] gap-8 mt-4">
 

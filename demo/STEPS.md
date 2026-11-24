@@ -2,12 +2,15 @@
 
 Walk through it commit by commit (`git log --reverse --oneline`). One commit = one step = one slide (Step 1 to Step 7; Step 1b is a short extra step right after Step 1).
 Run every command from this `demo/` folder.
+Every step is also a git tag. Jump to one with `git checkout step-N` (`step-1`, `step-1b`, `step-2` … `step-7`), list them with `git tag -l 'step-*'`, and come back with `git checkout demo`.
 Each step says what it is **for**, what to **run** and what you should **see**.
 Only Step 3 fails on purpose, so that Step 4 has a reason to exist.
 
 ---
 
 ## Step 1: just serve index.html
+
+**Get this step:** `git checkout step-1`
 
 **Intent:** the smallest possible container. nginx serves one static page. No API yet.
 
@@ -22,6 +25,8 @@ docker run -d --name web -p 3000:80 tree-web
 ---
 
 ## Step 1b: change the page, then rebuild the image
+
+**Get this step:** `git checkout step-1b`
 
 **Intent:** show that an image is a snapshot. Editing `index.html` does not change a container that is already built and running. New code needs a **new image**.
 
@@ -46,6 +51,8 @@ docker images tree-web
 
 ## Step 2: a second container, the API
 
+**Get this step:** `git checkout step-2`
+
 **Intent:** a Go service builds and verifies the QR code. Run it as another container and publish port 8080 to your laptop.
 
 ```bash
@@ -60,6 +67,8 @@ The web page does not use it: `curl -i localhost:3000/api/health` is still `404`
 ---
 
 ## Step 3: point the web at the API port **(fails on purpose)**
+
+**Get this step:** `git checkout step-3`
 
 **Intent:** the API answers on `localhost:8080`, so tell the web container to forward `/api` there. nginx reads `API_URL` from the Dockerfile.
 
@@ -82,6 +91,8 @@ It works on a laptop, but every service has to publish a port (even the database
 
 ## Step 4: Docker Compose, a private network and an alias
 
+**Get this step:** `git checkout step-4`
+
 **Intent:** stop chaining `docker run` flags. One file describes both containers and puts them on a private network `tree`. The API gets the **alias** `api`, so the web can reach it as `http://api:8080`.
 Two matching edits in `web/`: `API_URL` changes from `http://localhost:8080` to `http://api:8080`, and nginx asks Docker's DNS for `api` on every request (so the API container can be recreated without restarting the web).
 The API has no `ports:` any more: only the web is open to your laptop.
@@ -100,6 +111,8 @@ curl localhost:3000/api/health
 ---
 
 ## Step 5: add the database, then lose the data **(fails on purpose)**
+
+**Get this step:** `git checkout step-5`
 
 **Intent:** add Postgres as a third service. The API gets `DATABASE_URL` (host `db` = the service name) and waits for the database healthcheck. `db/init.sql` is mounted so the first start creates the tables and ten example gardens.
 The gallery and the save button start working. But the data lives inside the db container.
@@ -123,6 +136,8 @@ After `down` + `up` the saved garden is **gone**: `shared_trees` is back to `10`
 
 ## Step 6: keep the data with a named volume
 
+**Get this step:** `git checkout step-6`
+
 **Intent:** keep Postgres' files in a named volume `tree-data` (`/var/lib/postgresql` for the Postgres 18 image). The volume belongs to Docker, not to the container, so removing the container does not remove the data.
 
 ```bash
@@ -145,6 +160,8 @@ Careful: `docker compose down -v` deletes the volume, and the data with it.
 ---
 
 ## Step 7: scale the API
+
+**Get this step:** `git checkout step-7`
 
 **Intent:** no code change. Because the API is just a service with an alias, Compose can run three copies of it. The web asks for `api`, and Docker's DNS hands out the three containers in turn.
 
