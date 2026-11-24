@@ -322,13 +322,13 @@ class: text-center
 
 <Laptop name="Host Machine" width="640px" class="mt-4">
   <div class="flex items-center gap-6">
-    <div class="flex flex-col gap-2">
-      <div v-click class="chip">📄 Dockerfile</div>
-      <div v-click class="chip flex-col" style="padding: .4rem .6rem; border-radius: 12px"><img src="/img/photo-stamp.jpg" style="height: 5.5rem; width: 5.5rem; object-fit: cover; border-radius: 8px" /><span class="mt-1">image</span></div>
+    <div class="flex flex-col gap-2 shrink-0">
+      <div v-click class="chip whitespace-nowrap">📄 Dockerfile</div>
+      <div v-click class="chip !inline-flex flex-col items-center text-center" style="padding: .4rem .6rem; border-radius: 12px"><img src="/img/stamp-only.png" style="height: 6rem; width: auto" /><span class="mt-1">image</span></div>
     </div>
     <div v-click class="arrow">→</div>
-    <div class="grid grid-cols-3 gap-3">
-      <Ctr v-for="n in 12" :key="n" v-click />
+    <div class="grid grid-cols-4 gap-x-4 gap-y-3">
+      <Ctr v-for="n in 12" :key="n" v-click stamped />
     </div>
   </div>
 </Laptop>
@@ -351,7 +351,7 @@ class: text-center
           v-motion :initial="{ y: 30, opacity: 0 }" :enter="{ y: 0, opacity: 1, transition: { delay: 120 * i } }"
           :style="{ '--d': (0.6 + 0.12 * i) + 's' }">
     <template #person><Person :skin="p.skin" :hair="p.hair" :shirt="p.shirt" :hair-style="p.style" /></template>
-    <div class="chip" style="padding: .2rem .6rem .2rem .25rem"><img src="/img/photo-stamp.jpg" style="height: 2.2rem; width: 2.2rem; object-fit: cover; border-radius: 6px; display: inline-block; vertical-align: middle; margin-right: .4rem" />image</div><Ctr />
+    <div class="chip" style="display: inline-flex; align-items: center; gap: .45rem; padding: .25rem .8rem .25rem .45rem; border-radius: 12px"><img src="/img/stamp-only.png" style="height: 1.9rem; width: auto" />image</div><Ctr />
   </Laptop>
 </div>
 
