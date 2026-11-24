@@ -775,7 +775,7 @@ docker run -d --name web -p 3000:80 tree-web
 <div>
 
 <div v-click="1">
-<div class="small mb-1"><b>A</b> · Add a 4th flower colour in <code>web/index.html</code> (line 263)</div>
+<div class="small mb-1"><b>A</b> · Add a 4th flower colour in <code>web/index.html</code> (line 263). This is the <code>Step 1b</code> commit</div>
 
 ```diff
 - let SWATCHES = ['#e98aab','#a57ad6','#e0473c'];
@@ -826,7 +826,7 @@ docker images tree-web
 
 </div>
 
-<div v-click="4" class="mt-4 text-center text-lg">Save still says <b>API not reachable</b>. We need a second container: the API. <span class="small opacity-70">(First put the page back: <code>git restore web/index.html</code>)</span></div>
+<div v-click="4" class="mt-4 text-center text-lg">Save still says <b>API not reachable</b>. We need a second container: the API.</div>
 
 ---
 
