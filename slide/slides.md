@@ -541,40 +541,40 @@ docker run hello-world
 
 # Containers are isolated
 
-<div class="text-lg opacity-80">Same <b>stamp</b> (image), two <b>cards</b> (containers). <b>Writing on one card does not touch the other.</b></div>
+<div class="text-lg opacity-80">Same <b>stamp</b> (image), a passport and a ticket (two containers). <b>Writing on one does not touch the other.</b></div>
 
 <div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>1</b> · Press the same stamp on two cards</div>
+    <div class="small mb-1"><b>1</b> · Press the same stamp on a passport and a ticket</div>
 
 ```bash
-docker run -d --name card1 \
+docker run -d --name passport \
   alpine sleep 3600
-docker run -d --name card2 \
+docker run -d --name ticket \
   alpine sleep 3600
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>2</b> · Write a note on <code>card1</code> only</div>
+    <div class="small mb-1"><b>2</b> · Write a note in <code>passport</code> only</div>
 
 ```bash
-docker exec card1 sh -c \
+docker exec passport sh -c \
   "echo hi > /note.txt"
 ```
 
   </div>
 
   <div v-click="3">
-    <div class="small mb-1"><b>3</b> · Look for the note on each card</div>
+    <div class="small mb-1"><b>3</b> · Look for the note in each one</div>
 
 ```bash
-docker exec card1 cat /note.txt
-docker exec card2 cat /note.txt
+docker exec passport cat /note.txt
+docker exec ticket cat /note.txt
 ```
 
   </div>
@@ -588,13 +588,13 @@ docker exec card2 cat /note.txt
 
   <div class="grid grid-cols-2 gap-3 w-full">
     <div v-click="1" class="card text-center">
-      <div class="font-700">card <code>card1</code></div>
+      <div class="font-700">container <code>passport</code></div>
       <div v-click="2" class="mt-2 text-3xl">📝</div>
       <div v-click="2" class="small"><code>note.txt</code></div>
       <div v-click="3" class="label-good mt-1">✅ finds it</div>
     </div>
     <div v-click="1" class="card text-center">
-      <div class="font-700">card <code>card2</code></div>
+      <div class="font-700">container <code>ticket</code></div>
       <div v-click="2" class="mt-2 text-3xl opacity-30">⬜</div>
       <div v-click="2" class="small">still blank</div>
       <div v-click="3" class="label-bad mt-1">❌ not found</div>
@@ -605,32 +605,32 @@ docker exec card2 cat /note.txt
 
 </div>
 
-<div v-click="3" class="mt-3 text-center text-lg">Each container has its <b>own private space</b>, like each card has its own surface. Nothing leaks between them.</div>
+<div v-click="3" class="mt-3 text-center text-lg">Each container has its <b>own private space</b>, like your passport and your ticket are separate papers. Nothing leaks between them.</div>
 
 ---
 
 # Containers are stateless
 
-<div class="text-lg opacity-80">Throw a card away and press a new one. <b>It starts blank, every time.</b></div>
+<div class="text-lg opacity-80">Throw the passport away and press a new one. <b>It starts blank, every time.</b></div>
 
 <div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-3">
 
 <div class="min-w-0 flex flex-col gap-2">
 
   <div v-click="1">
-    <div class="small mb-1"><b>4</b> · Throw <code>card1</code> away</div>
+    <div class="small mb-1"><b>4</b> · Throw <code>passport</code> away</div>
 
 ```bash
-docker rm -f card1
+docker rm -f passport
 ```
 
   </div>
 
   <div v-click="2">
-    <div class="small mb-1"><b>5</b> · Press a new <code>card1</code> with the same stamp</div>
+    <div class="small mb-1"><b>5</b> · Press the same stamp again: a new <code>passport</code></div>
 
 ```bash
-docker run -d --name card1 \
+docker run -d --name passport \
   alpine sleep 3600
 ```
 
@@ -640,7 +640,7 @@ docker run -d --name card1 \
     <div class="small mb-1"><b>6</b> · Look for the note again</div>
 
 ```bash
-docker exec card1 cat /note.txt
+docker exec passport cat /note.txt
 ```
 
   </div>
@@ -653,13 +653,13 @@ docker exec card1 cat /note.txt
 
   <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full mt-2">
     <div class="card text-center">
-      <div class="font-700">old <code>card1</code></div>
+      <div class="font-700">old <code>passport</code></div>
       <div class="text-3xl mt-1">📝</div>
       <div class="small"><code>note.txt</code></div>
     </div>
     <div v-click="1" class="text-3xl">🗑️</div>
     <div v-click="2" class="card text-center">
-      <div class="font-700">new <code>card1</code></div>
+      <div class="font-700">new <code>passport</code></div>
       <div class="text-3xl mt-1 opacity-30">⬜</div>
       <div v-click="3" class="label-bad mt-1">❌ file gone</div>
     </div>
@@ -669,9 +669,9 @@ docker exec card1 cat /note.txt
 
 </div>
 
-<div v-click="3" class="mt-3 text-center text-lg">The stamp is the <b>same every time</b>, so every new card starts the <b>same</b>: blank. Nothing you wrote is saved.</div>
+<div v-click="3" class="mt-3 text-center text-lg">The stamp is the <b>same every time</b>, so every new passport starts the <b>same</b>: blank. Nothing you wrote is saved.</div>
 
-<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 6). Clean up: <code>docker rm -f card1 card2</code></div>
+<div v-click="3" class="mt-1 text-center small">Need to keep data? That is what a <b>volume</b> is for (Step 6). Clean up: <code>docker rm -f passport ticket</code></div>
 
 ---
 
